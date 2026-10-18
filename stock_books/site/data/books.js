@@ -418,5 +418,69 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "streetsmart",
+  "title": "Hướng dẫn định giá cổ phiếu (Streetsmart Guide to Valuing a Stock)",
+  "subtitle": "The Savvy Investor’s Key to Beating the Market – ấn bản 2",
+  "author": "Gary Gray, Patrick J. Cusatis, J. Randall Woolridge (McGraw-Hill)",
+  "cat": "Tài chính đầu tư",
+  "tags": [
+    "định giá cổ phiếu",
+    "dcf",
+    "fcff",
+    "wacc",
+    "chi phí vốn",
+    "nguyên tắc tài chính",
+    "citigroup",
+    "berkshire",
+    "microsoft"
+  ],
+  "level": "Trung cấp",
+  "emoji": "🧮",
+  "color": "linear-gradient(135deg,#1e3a8a,#6366f1)",
+  "desc": "Cách định giá cổ phiếu bằng chiết khấu dòng tiền tự do (FCFF): 10 nguyên tắc tài chính, dự báo dòng tiền, ước tính WACC, tìm dữ liệu trên Internet và các ví dụ thực tế (Microsoft, Cisco, ConEd, Citigroup, Merrill Lynch, Berkshire, Washington REIT).",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Giới thiệu và tổng quan",
+      "ready": false
+    },
+    {
+      "n": 2,
+      "title": "10 nguyên tắc tài chính và cách dùng",
+      "ready": false
+    },
+    {
+      "n": 3,
+      "title": "Định giá cổ phiếu: những điều sơ bộ",
+      "ready": false
+    },
+    {
+      "n": 4,
+      "title": "Cách định giá một cổ phiếu (DCF)",
+      "ready": false
+    },
+    {
+      "n": 5,
+      "title": "Dự báo dòng tiền kỳ vọng",
+      "ready": false
+    },
+    {
+      "n": 6,
+      "title": "Ước tính chi phí vốn",
+      "ready": false
+    },
+    {
+      "n": 7,
+      "title": "Tìm thông tin cho việc định giá",
+      "ready": false
+    },
+    {
+      "n": 8,
+      "title": "Định giá cổ phiếu: ghép tất cả lại (Citigroup, Merrill Lynch, Berkshire, Washington REIT)",
+      "ready": false
+    }
+  ]
 }
 ];
