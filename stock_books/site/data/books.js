@@ -134,7 +134,7 @@ window.BOOKS = [
       { n: 5, title: "Lý thuyết và mô hình định giá quyền chọn", ready: false },
       { n: 6, title: "Hiệu quả thị trường: lý thuyết và mô hình", ready: false },
       { n: 7, title: "Lãi suất phi rủi ro và phần bù rủi ro", ready: true },
-      { n: 8, title: "Ước tính tham số rủi ro và chi phí tài trợ", ready: false },
+      { n: 8, title: "Ước tính tham số rủi ro và chi phí tài trợ", ready: true },
       { n: 9, title: "Đo lường lợi nhuận", ready: false },
       { n: 10, title: "Từ lợi nhuận đến dòng tiền", ready: false },
       { n: 11, title: "Ước tính tăng trưởng", ready: false },
@@ -163,5 +163,130 @@ window.BOOKS = [
       { n: 34, title: "Định giá hợp đồng kỳ hạn và tương lai", ready: false },
       { n: 35, title: "Tổng quan và kết luận", ready: false }
     ]
-  }
+  },
+{
+  "id": "marks",
+  "title": "Điều quan trọng nhất được làm sáng tỏ",
+  "subtitle": "The Most Important Thing Illuminated – Uncommon Sense for the Thoughtful Investor",
+  "author": "Howard Marks (có chú giải của Davis, Greenblatt, Klarman, Johnson)",
+  "cat": "Tài chính đầu tư",
+  "tags": [
+    "howard marks",
+    "đầu tư giá trị",
+    "rủi ro",
+    "chu kỳ",
+    "tâm lý thị trường",
+    "hiệu quả thị trường",
+    "đối kháng",
+    "oaktree",
+    "tư duy cấp hai"
+  ],
+  "level": "Trung cấp",
+  "emoji": "🧭",
+  "color": "linear-gradient(135deg,#7c2d12,#ea580c)",
+  "desc": "21 'điều quan trọng nhất' trong đầu tư của Howard Marks: tư duy cấp hai, giá trị và giá cả, rủi ro, chu kỳ, con lắc tâm lý, chủ nghĩa đối kháng, đầu tư phòng thủ, kỳ vọng hợp lý… kèm chú giải của các nhà đầu tư lớn.",
+  "chapters": [
+    {
+      "n": 1, "title": "Suy nghĩ cấp thứ hai", "ready": true
+    },
+    {
+      "n": 2, "title": "Hiểu biên độ thị trường (hiệu quả thị trường) và hạn chế", "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Giá trị",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Mối quan hệ giữa giá cả và giá trị",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Hiểu biết về rủi ro",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Nhận diện rủi ro",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Kiểm soát rủi ro",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Chú ý đến các chu kỳ",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Nhận thức về con lắc",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Đối phó với ảnh hưởng tiêu cực",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Chủ nghĩa đối kháng",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Tìm kiếm món hời",
+      "ready": true
+    },
+    {
+      "n": 13,
+      "title": "Kiên nhẫn chờ cơ hội",
+      "ready": true
+    },
+    {
+      "n": 14,
+      "title": "Biết những gì bạn không biết",
+      "ready": true
+    },
+    {
+      "n": 15,
+      "title": "Cảm nhận vị trí của chúng ta",
+      "ready": true
+    },
+    {
+      "n": 16,
+      "title": "Đánh giá vai trò của may mắn",
+      "ready": true
+    },
+    {
+      "n": 17,
+      "title": "Đầu tư phòng thủ",
+      "ready": true
+    },
+    {
+      "n": 18,
+      "title": "Tránh những cạm bẫy",
+      "ready": true
+    },
+    {
+      "n": 19,
+      "title": "Thêm giá trị",
+      "ready": true
+    },
+    {
+      "n": 20,
+      "title": "Kỳ vọng hợp lý",
+      "ready": true
+    },
+    {
+      "n": 21,
+      "title": "Kết nối tất cả lại với nhau",
+      "ready": true
+    }
+  ]
+}
 ];

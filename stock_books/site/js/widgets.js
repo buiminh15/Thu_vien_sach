@@ -560,3 +560,69 @@ WIDGETS['wacc-calc'] = host => {
   }
   host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
 };
+
+// ---- Biên an toàn: giá vs giá trị (Marks ch3–4) ----
+WIDGETS['margin-safety'] = host => {
+  host.innerHTML = `<div class="row"><label>Giá trị nội tại ước tính <input id="v" type="number" value="80" style="width:75px"></label><label>Giá thị trường <input id="p" type="number" value="60" style="width:75px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const v = g('v'), p = g('p');
+    if (!p || !v) { o.textContent = 'Nhập giá trị và giá.'; return; }
+    const disc = (v - p) / v * 100, up = (v / p - 1) * 100;
+    o.innerHTML = `Chiết khấu so với giá trị = <b>${disc.toFixed(1)}%</b> (biên an toàn) · lãi tiềm năng khi giá hội tụ = <b>${up.toFixed(1)}%</b><br>${disc > 25 ? '✅ Biên an toàn rộng — nhưng giá có thể còn giảm trước khi hội tụ.' : disc > 0 ? '⚠️ Biên mỏng — sai số ước tính giá trị dễ xoá sạch.' : '❌ Giá ≥ giá trị: trả quá nhiều, phải dựa vào “kẻ ngốc lớn hơn”.'}`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Lỗ bao nhiêu thì phải lãi bấy nhiêu để hoà vốn (Marks ch7) ----
+WIDGETS['loss-recovery'] = host => {
+  host.innerHTML = `<div class="row"><label>Mức lỗ % <input id="l" type="range" min="1" max="95" value="40" style="width:200px"> <b id="lv">40</b>%</label></div><div class="calc" id="o"></div>`;
+  const l = host.querySelector('#l'), o = host.querySelector('#o'), lv = host.querySelector('#lv');
+  function draw() {
+    const x = +l.value; lv.textContent = x;
+    const need = x / (100 - x) * 100;
+    o.innerHTML = `Lỗ <b>${x}%</b> ⇒ cần lãi <b>${need.toFixed(1)}%</b> để hoà vốn.<br>Ví dụ: 100 → ${100 - x} → cần tăng ${need.toFixed(1)}% để về 100. (sách: lỗ 40% cần lãi 67%)`;
+  }
+  l.oninput = draw; draw();
+};
+
+// ---- Con lắc tâm lý thị trường (Marks ch9) ----
+WIDGETS['pendulum'] = host => {
+  host.innerHTML = `<div class="calc"><div style="display:flex;justify-content:space-between;font-size:.85em"><span>😱 Sợ hãi / bán tháo</span><span>🤑 Tham lam / hưng phấn</span></div><input id="s" type="range" min="0" max="100" value="50" style="width:100%"><div id="o" style="margin-top:8px"></div></div>`;
+  const s = host.querySelector('#s'), o = host.querySelector('#o');
+  const st = [
+    [10, '🩸 Cực kỳ sợ hãi', 'Giai đoạn 3 thị trường gấu: “mọi thứ chỉ có thể tệ hơn”. Giá rẻ, phần bù rủi ro lớn, người bán bị ép nhiều ⇒ <b>cơ hội của cả đời</b>; cần tính khách quan và quyết tâm để mua.'],
+    [30, '😟 Bi quan', 'Hầu hết nhận ra mọi thứ xấu đi. Giá đang giảm; bắt đầu quan sát món hời, chuẩn bị vốn.'],
+    [60, '😐 Quanh điểm giữa', 'Hiếm khi con lắc ở lâu đây. Nhà đầu tư thận trọng, định giá hợp lý; chọn lọc theo giá trị.'],
+    [85, '😄 Lạc quan', 'Giai đoạn 2 thị trường bò: ai cũng nhận thấy cải thiện; cần ít trí tưởng tượng để mua. Giá phản ánh hơn giá trị hợp lý ⇒ <b>giảm dần rủi ro</b>.'],
+    [101, '🤩 Hưng phấn cực độ', 'Giai đoạn 3 thị trường bò: “mọi thứ tốt mãi mãi”. Người khôn làm ở đầu, kẻ dại làm ở cuối; phần bù rủi ro mỏng, ghen tị thúc đẩy ⇒ <b>phòng thủ, bán bớt, tăng tiền mặt</b>.']
+  ];
+  function draw() { const v = +s.value, r = st.find(x => v < x[0]); o.innerHTML = `<b>${r[1]}</b><br>${r[2]}`; }
+  s.oninput = draw; draw();
+};
+
+// ---- Danh sách kiểm tra món hời (Marks ch12) ----
+WIDGETS['bargain-check'] = host => {
+  const items = ['Ít được biết đến và chưa được hiểu đầy đủ', 'Có vấn đề cơ bản trên bề mặt', 'Gây tranh cãi, đáng sợ hoặc cấm kỵ', 'Bị coi là không phù hợp với danh mục “đáng kính”', 'Không được yêu thích, bị báo chí nói xấu', 'Theo sau một kỷ lục lợi suất kém', 'Gần đây bị thoái vốn, không phải tích lũy'];
+  host.innerHTML = `<div class="calc">${items.map((t, i) => `<label style="display:block;margin:3px 0"><input type="checkbox" data-i="${i}"> ${t}</label>`).join('')}<div id="o" style="margin-top:8px"></div></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const n = host.querySelectorAll('input:checked').length;
+    o.innerHTML = `<b>${n}/7</b> — ` + (n >= 5 ? 'nhận thức có thể tệ hơn thực tế nhiều ⇒ <b>đáng nghiên cứu sâu về giá trị</b> (nhưng vẫn phải kiểm tra giá trị nội tại và rủi ro).' : n >= 3 ? 'có vài dấu hiệu của sự bị bỏ rơi; so sánh giá với giá trị.' : 'khó là món hời nếu ai cũng thích — nhớ: “nếu mọi người đều cảm thấy tốt, thì nó sẽ không có giá hời”.');
+  }
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};
+
+// ---- Đo nhiệt độ thị trường (Marks ch15) ----
+WIDGETS['market-thermometer'] = host => {
+  const q = [['Nhà đầu tư lạc quan', 'Nhà đầu tư bi quan'], ['Truyền thông nói nên đầu tư mạnh', 'Truyền thông nói nên tránh xa'], ['Kế hoạch đầu tư mới được chấp nhận dễ dàng', 'Kế hoạch mới bị bác ngay'], ['Phát hành/mở quỹ được coi là cơ hội làm giàu', 'Phát hành/mở quỹ được coi là cạm bẫy'], ['Vốn dễ có (chu kỳ tín dụng mở)', 'Vốn khó có'], ['P/E cao so với lịch sử', 'P/E thấp so với lịch sử'], ['Chênh lệch lợi suất chặt', 'Chênh lệch lợi suất rộng'], ['Quá nhiều tiền đuổi theo quá ít thương vụ', 'Tiền khan hiếm, người bán bị ép nhiều']];
+  host.innerHTML = `<div class="calc">${q.map((r, i) => `<div style="margin:4px 0"><label><input type="radio" name="q${i}" value="0"> ${r[0]}</label><br><label><input type="radio" name="q${i}" value="1"> ${r[1]}</label></div>`).join('')}<div id="o" style="margin-top:8px">Chọn từng cặp theo thị trường hôm nay.</div></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    let a = 0, b = 0;
+    q.forEach((_, i) => { const c = host.querySelector(`input[name=q${i}]:checked`); if (c) { if (c.value === '0') a++; else b++; } });
+    if (a + b === 0) return;
+    o.innerHTML = `Cột “nóng”: <b>${a}</b> · cột “lạnh”: <b>${b}</b><br>` + (a > b + 1 ? '🔥 Phần lớn ở cột nóng ⇒ <b>giữ chặt ví</b>: thận trọng, giảm rủi ro.' : b > a + 1 ? '🧊 Phần lớn ở cột lạnh ⇒ <b>cơ hội</b>: cần quyết liệt, mua có chọn lọc.' : '🌡️ Cân bằng ⇒ kiên nhẫn, chọn lọc, không có thái quá rõ ràng.');
+  }
+  host.querySelectorAll('input').forEach(i => i.onchange = draw);
+};
