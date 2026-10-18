@@ -1,6 +1,37 @@
 // Danh sách sách. Thêm sách mới: thêm 1 object vào đây + 1 file data/<id>.js
 window.BOOKS = [
   {
+    id: "phantichtc",
+    title: "Phân tích tài chính",
+    subtitle: "Corporate Finance – Chương trình Giảng dạy Kinh tế Fulbright (FETP)",
+    author: "Nguyễn Minh Kiều, Ngô Kim Phượng, Diệp Dũng, Trần Thị Kim Chi và FETP",
+    cat: "Đầu tư & Tài chính",
+    tags: ["tài chính doanh nghiệp","thời giá tiền tệ","npv","irr","capm","wacc","đòn bẩy","cơ cấu vốn","phái sinh","tỷ giá"],
+    level: "Cơ bản → Trung cấp",
+    emoji: "📈",
+    color: "linear-gradient(135deg,#064e3b,#10b981)",
+    desc: "Giáo trình quản trị tài chính 17 bài: thời giá tiền tệ, định giá trái phiếu, rủi ro – lợi nhuận, CAPM, phân tích báo cáo tài chính, vốn lưu động, dự toán vốn đầu tư (NPV/IRR), chi phí vốn, đòn bẩy, cơ cấu vốn, thuê tài sản, phái sinh và rủi ro tỷ giá. Có máy tính tương tác, flashcard, trắc nghiệm.",
+    chapters: [
+      { n: 1, title: "Vai trò của quản trị tài chính", ready: true },
+      { n: 2, title: "Môi trường kinh doanh và tài chính", ready: true },
+      { n: 3, title: "Thời giá tiền tệ", ready: true },
+      { n: 4, title: "Định giá chứng khoán (trái phiếu)", ready: true },
+      { n: 5, title: "Lợi nhuận và rủi ro", ready: true },
+      { n: 6, title: "Mô hình định giá tài sản vốn (CAPM)", ready: true },
+      { n: 7, title: "Phân tích báo cáo tài chính", ready: true },
+      { n: 8, title: "Quản trị tiền mặt và chứng khoán đầu tư", ready: true },
+      { n: 9, title: "Quản trị khoản phải thu và hàng tồn kho", ready: true },
+      { n: 10, title: "Dự toán vốn đầu tư", ready: true },
+      { n: 11, title: "Chi phí sử dụng vốn", ready: true },
+      { n: 12, title: "Đòn bẩy hoạt động và đòn bẩy tài chính", ready: true },
+      { n: 13, title: "Quyết định cơ cấu vốn của công ty", ready: true },
+      { n: 14, title: "Thuê tài sản: thuê hay mua?", ready: true },
+      { n: 15, title: "Công cụ tài chính phái sinh", ready: true },
+      { n: 16, title: "Phân tích tài chính quốc tế", ready: true },
+      { n: 17, title: "Rủi ro tỷ giá và cách tự bảo hiểm", ready: true }
+    ]
+  },
+  {
     id: "buffett",
     title: "Phong cách đầu tư Warren Buffett",
     subtitle: "The Warren Buffett Way",
@@ -418,7 +449,8 @@ window.BOOKS = [
       "ready": true
     }
   ]
-},
+}
+,
 {
   "id": "streetsmart",
   "title": "Hướng dẫn định giá cổ phiếu (Streetsmart Guide to Valuing a Stock)",
@@ -444,42 +476,42 @@ window.BOOKS = [
     {
       "n": 1,
       "title": "Giới thiệu và tổng quan",
-      "ready": false
+      "ready": true
     },
     {
       "n": 2,
       "title": "10 nguyên tắc tài chính và cách dùng",
-      "ready": false
+      "ready": true
     },
     {
       "n": 3,
       "title": "Định giá cổ phiếu: những điều sơ bộ",
-      "ready": false
+      "ready": true
     },
     {
       "n": 4,
       "title": "Cách định giá một cổ phiếu (DCF)",
-      "ready": false
+      "ready": true
     },
     {
       "n": 5,
       "title": "Dự báo dòng tiền kỳ vọng",
-      "ready": false
+      "ready": true
     },
     {
       "n": 6,
       "title": "Ước tính chi phí vốn",
-      "ready": false
+      "ready": true
     },
     {
       "n": 7,
       "title": "Tìm thông tin cho việc định giá",
-      "ready": false
+      "ready": true
     },
     {
       "n": 8,
       "title": "Định giá cổ phiếu: ghép tất cả lại (Citigroup, Merrill Lynch, Berkshire, Washington REIT)",
-      "ready": false
+      "ready": true
     }
   ]
 }

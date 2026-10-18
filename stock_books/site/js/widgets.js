@@ -727,3 +727,84 @@ WIDGETS['sell-rules'] = host => {
   }
   host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
 };
+
+// ---- Trung bình đơn vs trung bình kép (Streetsmart ch2) ----
+WIDGETS['avg-returns'] = host => {
+  host.innerHTML = `<div class="row"><label>Lợi suất các năm %, cách nhau bởi dấu phẩy <input id="r" type="text" value="100,-80" style="width:220px"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const a = host.querySelector('#r').value.split(',').map(parseFloat).filter(x => !isNaN(x));
+    if (!a.length) { o.textContent = 'Nhập lợi suất.'; return; }
+    const simple = a.reduce((s, x) => s + x, 0) / a.length, tot = a.reduce((p, x) => p * (1 + x / 100), 1), comp = (Math.pow(tot, 1 / a.length) - 1) * 100;
+    const mean = simple, sd = a.length > 1 ? Math.sqrt(a.reduce((s, x) => s + (x - mean) ** 2, 0) / (a.length - 1)) : 0;
+    o.innerHTML = `Trung bình đơn: <b>${simple.toFixed(2)}%</b> · Trung bình kép (hình học): <b>${comp.toFixed(2)}%</b> · tổng lợi suất cả kỳ: <b>${((tot - 1) * 100).toFixed(1)}%</b> · độ lệch chuẩn: ${sd.toFixed(2)}%<br>Ví dụ sách: +100%, −80% ⇒ đơn 10%, kép −36,75%. Để hoà vốn sau khi giảm x%: cần tăng 1/(1−x) − 1.`;
+  }
+  host.querySelector('#r').oninput = draw; draw();
+};
+
+// ---- Giá trị tương lai & hiện tại ----
+WIDGETS['fv-pv'] = host => {
+  host.innerHTML = `<div class="row"><label>Số tiền $ <input id="a" type="number" value="10" style="width:80px"></label><label>Lãi suất/chiết khấu % <input id="r" type="number" value="8" step="0.5" style="width:60px"></label><label>Số năm <input id="n" type="number" value="5" style="width:50px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const a = g('a'), r = g('r') / 100, n = g('n'), fv = a * Math.pow(1 + r, n), pv = a / Math.pow(1 + r, n);
+    o.innerHTML = `FV = ${a} × (1+${r})<sup>${n}</sup> = <b>$${fv.toFixed(2)}</b> (sách: $10, 8%, 5 năm ⇒ $14,69)<br>PV = ${a} ÷ (1+${r})<sup>${n}</sup> = <b>$${pv.toFixed(2)}</b> · hệ số chiết khấu = ${(1 / Math.pow(1 + r, n)).toFixed(4)}`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Vốn hoá lợi nhuận: giá trị = lợi nhuận ÷ lãi suất yêu cầu (Streetsmart ch3) ----
+WIDGETS['capitalize'] = host => {
+  host.innerHTML = `<div class="row"><label>Lợi nhuận/dòng tiền hằng năm (triệu $) <input id="e" type="number" value="200" style="width:90px"></label><label>Lợi suất yêu cầu % <input id="r" type="number" value="10" step="0.5" style="width:60px"></label><label>Tăng trưởng g % <input id="g" type="number" value="0" step="0.5" style="width:60px"></label><label>Số cổ phiếu (triệu) <input id="n" type="number" value="200" style="width:80px"></label></div><div class="calc" id="o"></div>`;
+  const q = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const e = q('e'), r = q('r') / 100, g = q('g') / 100, n = q('n');
+    if (r <= g) { o.textContent = 'Lợi suất yêu cầu phải lớn hơn tăng trưởng.'; return; }
+    const v = e * (1 + (g ? g : 0)) / (r - g), vs = g ? v : e / r;
+    o.innerHTML = `Giá trị vốn hoá ≈ <b>$${vs.toLocaleString(undefined, { maximumFractionDigits: 0 })} triệu</b> ⇒ ${n ? '<b>$' + (vs / n).toFixed(2) + '/cổ phiếu</b>' : ''}<br>Ví dụ sách (ABC Utility): $200 triệu ÷ 10% = $2 tỷ; lên 12% ⇒ $1,667 tỷ (−16,7%); xuống 8% ⇒ $2,5 tỷ (+25%).`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Khoản vay thế chấp: giá trị theo lãi suất (Streetsmart ch3) ----
+WIDGETS['mortgage-pv'] = host => {
+  host.innerHTML = `<div class="row"><label>Khoản thanh toán/tháng $ <input id="p" type="number" value="734" style="width:80px"></label><label>Số tháng <input id="n" type="number" value="360" style="width:60px"></label><label>Lãi suất chiết khấu %/năm <input id="r" type="number" value="9" step="0.25" style="width:60px"></label></div><div class="calc" id="o"></div>`;
+  const q = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const p = q('p'), n = q('n'), r = q('r') / 1200, pv = r ? p * (1 - Math.pow(1 + r, -n)) / r : p * n;
+    o.innerHTML = `Hiện giá của ${n} khoản $${p} chiết khấu ở ${(r * 1200).toFixed(2)}% = <b>$${pv.toLocaleString(undefined, { maximumFractionDigits: 0 })}</b><br>Sách: Mary vay $100.000 lãi 8% ⇒ $734/tháng; lãi thị trường lên 9% ⇒ $91.223; xuống 7% ⇒ $110.326.`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- DCF dòng tiền tự do doanh nghiệp (FCFF) rút gọn (Streetsmart ch4–5) ----
+WIDGETS['fcff-dcf'] = host => {
+  host.innerHTML = `<div class="row"><label>Doanh thu năm gốc (triệu $) <input id="rev" type="number" value="28365" style="width:90px"></label><label>Tăng trưởng DT %/năm <input id="g" type="number" value="11" step="0.5" style="width:55px"></label><label>NOPM % <input id="m" type="number" value="42" step="0.5" style="width:55px"></label><label>Thuế % <input id="t" type="number" value="32" style="width:50px"></label></div><div class="row"><label>Đầu tư vốn cố định ròng % DT <input id="ni" type="number" value="-1.1" step="0.1" style="width:55px"></label><label>Vốn lưu động % DT tăng thêm <input id="wc" type="number" value="9.8" step="0.1" style="width:55px"></label><label>Số năm vượt trội <input id="n" type="number" value="10" style="width:45px"></label><label>WACC % <input id="w" type="number" value="10" step="0.25" style="width:55px"></label></div><div class="row"><label>Tài sản ngắn hạn <input id="sa" type="number" value="47827" style="width:80px"></label><label>Nợ + ưu đãi + nợ ngắn hạn <input id="li" type="number" value="11640" style="width:80px"></label><label>Số cổ phiếu (triệu) <input id="sh" type="number" value="5415" style="width:75px"></label><label>Giá thị trường $ <input id="px" type="number" value="45.15" step="0.01" style="width:60px"></label></div><div class="calc" id="o"></div>`;
+  const q = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const g = q('g') / 100, m = q('m') / 100, t = q('t') / 100, ni = q('ni') / 100, wc = q('wc') / 100, n = Math.max(1, Math.round(q('n'))), w = q('w') / 100;
+    let prev = q('rev'), pv = 0, nopat = 0;
+    for (let i = 1; i <= n; i++) {
+      const rev = prev * (1 + g), nop = rev * m, tax = nop * t;
+      const fcff = nop - tax - rev * ni - (rev - prev) * wc;
+      pv += fcff / Math.pow(1 + w, i); nopat = nop - tax; prev = rev;
+    }
+    const resid = nopat / w, pvResid = resid / Math.pow(1 + w, n);
+    const ev = pv + pvResid + q('sa'), eq = ev - q('li'), sh = q('sh'), vps = sh ? eq / sh : 0, px = q('px'), ratio = px ? vps / px : 0;
+    o.innerHTML = `Σ FCFF chiết khấu = <b>${pv.toFixed(0)}</b> · giá trị cuối kỳ (NOPAT/WACC) chiết khấu = <b>${pvResid.toFixed(0)}</b> (${(pvResid / ev * 100).toFixed(0)}% giá trị DN) · giá trị doanh nghiệp = <b>${ev.toFixed(0)}</b><br>Giá trị vốn chủ = ${eq.toFixed(0)} ⇒ <b>giá trị nội tại ≈ $${vps.toFixed(2)}/cổ phiếu</b> · tỷ lệ giá trị/giá = <b>${ratio.toFixed(2)}</b> ⇒ ${ratio > 1.15 ? 'bị định giá thấp (cân nhắc mua)' : ratio < 0.85 ? 'bị định giá cao (bán/chờ)' : 'gần với giá hợp lý'}<br><i>Mô hình rút gọn minh hoạ (tăng trưởng không đổi, dữ liệu mặc định gần số Microsoft 2002) — không trùng chính xác với bảng tính ValuePro của sách ($38,86).</i>`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Tăng trưởng doanh thu: trung bình đơn vs CAGR (Streetsmart ch5) ----
+WIDGETS['cagr'] = host => {
+  host.innerHTML = `<div class="row"><label>Doanh thu theo năm (cũ → mới), phân cách bằng dấu phẩy <input id="r" type="text" value="6452,8488,12173,18928,22293,18915" style="width:100%"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const a = host.querySelector('#r').value.split(',').map(parseFloat).filter(x => !isNaN(x) && x > 0);
+    if (a.length < 2) { o.textContent = 'Cần ít nhất 2 giá trị.'; return; }
+    const gs = a.slice(1).map((x, i) => (x / a[i] - 1) * 100), avg = gs.reduce((s, x) => s + x, 0) / gs.length, cagr = (Math.pow(a[a.length - 1] / a[0], 1 / (a.length - 1)) - 1) * 100;
+    o.innerHTML = `Tăng trưởng từng năm: ${gs.map(x => x.toFixed(2) + '%').join(' · ')}<br>Trung bình đơn: <b>${avg.toFixed(2)}%</b> · CAGR: <b>${cagr.toFixed(2)}%</b> (sách Cisco 1997–2002: 26,62% vs 24,00%). Dùng CAGR vì thận trọng hơn.`;
+  }
+  host.querySelector('#r').oninput = draw; draw();
+};
