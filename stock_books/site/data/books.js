@@ -1,6 +1,32 @@
 // Danh sách sách. Thêm sách mới: thêm 1 object vào đây + 1 file data/<id>.js
 window.BOOKS = [
   {
+    id: "buffett",
+    title: "Phong cách đầu tư Warren Buffett",
+    subtitle: "The Warren Buffett Way",
+    author: "Robert G. Hagstrom",
+    cat: "Đầu tư & Tài chính",
+    tags: ["warren buffett","đầu tư giá trị","berkshire hathaway","graham","biên độ an toàn","định giá","tâm lý đầu tư","cổ phiếu"],
+    level: "Cơ bản → Trung cấp",
+    emoji: "💰",
+    color: "linear-gradient(135deg,#7c2d12,#f59e0b)",
+    desc: "12 nguyên lý đầu tư của Warren Buffett: kinh doanh, quản lý, tài chính, giá trị; cùng học vấn từ Graham–Fisher–Williams–Munger, thương vụ Coca-Cola, Gillette, Washington Post, bảo hiểm, danh mục tập trung và tâm lý nhà đầu tư. 12 chương có widget tương tác, flashcard, trắc nghiệm.",
+    chapters: [
+      { n: 1, title: "Nhà đầu tư vĩ đại nhất thế giới", ready: true },
+      { n: 2, title: "Học vấn của Warren Buffett", ready: true },
+      { n: 3, title: "“Ngành kinh doanh chính của chúng tôi là bảo hiểm”", ready: true },
+      { n: 4, title: "Mua một doanh nghiệp", ready: true },
+      { n: 5, title: "Hướng dẫn đầu tư: Nguyên lý kinh doanh", ready: true },
+      { n: 6, title: "Hướng dẫn đầu tư: Nguyên lý quản lý", ready: true },
+      { n: 7, title: "Hướng dẫn đầu tư: Nguyên lý tài chính", ready: true },
+      { n: 8, title: "Hướng dẫn đầu tư: Nguyên lý giá trị", ready: true },
+      { n: 9, title: "Đầu tư vào những chứng khoán thu nhập cố định", ready: true },
+      { n: 10, title: "Quản lý danh mục đầu tư", ready: true },
+      { n: 11, title: "Tâm lý tiền bạc", ready: true },
+      { n: 12, title: "Nhân vật “không duy lý”", ready: true }
+    ]
+  },
+  {
     id: "kinhte",
     title: "Các khái niệm cơ bản về kinh tế",
     subtitle: "Basic Economic Concepts – Phần 1–3: Vi mô, vĩ mô, tài chính & thuế",
@@ -329,7 +355,7 @@ window.BOOKS = [
     {
       "n": 4,
       "title": "Những điều thú vị bạn có thể làm với cổ phiếu",
-      "ready": false
+      "ready": true
     },
     {
       "n": 5,
@@ -344,7 +370,7 @@ window.BOOKS = [
     {
       "n": 7,
       "title": "Chiến lược đầu tư kiếm tiền chậm",
-      "ready": false
+      "ready": true
     },
     {
       "n": 8,
@@ -354,7 +380,7 @@ window.BOOKS = [
     {
       "n": 9,
       "title": "Phân tích cơ bản: nhập môn",
-      "ready": false
+      "ready": true
     },
     {
       "n": 10,
@@ -364,7 +390,7 @@ window.BOOKS = [
     {
       "n": 11,
       "title": "Phân tích kỹ thuật: nhập môn",
-      "ready": false
+      "ready": true
     },
     {
       "n": 12,
@@ -374,7 +400,7 @@ window.BOOKS = [
     {
       "n": 13,
       "title": "Tâm lý cổ phiếu: phân tích tâm lý thị trường",
-      "ready": false
+      "ready": true
     },
     {
       "n": 14,
@@ -384,12 +410,12 @@ window.BOOKS = [
     {
       "n": 15,
       "title": "Vì sao nhà đầu tư thua lỗ",
-      "ready": false
+      "ready": true
     },
     {
       "n": 16,
       "title": "Tác giả thực sự nghĩ gì về thị trường chứng khoán",
-      "ready": false
+      "ready": true
     }
   ]
 }

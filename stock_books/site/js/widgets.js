@@ -712,3 +712,18 @@ WIDGETS['sma-rsi'] = host => {
   }
   host.querySelectorAll('textarea,input').forEach(i => i.oninput = draw); draw();
 };
+
+// ---- Quy tắc bán 10% và kế hoạch 30-30 (Understanding Stocks ch15) ----
+WIDGETS['sell-rules'] = host => {
+  host.innerHTML = `<div class="row"><label>Giá mua $ <input id="b" type="number" value="20" step="0.01" style="width:70px"></label><label>Giá hiện tại $ <input id="p" type="number" value="26.5" step="0.01" style="width:70px"></label><label>Số cổ phiếu <input id="n" type="number" value="100" style="width:70px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const b = g('b'), p = g('p'), n = g('n'), ch = b ? (p / b - 1) * 100 : 0;
+    let msg;
+    if (ch <= -10) msg = `🔴 Quy tắc 10%: đã lỗ ${ch.toFixed(1)}% ⇒ <b>bán</b> (O’Neil dùng 8%). Mức dừng lỗ lúc mua: $${(b * 0.9).toFixed(2)}.`;
+    else if (ch >= 30) msg = `🟢 Kế hoạch 30-30: đã lãi ${ch.toFixed(1)}% (> 30%) ⇒ bán <b>30%</b> vị thế = ${Math.round(n * 0.3)} cổ phiếu, chốt khoảng $${(Math.round(n * 0.3) * p).toLocaleString()}.`;
+    else msg = `Thay đổi ${ch.toFixed(1)}%: chưa chạm quy tắc. Stop-loss nên đặt ở $${(b * 0.9).toFixed(2)} (−10%).`;
+    o.innerHTML = msg;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
