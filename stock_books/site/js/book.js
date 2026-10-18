@@ -1,0 +1,198 @@
+// Trình đọc sách: bài học / flashcard / trắc nghiệm / ghép cặp theo từng chương
+const params = new URLSearchParams(location.search);
+const book = BOOKS.find(b => b.id === params.get('id'));
+const data = book && (BOOK_DATA[book.id] || { chapters: [] });
+const main = $('#main');
+let cur = 1, mode = 'learn';
+
+const chData = n => data.chapters.find(c => c.n === n);
+const doneList = () => Store.get('done:' + book.id, []);
+
+function go() {
+  location.hash = `#ch${cur}/${mode}`;
+  renderSide(); renderMain();
+  window.scrollTo({ top: 0 });
+}
+
+function renderSide() {
+  const done = doneList();
+  $('#chlist').innerHTML = book.chapters.map(c => `
+    <button class="chbtn ${c.n === cur ? 'on' : ''} ${done.includes(c.n) ? 'done' : ''} ${c.ready ? '' : 'lock'}" data-n="${c.n}">
+      <span class="n">${done.includes(c.n) ? '✓' : c.n}</span><span class="tt">${esc(c.title)}${c.ready ? '' : '<br><small>Đang soạn…</small>'}</span>
+    </button>`).join('') || '<div class="small" style="padding:8px">Sách này đang được soạn.</div>';
+  $('#chlist').querySelectorAll('.chbtn').forEach(b => b.onclick = () => { cur = +b.dataset.n; mode = 'learn'; go(); });
+}
+
+function renderMain() {
+  const meta = book.chapters.find(c => c.n === cur);
+  const ch = chData(cur);
+  if (!meta || !ch) {
+    main.innerHTML = `<div class="sec"><h2>🚧 Chương này đang được soạn</h2><p>Nội dung sẽ được bổ sung ở lượt tiếp theo. Hãy chọn chương khác ở thanh bên.</p></div>`;
+    return;
+  }
+  const tabs = [['learn', '📖 Bài học'], ['cards', '🃏 Flashcard (' + ch.cards.length + ')'], ['quiz', '✅ Trắc nghiệm (' + ch.quiz.length + ')'], ['match', '🔗 Ghép cặp']];
+  main.innerHTML = `
+    <div class="chhead"><small>Chương ${ch.n} · ${esc(book.title)}</small><h1>${esc(ch.title)}</h1><p>${ch.intro}</p></div>
+    <div class="tabs">${tabs.map(t => `<button class="tab ${t[0] === mode ? 'on' : ''}" data-m="${t[0]}">${t[1]}</button>`).join('')}</div>
+    <div id="pane"></div>`;
+  main.querySelectorAll('.tab').forEach(b => b.onclick = () => { mode = b.dataset.m; go(); });
+  ({ learn: learn, cards: cards, quiz: quiz, match: match })[mode](ch, $('#pane'));
+}
+
+/* ---------- BÀI HỌC ---------- */
+function block(b) {
+  switch (b.t) {
+    case 'p': return `<p>${b.x}</p>`;
+    case 'h3': return `<h3>${b.x}</h3>`;
+    case 'key': return `<div class="box key"><b class="t">🔑 Ý chính</b>${b.x}</div>`;
+    case 'tip': return `<div class="box tip"><b class="t">💡 Mẹo</b>${b.x}</div>`;
+    case 'warn': return `<div class="box warn"><b class="t">⚠️ Lưu ý</b>${b.x}</div>`;
+    case 'mnemo': return `<div class="box mnemo"><b class="t">🧠 Mẹo nhớ</b>${b.x}</div>`;
+    case 'list': return `<ul>${b.items.map(i => `<li>${i}</li>`).join('')}</ul>`;
+    case 'steps': return `<ol class="steps">${b.items.map(i => `<li>${i}</li>`).join('')}</ol>`;
+    case 'table': return `<table class="tb"><thead><tr>${b.head.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${b.rows.map(r => `<tr>${r.map(x => `<td>${x}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    case 'timeline': return `<div class="tl">${b.items.map(i => `<div><b>${i[0]}</b> — ${i[1]}</div>`).join('')}</div>`;
+    case 'tabs': return `<div class="itabs"><div class="hd">${b.items.map((i, k) => `<button class="${k ? '' : 'on'}" data-k="${k}">${i[0]}</button>`).join('')}</div><div class="bd">${b.items[0][1]}</div><script type="application/json">${JSON.stringify(b.items.map(i => i[1])).replace(/</g, '\\u003c')}<\/script></div>`;
+    case 'widget': return `<div class="widget"><div class="wt">🎛️ ${b.title}</div><div data-w="${b.name}"></div></div>`;
+  }
+  return '';
+}
+
+function learn(ch, pane) {
+  const done = doneList().includes(ch.n);
+  pane.innerHTML = ch.sections.map(s => `<section class="sec"><h2><span class="ic">${s.icon || '📌'}</span>${s.title}</h2>${s.blocks.map(block).join('')}</section>`).join('') +
+    `<section class="sec"><h2>🏁 Tóm tắt chương</h2><ul>${ch.summary.map(x => `<li>${x}</li>`).join('')}</ul>
+      <div class="donebar"><button class="btn ${done ? '' : 'ok'}" id="dn">${done ? '✓ Đã học xong (bấm để bỏ)' : 'Đánh dấu đã học xong'}</button>
+      <span><button class="btn primary" data-go="cards">Ôn flashcard →</button> <button class="btn primary" data-go="quiz">Làm trắc nghiệm →</button></span></div></section>`;
+  pane.querySelectorAll('.itabs').forEach(el => {
+    const bodies = JSON.parse(el.querySelector('script').textContent);
+    el.querySelectorAll('.hd button').forEach(bt => bt.onclick = () => {
+      el.querySelectorAll('.hd button').forEach(x => x.classList.toggle('on', x === bt));
+      el.querySelector('.bd').innerHTML = bodies[+bt.dataset.k];
+    });
+  });
+  pane.querySelectorAll('[data-w]').forEach(el => WIDGETS[el.dataset.w](el));
+  pane.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { mode = b.dataset.go; go(); });
+  $('#dn').onclick = () => {
+    let d = doneList(); d = d.includes(ch.n) ? d.filter(x => x !== ch.n) : [...d, ch.n];
+    Store.set('done:' + book.id, d); renderSide(); learn(ch, pane);
+  };
+}
+
+/* ---------- FLASHCARD ---------- */
+function cards(ch, pane) {
+  const key = `fc:${book.id}:${ch.n}`;
+  let known = Store.get(key, []);
+  let onlyNew = false, deck = [], i = 0, flip = false;
+  function build() {
+    deck = ch.cards.map((c, k) => k).filter(k => !onlyNew || !known.includes(k));
+    if (i >= deck.length) i = 0; flip = false;
+  }
+  function draw() {
+    build();
+    const total = ch.cards.length;
+    if (!deck.length) {
+      pane.innerHTML = `<div class="fc-wrap score"><div class="big">🎉</div><h2>Bạn đã thuộc cả ${total} thẻ!</h2><button class="btn primary" id="rs">Học lại từ đầu</button> <button class="btn" id="all">Xem tất cả thẻ</button></div>`;
+      $('#rs').onclick = () => { known = []; Store.set(key, known); onlyNew = false; i = 0; draw(); };
+      $('#all').onclick = () => { onlyNew = false; draw(); };
+      return;
+    }
+    const c = ch.cards[deck[i]];
+    pane.innerHTML = `<div class="fc-wrap">
+      <div class="fc-top"><span class="pill">Thẻ ${i + 1}/${deck.length}</span><span class="small">Đã thuộc ${known.length}/${total}</span>
+        <label class="small"><input type="checkbox" id="nw" ${onlyNew ? 'checked' : ''}> Chỉ thẻ chưa thuộc</label></div>
+      <div class="fc ${flip ? 'flip' : ''}" id="card"><div class="in"><div class="face">${c[0]}<span class="hint">chạm để lật</span></div><div class="face back">${c[1]}</div></div></div>
+      <div class="fc-bar"><button class="btn" id="pv">← Trước</button><button class="btn bad" id="no">Chưa thuộc</button><button class="btn ok" id="yes">Đã thuộc ✓</button><button class="btn" id="nx">Sau →</button><button class="btn" id="sh">🔀 Xáo</button></div>
+      <p class="small" style="text-align:center">Phím tắt: Space = lật · ←/→ = chuyển thẻ</p></div>`;
+    $('#card').onclick = () => { flip = !flip; $('#card').classList.toggle('flip', flip); };
+    $('#pv').onclick = () => { i = (i - 1 + deck.length) % deck.length; flip = false; draw(); };
+    $('#nx').onclick = () => { i = (i + 1) % deck.length; flip = false; draw(); };
+    $('#yes').onclick = () => { if (!known.includes(deck[i])) known.push(deck[i]); Store.set(key, known); flip = false; if (onlyNew) { draw(); } else { i = (i + 1) % deck.length; draw(); } };
+    $('#no').onclick = () => { known = known.filter(x => x !== deck[i]); Store.set(key, known); flip = false; i = (i + 1) % deck.length; draw(); };
+    $('#sh').onclick = () => { ch.cards = shuffle(ch.cards); known = []; Store.set(key, known); i = 0; draw(); };
+    $('#nw').onchange = e => { onlyNew = e.target.checked; i = 0; draw(); };
+  }
+  window.onkeydown = e => {
+    if (mode !== 'cards' || !$('#card')) return;
+    if (e.code === 'Space') { e.preventDefault(); $('#card').click(); }
+    if (e.code === 'ArrowRight') $('#nx').click();
+    if (e.code === 'ArrowLeft') $('#pv').click();
+  };
+  draw();
+}
+
+/* ---------- TRẮC NGHIỆM ---------- */
+function quiz(ch, pane) {
+  const key = `best:${book.id}:${ch.n}`;
+  let qs, i, score, wrong;
+  function start() { qs = shuffle(ch.quiz); i = 0; score = 0; wrong = []; show(); }
+  function show() {
+    if (i >= qs.length) return finish();
+    const q = qs[i];
+    const order = shuffle(q.o.map((t, k) => k));
+    pane.innerHTML = `<div class="qz"><div class="fc-top"><span class="pill">Câu ${i + 1}/${qs.length}</span><span class="small">Đúng: ${score}</span></div>
+      <div class="qbar"><i style="width:${i / qs.length * 100}%"></i></div>
+      <div class="q-t">${q.q}</div>
+      <div id="ops">${order.map(k => `<button class="opt" data-k="${k}">${q.o[k]}</button>`).join('')}</div>
+      <div id="ex"></div></div>`;
+    pane.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+      const k = +b.dataset.k, ok = k === q.a;
+      pane.querySelectorAll('.opt').forEach(x => { x.disabled = true; if (+x.dataset.k === q.a) x.classList.add('ok'); });
+      if (!ok) { b.classList.add('no'); wrong.push(q); } else score++;
+      $('#ex').innerHTML = `<div class="explain"><b>${ok ? '✅ Chính xác!' : '❌ Chưa đúng.'}</b> ${q.e}</div><button class="btn primary" id="nx">${i + 1 < qs.length ? 'Câu tiếp →' : 'Xem kết quả'}</button>`;
+      $('#nx').onclick = () => { i++; show(); };
+    });
+  }
+  function finish() {
+    const pct = Math.round(score / qs.length * 100), best = Math.max(Store.get(key, 0), pct);
+    Store.set(key, best);
+    pane.innerHTML = `<div class="qz score"><div class="big">${score}/${qs.length}</div>
+      <h2>${pct >= 80 ? '🏆 Xuất sắc!' : pct >= 50 ? '👍 Khá tốt, ôn thêm chút nữa' : '📚 Cần đọc lại bài học'}</h2>
+      <p class="small">Điểm cao nhất: ${best}%</p>
+      <button class="btn primary" id="again">Làm lại</button> ${wrong.length ? '<button class="btn" id="rw">Làm lại câu sai (' + wrong.length + ')</button>' : ''} <button class="btn" id="bk">Xem lại bài học</button></div>`;
+    $('#again').onclick = start;
+    if (wrong.length) $('#rw').onclick = () => { qs = shuffle(wrong); i = 0; score = 0; wrong = []; show(); };
+    $('#bk').onclick = () => { mode = 'learn'; go(); };
+  }
+  start();
+}
+
+/* ---------- GHÉP CẶP ---------- */
+function match(ch, pane) {
+  function start() {
+    const pairs = shuffle(ch.match).slice(0, 6);
+    const L = shuffle(pairs.map((p, k) => ({ k, t: p[0] }))), R = shuffle(pairs.map((p, k) => ({ k, t: p[1] })));
+    let sel = null, left = pairs.length, tries = 0;
+    pane.innerHTML = `<p class="small" style="text-align:center">Chọn một ô bên trái, rồi chọn ô bên phải có nghĩa tương ứng. <b id="st"></b></p>
+      <div class="mg"><div>${L.map(x => `<button data-s="l" data-k="${x.k}" style="width:100%;margin-bottom:10px">${x.t}</button>`).join('')}</div>
+      <div>${R.map(x => `<button data-s="r" data-k="${x.k}" style="width:100%;margin-bottom:10px">${x.t}</button>`).join('')}</div></div><div id="fin"></div>`;
+    pane.querySelectorAll('.mg button').forEach(b => b.onclick = () => {
+      if (b.classList.contains('done')) return;
+      if (!sel || sel.dataset.s === b.dataset.s) {
+        if (sel) sel.classList.remove('sel');
+        sel = b; b.classList.add('sel'); return;
+      }
+      tries++;
+      if (sel.dataset.k === b.dataset.k) {
+        sel.classList.remove('sel'); sel.classList.add('done'); b.classList.add('done'); left--; sel = null;
+        if (!left) $('#fin').innerHTML = `<div class="score"><div class="big">🎯</div><p>Hoàn thành sau ${tries} lượt ghép.</p><button class="btn primary" id="rp">Chơi lại (bộ cặp mới)</button></div>`, $('#rp').onclick = start;
+      } else {
+        const a = sel; sel = null; a.classList.remove('sel'); a.classList.add('wrong'); b.classList.add('wrong');
+        setTimeout(() => { a.classList.remove('wrong'); b.classList.remove('wrong'); }, 600);
+      }
+    });
+  }
+  start();
+}
+
+/* ---------- KHỞI ĐỘNG (đặt cuối file để mọi khai báo đã sẵn sàng) ---------- */
+if (!book) {
+  main.innerHTML = '<div class="empty">Không tìm thấy sách. <a href="index.html">Về thư viện</a></div>';
+} else {
+  document.title = book.title;
+  $('#bktitle').textContent = book.emoji + ' ' + book.title;
+  const h = location.hash.match(/^#ch(\d+)(?:\/(\w+))?/);
+  if (h) { cur = +h[1]; if (h[2]) mode = h[2]; }
+  else { const f = book.chapters.find(c => c.ready); cur = f ? f.n : 1; }
+  go();
+}

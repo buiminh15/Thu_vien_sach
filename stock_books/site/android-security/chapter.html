@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chương – Android Security Internals</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="progress-top" id="readBar"></div>
+<header class="topbar"><div class="topbar-in">
+  <a class="brand" href="index.html"><span class="logo">🛡</span><span>Android Security<small>← Về danh sách chương</small></span></a>
+  <span class="spacer"></span>
+  <a class="icon-btn" href="../index.html" title="Về thư viện sách">📚</a>
+  <a class="icon-btn" id="prevCh" href="#" title="Chương trước">◀</a>
+  <a class="icon-btn" id="nextCh" href="#" title="Chương sau">▶</a>
+  <button class="icon-btn" id="themeBtn" title="Đổi giao diện sáng/tối">🌓</button>
+</div></header>
+
+<main class="container">
+  <div class="chap-head"><div class="chap-num" id="cNum"></div><div><h1 id="cTitle"></h1><p id="cSub"></p></div></div>
+  <nav class="tabs" id="tabs">
+    <button class="tab" data-t="lesson">📖 Bài học</button>
+    <button class="tab" data-t="cards">🃏 Flashcard</button>
+    <button class="tab" data-t="quiz">✅ Trắc nghiệm</button>
+    <button class="tab" data-t="practice">🧩 Luyện tập</button>
+    <button class="tab" data-t="cheat">⚡ Ôn nhanh</button>
+  </nav>
+
+  <section class="panel" id="p-lesson"><div class="lesson-grid"><nav class="toc" id="toc"></nav><div id="lessonBody"></div></div></section>
+  <section class="panel" id="p-cards"></section>
+  <section class="panel" id="p-quiz"></section>
+  <section class="panel" id="p-practice"></section>
+  <section class="panel" id="p-cheat"></section>
+</main>
+
+<script src="js/meta.js"></script>
+<script src="js/common.js"></script>
+<script src="js/widgets.js"></script>
+<script src="js/chapter.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Android Security Internals – Học bằng tiếng Việt</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar"><div class="topbar-in">
+  <a class="brand" href="index.html"><span class="logo">🛡</span><span>Android Security<small>Internals · bản học tiếng Việt</small></span></a>
+  <span class="spacer"></span>
+  <a class="icon-btn" href="../index.html" title="Về thư viện sách">📚 Thư viện</a>
+  <button class="icon-btn" id="themeBtn" title="Đổi giao diện sáng/tối">🌓</button>
+</div></header>
+
+<main class="container">
+  <section class="hero">
+    <h1>Học bảo mật Android từ gốc rễ</h1>
+    <p>Chuyển thể từ cuốn <i>Android Security Internals</i> (Nikolay Elenkov): bài giảng trực quan, sơ đồ tương tác, flashcard, trắc nghiệm và bài tập sắp xếp cho từng chương.</p>
+    <span class="pill">📖 Bài học</span><span class="pill">🃏 Flashcard</span><span class="pill">✅ Trắc nghiệm</span><span class="pill">🧩 Luyện tập</span><span class="pill">⚡ Ôn nhanh</span>
+    <svg viewBox="0 0 100 100" aria-hidden="true"><path fill="#fff" d="M50 4 L90 20 V50 C90 74 72 90 50 97 C28 90 10 74 10 50 V20 Z"/></svg>
+  </section>
+
+  <div class="stats" id="stats"></div>
+
+  <h2 style="margin-top:26px">Các chương</h2>
+  <div class="chap-grid" id="grid"></div>
+
+  <div class="callout c-info" style="margin-top:28px">
+    <b>Lưu ý về phiên bản</b>
+    Sách viết dựa trên Android 4.4 (KitKat). Các nguyên lý (sandbox UID, Binder, signature, SELinux…) vẫn đúng đến ngày nay, nhưng một số chi tiết đã đổi (ví dụ quyền runtime từ Android 6, ART thay Dalvik). Chỗ nào khác biệt, mình đánh dấu bằng khung <b>“Android hiện đại”</b> màu tím – phần đó là bổ sung, không có trong sách.
+  </div>
+</main>
+
+<script src="js/meta.js"></script>
+<script src="js/common.js"></script>
+<script>
+(function(){
+  var grid=document.getElementById('grid'), totalDone=0, ready=0, quizBest=0, cardsKnown=0;
+  CHAPTERS.forEach(function(c){
+    var p=App.progress(c.n);
+    if(c.ready){ready++; totalDone+=p.pct; quizBest+=p.quiz||0; cardsKnown+=p.known||0;}
+    var a=document.createElement(c.ready?'a':'div');
+    a.className='chap-card'+(c.ready?'':' soon');
+    if(c.ready) a.href='chapter.html?c='+c.n;
+    a.innerHTML='<div class="row"><div class="chap-num">'+c.n+'</div><span class="badge '+(c.ready?'ok':'')+'">'+(c.ready?'Đã có nội dung':'Sắp ra mắt')+'</span></div>'+
+      '<h3>'+c.title+'</h3><p>'+c.sub+'</p><p style="font-size:.78rem;font-style:italic">'+c.en+'</p>'+
+      (c.ready?'<div class="bar"><i style="width:'+p.pct+'%"></i></div><span style="font-size:.78rem;color:var(--muted)">Tiến độ '+p.pct+'% · Quiz tốt nhất '+(p.quiz!=null?p.quiz+'%':'—')+'</span>':'');
+    grid.appendChild(a);
+  });
+  var avg=ready?Math.round(totalDone/ready):0;
+  document.getElementById('stats').innerHTML=
+    '<div class="stat"><b>'+ready+'/13</b><span>chương đã sẵn sàng</span></div>'+
+    '<div class="stat"><b>'+avg+'%</b><span>tiến độ trung bình</span></div>'+
+    '<div class="stat"><b>'+cardsKnown+'</b><span>flashcard đã thuộc</span></div>';
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thư viện tự học</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="index.html">📚 Thư viện <span>Tự học</span></a>
+  <div class="grow"></div>
+  <button class="btn sm" id="theme">🌓 Giao diện</button>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>Học sách qua bài giảng, flashcard và trắc nghiệm</h1>
+    <p>Chọn một cuốn sách, học từng chương, ôn bằng flashcard và kiểm tra bằng bài tập.</p>
+    <div class="tools"><input id="q" class="search" type="search" placeholder="🔍 Tìm sách, tác giả, chủ đề, tên chương…" autocomplete="off"></div>
+    <div class="chips" id="chips"></div>
+  </section>
+  <section class="grid" id="grid"></section>
+</main>
+
+<script src="data/books.js"></script>
+<script src="js/common.js"></script>
+<script src="js/library.js"></script>
+</body>
+</html>
