@@ -626,3 +626,89 @@ WIDGETS['market-thermometer'] = host => {
   }
   host.querySelectorAll('input').forEach(i => i.onchange = draw);
 };
+
+// ---- Máy tính cổ phiếu cơ bản (Understanding Stocks ch1) ----
+WIDGETS['stock-calc'] = host => {
+  host.innerHTML = `<div class="row"><label>Số cổ phiếu <input id="n" type="number" value="1000" style="width:80px"></label><label>Giá mua $ <input id="b" type="number" value="15" step="0.01" style="width:70px"></label><label>Giá hiện tại/bán $ <input id="s" type="number" value="17" step="0.01" style="width:70px"></label><label>Phí môi giới $ <input id="f" type="number" value="0" style="width:60px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const n = g('n'), b = g('b'), s = g('s'), f = g('f'), cost = n * b, pts = s - b, pl = n * pts - f;
+    o.innerHTML = `Chi phí mua = ${n} × $${b} = <b>$${cost.toLocaleString()}</b><br>Lãi/lỗ = <b>${pts >= 0 ? '+' : ''}${pts.toFixed(2)} điểm</b> ⇒ ${n} × ${pts.toFixed(2)} − phí = <b>${pl >= 0 ? '+' : '−'}$${Math.abs(pl).toLocaleString()}</b> (${cost ? (pl / cost * 100).toFixed(1) : 0}%)`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Giá trái phiếu và lãi suất (nghịch chiều) ----
+WIDGETS['bond-rate'] = host => {
+  host.innerHTML = `<div class="row"><label>Coupon % <input id="c" type="number" value="8" step="0.25" style="width:60px"></label><label>Lãi suất thị trường mới % <input id="r" type="number" value="6" step="0.25" style="width:60px"></label><label>Số năm còn lại <input id="y" type="number" value="10" style="width:55px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const c = g('c') / 100 * 1000, r = g('r') / 100, y = Math.max(1, Math.round(g('y')));
+    const p = r === 0 ? c * y + 1000 : c * (1 - Math.pow(1 + r, -y)) / r + 1000 / Math.pow(1 + r, y);
+    o.innerHTML = `Trái phiếu mệnh giá $1.000, coupon $${c.toFixed(0)}/năm ⇒ giá hợp lý ≈ <b>$${p.toFixed(0)}</b> ${p > 1000 ? '(trên mệnh giá: lãi suất giảm ⇒ giá tăng)' : p < 1000 ? '(dưới mệnh giá: lãi suất tăng ⇒ giá giảm)' : ''}`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Lãi kép (Understanding Stocks ch4) ----
+WIDGETS['compound-simple'] = host => {
+  host.innerHTML = `<div class="row"><label>Vốn ban đầu <input id="p" type="number" value="100" style="width:90px"></label><label>Lãi suất %/năm <input id="r" type="number" value="10" step="0.5" style="width:60px"></label><label>Số năm <input id="y" type="number" value="20" style="width:55px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const p = g('p'), r = g('r') / 100, y = Math.max(0, Math.round(g('y')));
+    const comp = p * Math.pow(1 + r, y), simple = p * (1 + r * y);
+    o.innerHTML = `Lãi kép: <b>$${comp.toLocaleString(undefined, { maximumFractionDigits: 0 })}</b> · lãi đơn: $${simple.toLocaleString(undefined, { maximumFractionDigits: 0 })} · phần lãi kép “ăn thêm” = <b>$${(comp - simple).toLocaleString(undefined, { maximumFractionDigits: 0 })}</b><br>Ví dụ sách: $100 × 10% ⇒ $110 năm 1, $121 năm 2 (lãi trên lãi).`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Trung bình giá (DCA) ----
+WIDGETS['dca-avg'] = host => {
+  host.innerHTML = `<div class="row"><label>Lần 1: cổ phiếu <input id="n1" type="number" value="100" style="width:70px"> giá $ <input id="p1" type="number" value="20" style="width:55px"></label><label>Lần 2: cổ phiếu <input id="n2" type="number" value="200" style="width:70px"> giá $ <input id="p2" type="number" value="10" style="width:55px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const n1 = g('n1'), p1 = g('p1'), n2 = g('n2'), p2 = g('p2'), n = n1 + n2, c = n1 * p1 + n2 * p2;
+    o.innerHTML = n ? `Tổng ${n} cổ phiếu, tổng vốn $${c.toLocaleString()} ⇒ giá vốn trung bình = <b>$${(c / n).toFixed(2)}</b> (ví dụ sách: 13,33). Chỉ có lãi khi giá vượt mức này.` : '';
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Quyền chọn mua (call) ----
+WIDGETS['call-option'] = host => {
+  host.innerHTML = `<div class="row"><label>Giá hiện tại $ <input id="s0" type="number" value="20" style="width:60px"></label><label>Strike $ <input id="k" type="number" value="25" style="width:60px"></label><label>Phí/cổ phiếu $ <input id="pr" type="number" value="2" step="0.1" style="width:60px"></label><label>Hợp đồng <input id="c" type="number" value="5" style="width:50px"></label><label>Giá khi đáo hạn $ <input id="st" type="number" value="27" style="width:60px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const s0 = g('s0'), k = g('k'), pr = g('pr'), c = g('c'), st = g('st'), sh = c * 100, cost = sh * pr, value = Math.max(0, st - k) * sh, pl = value - cost;
+    o.innerHTML = `Chi phí quyền chọn = ${sh} × $${pr} = <b>$${cost.toLocaleString()}</b> (kiểm soát $${(sh * s0).toLocaleString()} cổ phiếu)<br>Khi đáo hạn ở $${st}: giá trị = $${value.toLocaleString()} ⇒ ${pl >= 0 ? 'lãi' : 'lỗ'} <b>$${Math.abs(pl).toLocaleString()}</b>${st <= k ? ' — hết hạn vô giá trị, mất toàn bộ phí' : ''}. Hoà vốn ở giá ${(k + pr).toFixed(2)}.`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Các hệ số định giá cổ phiếu (Understanding Stocks ch10) ----
+WIDGETS['stock-ratios'] = host => {
+  host.innerHTML = `<div class="row"><label>Giá cổ phiếu $ <input id="p" type="number" value="20" style="width:70px"></label><label>EPS năm qua $ <input id="e" type="number" value="2" step="0.1" style="width:60px"></label><label>EPS dự báo $ <input id="f" type="number" value="4" step="0.1" style="width:60px"></label><label>Tăng trưởng EPS %/năm <input id="g" type="number" value="10" style="width:60px"></label></div><div class="row"><label>Vốn hoá $ <input id="m" type="number" value="1000" style="width:80px"></label><label>Doanh thu $ <input id="s" type="number" value="500" style="width:80px"></label><label>Lợi nhuận ròng $ <input id="ni" type="number" value="100" style="width:70px"></label><label>Vốn chủ $ <input id="eq" type="number" value="500" style="width:70px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const p = g('p'), e = g('e'), f = g('f'), gr = g('g'), m = g('m'), s = g('s'), ni = g('ni'), eq = g('eq');
+    const pe = e ? p / e : NaN, fpe = f ? p / f : NaN, peg = gr ? pe / gr : NaN, ps = s ? m / s : NaN, roe = eq ? ni / eq * 100 : NaN;
+    const pegTxt = isNaN(peg) ? '—' : peg < 0.5 ? 'rẻ (< 0,5)' : peg <= 1 ? 'hợp lý (0,5–1)' : peg <= 2 ? 'đắt (> 1)' : 'rất đắt (> 2)';
+    o.innerHTML = `P/E trailing = <b>${pe.toFixed(1)}</b> · P/E forward = <b>${fpe.toFixed(1)}</b><br>PEG = P/E ÷ tăng trưởng = <b>${isNaN(peg) ? '—' : peg.toFixed(2)}</b> (${pegTxt})<br>P/S = <b>${isNaN(ps) ? '—' : ps.toFixed(2)}</b> (${ps > 5 ? 'cao > 5' : ps < 1 ? 'thấp < 1: ưa chuộng của nhà đầu tư giá trị' : 'trung bình'}) · ROE = <b>${isNaN(roe) ? '—' : roe.toFixed(1)}%</b> (${roe > 15 ? 'tốt > 15%' : 'thấp hơn 15%'})`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Trung bình động & RSI (Understanding Stocks ch12) ----
+WIDGETS['sma-rsi'] = host => {
+  host.innerHTML = `<div class="row"><label>Chuỗi giá đóng cửa (cách nhau bằng dấu phẩy)<br><textarea id="d" rows="2" style="width:100%">20,21,22,21,23,24,25,24,26,27,26,25,24,23,24,22,21,20,21,20</textarea></label></div><div class="row"><label>Chu kỳ MA <input id="n" type="number" value="5" style="width:50px"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const a = host.querySelector('#d').value.split(/[,\s]+/).map(parseFloat).filter(x => !isNaN(x)), n = Math.max(2, parseInt(host.querySelector('#n').value) || 5);
+    if (a.length < n) { o.textContent = 'Cần ít nhất ' + n + ' giá.'; return; }
+    const ma = a.slice(-n).reduce((s, x) => s + x, 0) / n, last = a[a.length - 1];
+    let up = 0, dn = 0, k = Math.min(14, a.length - 1);
+    for (let i = a.length - k; i < a.length; i++) { const d = a[i] - a[i - 1]; if (d > 0) up += d; else dn -= d; }
+    const rsi = dn === 0 ? 100 : 100 - 100 / (1 + (up / k) / (dn / k));
+    o.innerHTML = `Giá cuối <b>${last}</b> · MA(${n}) = <b>${ma.toFixed(2)}</b> ⇒ giá ${last > ma ? 'trên MA (tín hiệu tăng)' : 'dưới MA (tín hiệu giảm)'}<br>RSI(${k}) ≈ <b>${rsi.toFixed(0)}</b> ${rsi > 70 ? '— mua quá mức (overbought)' : rsi < 30 ? '— bán quá mức (oversold)' : '— vùng trung tính'}`;
+  }
+  host.querySelectorAll('textarea,input').forEach(i => i.oninput = draw); draw();
+};

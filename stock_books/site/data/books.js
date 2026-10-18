@@ -288,5 +288,109 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "stocks",
+  "title": "Hiểu về cổ phiếu (Understanding Stocks)",
+  "subtitle": "Understanding Stocks – nhập môn thị trường chứng khoán cho người mới",
+  "author": "Michael Sincere (McGraw-Hill)",
+  "cat": "Tài chính đầu tư",
+  "tags": [
+    "cổ phiếu",
+    "chứng khoán",
+    "người mới",
+    "phân tích kỹ thuật",
+    "phân tích cơ bản",
+    "giao dịch",
+    "đầu tư dài hạn",
+    "tâm lý thị trường",
+    "môi giới"
+  ],
+  "level": "Cơ bản",
+  "emoji": "📈",
+  "color": "linear-gradient(135deg,#065f46,#10b981)",
+  "desc": "Giáo trình nhập môn cho người mới: cổ phiếu là gì, phân loại, mua ở đâu, chiến lược đầu tư và giao dịch, phân tích cơ bản – kỹ thuật – tâm lý, vì sao giá lên xuống và vì sao nhà đầu tư thua lỗ.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Chào mừng đến thị trường chứng khoán",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Cổ phiếu không phải khoản đầu tư duy nhất",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Cách phân loại cổ phiếu",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Những điều thú vị bạn có thể làm với cổ phiếu",
+      "ready": false
+    },
+    {
+      "n": 5,
+      "title": "Hiểu giá cổ phiếu",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Mua cổ phiếu ở đâu",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Chiến lược đầu tư kiếm tiền chậm",
+      "ready": false
+    },
+    {
+      "n": 8,
+      "title": "Chiến lược giao dịch kiếm tiền nhanh",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Phân tích cơ bản: nhập môn",
+      "ready": false
+    },
+    {
+      "n": 10,
+      "title": "Phân tích cơ bản: công cụ và chiến thuật",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Phân tích kỹ thuật: nhập môn",
+      "ready": false
+    },
+    {
+      "n": 12,
+      "title": "Phân tích kỹ thuật: công cụ và chiến thuật",
+      "ready": true
+    },
+    {
+      "n": 13,
+      "title": "Tâm lý cổ phiếu: phân tích tâm lý thị trường",
+      "ready": false
+    },
+    {
+      "n": 14,
+      "title": "Điều gì khiến cổ phiếu tăng hay giảm",
+      "ready": true
+    },
+    {
+      "n": 15,
+      "title": "Vì sao nhà đầu tư thua lỗ",
+      "ready": false
+    },
+    {
+      "n": 16,
+      "title": "Tác giả thực sự nghĩ gì về thị trường chứng khoán",
+      "ready": false
+    }
+  ]
 }
 ];
