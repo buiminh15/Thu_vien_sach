@@ -209,4 +209,43 @@
     }
     $$('#gr').oninput = draw; draw();
   };
+  // ---- Phần 3: nêm thuế và tổn thất vô ích ----
+  WIDGETS['tax-wedge'] = host => {
+    host.innerHTML = `${sl('tw', 'Thuế trên mỗi lít xăng (đồng)', 0, 1500, 200, 50)}<div class="calc" id="out"></div><p class="small">Mô hình: cầu P = 5.000 − 2·Q, cung P = 2.000 + 1·Q (Q: triệu lít/ngày). Cân bằng không thuế: Q = 1.000, P = 3.000.</p>`;
+    const $$ = s => host.querySelector(s);
+    function draw() {
+      const t = +$$('#tw').value; $$('#twv').textContent = f0(t);
+      const q0 = 1000, q1 = (3000 - t) / 3, pb = 5000 - 2 * q1, ps = pb - t;
+      const rev = t * q1, dwl = 0.5 * t * (q0 - q1), cs = 0.5 * (5000 - pb) * q1 * 0 + 0;
+      const dCS = (pb - 3000) * q1 + 0.5 * (pb - 3000) * (q0 - q1), dPS = (3000 - ps) * q1 + 0.5 * (3000 - ps) * (q0 - q1);
+      $$('#out').innerHTML = `Sản lượng giảm: ${f0(q0)} → <b>${f0(q1)}</b> triệu lít<br>Người mua trả <b>${f0(pb)}</b> đ · người bán nhận <b>${f0(ps)}</b> đ (chênh = thuế ${f0(t)})<br>Người mua gánh ${f0(pb - 3000)} đ/lít · người bán gánh ${f0(3000 - ps)} đ/lít<br>Thu ngân sách: <b>${f0(rev)}</b> · Tổn thất vô ích (c+d): <b style="color:#e03131">${f0(dwl)}</b> (đơn vị: triệu đồng/ngày)`;
+    }
+    $$('#tw').oninput = draw; draw();
+  };
+
+  // ---- Thuế lũy tiến / tỷ lệ / lũy thoái ----
+  WIDGETS['tax-types'] = host => {
+    host.innerHTML = `<label style="display:block;margin:8px 0 2px">Kiểu thuế: <select id="tt"><option value="reg">Lũy thoái (2 triệu và 4 triệu)</option><option value="prop">Tỷ lệ 25%</option><option value="prog">Lũy tiến (10% đến 5 triệu, 40% phần vượt)</option></select></label><div class="calc" id="out"></div><p class="small">Người nghèo thu nhập 4 triệu; người giàu 20 triệu.</p>`;
+    const $$ = s => host.querySelector(s);
+    function draw() {
+      const m = $$('#tt').value;
+      const f = { reg: i => i === 4 ? 2 : 4, prop: i => i * 0.25, prog: i => 0.1 * Math.min(i, 5) + 0.4 * Math.max(0, i - 5) }[m];
+      const row = (n, i) => { const t = f(i); return `${n}: thu nhập ${i} tr, thuế ${f1(t)} tr → <b>thuế suất bình quân ${f1(t / i * 100)}%</b>, còn lại ${f1(i - t)} tr`; };
+      const a = f(4) / 4, b = f(20) / 20;
+      $$('#out').innerHTML = row('Người nghèo', 4) + '<br>' + row('Người giàu', 20) + '<br>' + (b < a - 1e-9 ? '⬇️ <b>Lũy thoái</b>: người giàu chịu thuế suất bình quân thấp hơn.' : Math.abs(a - b) < 1e-9 ? '➡️ <b>Tỷ lệ</b>: cùng thuế suất.' : '⬆️ <b>Lũy tiến</b>: người giàu chịu thuế suất bình quân cao hơn.');
+    }
+    $$('#tt').onchange = draw; draw();
+  };
+
+  // ---- Quyền chọn cổ phiếu ----
+  WIDGETS['stock-option'] = host => {
+    host.innerHTML = `${sl('sp', 'Giá cổ phiếu sau 2 năm (đồng)', 15000, 40000, 26000, 500)}<div class="calc" id="out"></div><p class="small">Gidomex: giá hiện tại và giá thực hiện (strike) 25.000 đ; quản lý có quyền (không bắt buộc) mua 10.000 cổ phiếu.</p>`;
+    const $$ = s => host.querySelector(s);
+    function draw() {
+      const p = +$$('#sp').value; $$('#spv').textContent = f0(p);
+      const g = Math.max(0, p - 25000) * 10000;
+      $$('#out').innerHTML = p > 25000 ? `✅ Quản lý thực hiện quyền: mua ở 25.000, bán ở ${f0(p)} → lãi <b>${f0(g / 1e6)}</b> triệu đồng. Cổ đông cũng có lợi vì giá tăng.` : `❌ Quyền chọn <b>vô giá trị</b> (giá ≤ 25.000): quản lý không có lãi → có động cơ làm giá tăng.`;
+    }
+    $$('#sp').oninput = draw; draw();
+  };
 })();

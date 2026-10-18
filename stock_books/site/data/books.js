@@ -3,14 +3,14 @@ window.BOOKS = [
   {
     id: "kinhte",
     title: "Các khái niệm cơ bản về kinh tế",
-    subtitle: "Basic Economic Concepts – Phần 1 & 2: Vi mô, vĩ mô & quốc tế",
+    subtitle: "Basic Economic Concepts – Phần 1–3: Vi mô, vĩ mô, tài chính & thuế",
     author: "Nhiều tác giả – Chương trình Giảng dạy Kinh tế Fulbright (FETP)",
     cat: "Kinh tế",
     tags: ["kinh tế vi mô","cung cầu","ngoại tác","độc quyền","rủi ro","thuế","vĩ mô","tỷ giá","lạm phát","toàn cầu hóa"],
     level: "Cơ bản",
     emoji: "📊",
     color: "linear-gradient(135deg,#1e3a8a,#3b82f6)",
-    desc: "Phần 1 vi mô (bài 1–33) và Phần 2 vĩ mô & quốc tế (bài 34–65: GDP, tài khóa, tiền tệ, lạm phát, tỷ giá, khủng hoảng, bán phá giá, toàn cầu hóa…): chi phí cơ hội, cung cầu, thặng dư, ngoại tác, phân tích cận biên, độc quyền, thông tin bất cân xứng, giá chuyển giao, thuế. Có widget tương tác, flashcard, trắc nghiệm.",
+    desc: "Phần 1 vi mô (bài 1–33) và Phần 3 tài chính & thuế (bài 66–98: thuế, hệ thống tài chính, quyền chọn cổ phiếu, tiết kiệm, vốn mạo hiểm, kinh tế lượng…), Phần 2 vĩ mô & quốc tế (bài 34–65: GDP, tài khóa, tiền tệ, lạm phát, tỷ giá, khủng hoảng, bán phá giá, toàn cầu hóa…): chi phí cơ hội, cung cầu, thặng dư, ngoại tác, phân tích cận biên, độc quyền, thông tin bất cân xứng, giá chuyển giao, thuế. Có widget tương tác, flashcard, trắc nghiệm.",
     chapters: [
       { n: 1, title: "Nhập môn: kinh tế học nghiên cứu điều gì?", ready: true },
       { n: 2, title: "Cung, cầu và cân bằng thị trường", ready: true },
@@ -27,7 +27,15 @@ window.BOOKS = [
       { n: 13, title: "Công nghiệp hóa, công nghệ và năng lực cạnh tranh", ready: true },
       { n: 14, title: "Viện trợ, FDI và đo lường hiệu quả công", ready: true },
       { n: 15, title: "Bán phá giá và thương mại công bằng", ready: true },
-      { n: 16, title: "Toàn cầu hóa, tài nguyên, vàng và quy tắc 72", ready: true }
+      { n: 16, title: "Toàn cầu hóa, tài nguyên, vàng và quy tắc 72", ready: true },
+      { n: 17, title: "Thuế cơ bản: nêm thuế, thuế trực thu – gián thu, thu nhập", ready: true },
+      { n: 18, title: "Công bằng và hiệu quả trong hệ thống thuế", ready: true },
+      { n: 19, title: "Ưu đãi thuế, DNNN và cạnh tranh thuế", ready: true },
+      { n: 20, title: "Hàng hóa công, trách nhiệm người nộp thuế và hệ thống tài chính", ready: true },
+      { n: 21, title: "Thông tin, thị trường hiệu quả và cơ cấu vốn", ready: true },
+      { n: 22, title: "Chủ sở hữu – nhà quản lý và quyền chọn cổ phiếu", ready: true },
+      { n: 23, title: "Tiết kiệm, tín dụng vi mô và vốn mạo hiểm", ready: true },
+      { n: 24, title: "Công cụ phân tích và hệ quả của chính sách công", ready: true }
     ]
   },
   {
@@ -104,6 +112,56 @@ window.BOOKS = [
       { n: 10, title: "Marketing và pháp luật", ready: true },
       { n: 11, title: "Kế hoạch marketing và ngân sách", ready: true },
       { n: 12, title: "Những vấn đề cốt lõi (kế toán, tài chính, tổ chức, chiến lược)", ready: true }
+    ]
+  }
+,
+  {
+    id: "valuation",
+    title: "Định giá đầu tư (Investment Valuation, ấn bản 2)",
+    subtitle: "Investment Valuation – Tools and Techniques for Determining the Value of Any Asset",
+    author: "Aswath Damodaran",
+    cat: "Tài chính đầu tư",
+    tags: ["định giá", "valuation", "dcf", "chiết khấu dòng tiền", "wacc", "định giá tương đối", "p/e", "quyền chọn", "cổ phiếu", "doanh nghiệp", "tài chính", "damodaran", "đầu tư"],
+    level: "Trung cấp → Nâng cao",
+    emoji: "💹",
+    color: "linear-gradient(135deg,#0b7285,#1c7ed6)",
+    desc: "Giáo trình kinh điển về định giá mọi tài sản: DCF, định giá tương đối, quyền chọn; từ cổ phiếu, doanh nghiệp tư nhân, khởi nghiệp, bất động sản đến trái phiếu và phái sinh. 35 chương – đang soạn dần.",
+    chapters: [
+      { n: 1, title: "Giới thiệu về định giá", ready: true },
+      { n: 2, title: "Các phương pháp định giá", ready: true },
+      { n: 3, title: "Hiểu báo cáo tài chính", ready: true },
+      { n: 4, title: "Cơ bản về rủi ro", ready: true },
+      { n: 5, title: "Lý thuyết và mô hình định giá quyền chọn", ready: false },
+      { n: 6, title: "Hiệu quả thị trường: lý thuyết và mô hình", ready: false },
+      { n: 7, title: "Lãi suất phi rủi ro và phần bù rủi ro", ready: true },
+      { n: 8, title: "Ước tính tham số rủi ro và chi phí tài trợ", ready: false },
+      { n: 9, title: "Đo lường lợi nhuận", ready: false },
+      { n: 10, title: "Từ lợi nhuận đến dòng tiền", ready: false },
+      { n: 11, title: "Ước tính tăng trưởng", ready: false },
+      { n: 12, title: "Giá trị cuối kỳ (terminal value)", ready: false },
+      { n: 13, title: "Mô hình chiết khấu cổ tức", ready: false },
+      { n: 14, title: "Mô hình dòng tiền tự do vốn chủ sở hữu", ready: false },
+      { n: 15, title: "Định giá doanh nghiệp: WACC và APV", ready: false },
+      { n: 16, title: "Ước tính giá trị vốn chủ sở hữu trên mỗi cổ phiếu", ready: false },
+      { n: 17, title: "Nguyên tắc định giá tương đối", ready: false },
+      { n: 18, title: "Bội số lợi nhuận", ready: false },
+      { n: 19, title: "Bội số giá trị sổ sách", ready: false },
+      { n: 20, title: "Bội số doanh thu và theo ngành", ready: false },
+      { n: 21, title: "Định giá tổ chức tài chính", ready: false },
+      { n: 22, title: "Định giá doanh nghiệp lợi nhuận âm", ready: false },
+      { n: 23, title: "Định giá doanh nghiệp trẻ và khởi nghiệp", ready: false },
+      { n: 24, title: "Định giá doanh nghiệp tư nhân", ready: false },
+      { n: 25, title: "Mua lại và thâu tóm", ready: false },
+      { n: 26, title: "Định giá bất động sản", ready: false },
+      { n: 27, title: "Định giá các tài sản khác", ready: false },
+      { n: 28, title: "Quyền chọn trì hoãn", ready: false },
+      { n: 29, title: "Quyền chọn mở rộng và từ bỏ", ready: false },
+      { n: 30, title: "Định giá vốn chủ sở hữu doanh nghiệp khó khăn", ready: false },
+      { n: 31, title: "Tăng giá trị: khung DCF", ready: false },
+      { n: 32, title: "Tăng giá trị: EVA, CFROI", ready: false },
+      { n: 33, title: "Định giá trái phiếu", ready: false },
+      { n: 34, title: "Định giá hợp đồng kỳ hạn và tương lai", ready: false },
+      { n: 35, title: "Tổng quan và kết luận", ready: false }
     ]
   }
 ];

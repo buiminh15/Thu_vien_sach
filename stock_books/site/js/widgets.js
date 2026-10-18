@@ -439,3 +439,124 @@ WIDGETS['gearing'] = host => {
   }
   host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
 };
+
+// ---- Định giá: DCF khớp dòng tiền – tỷ suất chiết khấu; so sánh P/E (Valuation ch2) ----
+WIDGETS['dcf-match'] = host => {
+  const ce = [50, 60, 68, 76.2, 83.49 + 1603.008], cf = [90, 100, 108, 116.2, 123.49 + 2363.008], debt = 800;
+  host.innerHTML = `<div class="row"><label>Chi phí vốn chủ sở hữu % <input id="ke" type="number" value="13.625" step="0.025" style="width:80px"></label><label>WACC % <input id="w" type="number" value="9.94" step="0.01" style="width:70px"></label></div>
+    <div class="calc" id="o"></div><p class="small">Dữ liệu ví dụ 2.1 trong sách: nợ thị trường 800; lãi vay sau thuế 40/năm; thuế 50%.</p>`;
+  const g = id => (parseFloat(host.querySelector('#' + id).value) || 0) / 100, o = host.querySelector('#o');
+  const pv = (a, r) => a.reduce((s, x, i) => s + x / Math.pow(1 + r, i + 1), 0);
+  function draw() {
+    const ke = g('ke'), w = g('w'), f = (x) => x.toFixed(0);
+    const ok1 = pv(ce, ke), ok2 = pv(cf, w) - debt, bad1 = pv(ce, w), bad2 = pv(cf, ke) - debt;
+    o.innerHTML = `<table class="tb"><tbody>
+      <tr><td>✅ CF vốn chủ sở hữu ÷ chi phí vốn chủ sở hữu</td><td><b>${f(ok1)}</b></td></tr>
+      <tr><td>✅ CF doanh nghiệp ÷ WACC, trừ nợ ${debt}</td><td><b>${f(ok2)}</b></td></tr>
+      <tr><td>❌ CF vốn chủ sở hữu ÷ <i>WACC</i> (định giá quá cao)</td><td style="color:var(--bad)"><b>${f(bad1)}</b> (${bad1 >= ok1 ? '+' : ''}${f(bad1 - ok1)})</td></tr>
+      <tr><td>❌ CF doanh nghiệp ÷ <i>chi phí vốn chủ sở hữu</i> (định giá quá thấp)</td><td style="color:var(--bad)"><b>${f(bad2)}</b> (${f(bad2 - ok2)})</td></tr></tbody></table>
+      <span class="small">Hai cách đúng cho cùng giá trị vốn chủ sở hữu (≈ 1.073). Khớp đúng loại dòng tiền với đúng tỷ suất chiết khấu.</span>`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['pe-comps'] = host => {
+  const F = [['Adobe Systems', 23.2], ['Autodesk', 20.4], ['Broderbund', 32.8], ['Computer Associates', 18.0], ['Lotus Development', 24.1], ['Microsoft', 27.4], ['Novell', 30.0], ['Oracle', 37.8], ['Software Publishing', 10.6], ['System Software', 15.7]];
+  host.innerHTML = `<p class="small">Bỏ chọn vài công ty để thấy P/E trung bình “thay đổi” – minh hoạ nguy cơ thiên lệch khi chọn công ty so sánh.</p><div class="leg">${F.map((f, i) => `<label><input type="checkbox" data-i="${i}" checked>${f[0]} (${f[1]})</label>`).join('')}</div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const sel = [...host.querySelectorAll('input:checked')].map(c => F[+c.dataset.i][1]);
+    o.innerHTML = sel.length ? `Số công ty: ${sel.length} · <b>P/E trung bình = ${(sel.reduce((s, x) => s + x, 0) / sel.length).toFixed(1)}</b>` : 'Chọn ít nhất một công ty.';
+  }
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};
+
+// ---- ROC / ROE (Valuation ch3) ----
+WIDGETS['roc-roe'] = host => {
+  host.innerHTML = `<div class="row"><label>EBIT <input id="e" type="number" value="1720" style="width:80px"></label><label>Thuế % <input id="t" type="number" value="35" style="width:50px"></label><label>Nợ (BV) <input id="d" type="number" value="6972" style="width:80px"></label><label>Vốn chủ (BV) <input id="q" type="number" value="12316" style="width:80px"></label><label>Lãi vay <input id="i" type="number" value="453" style="width:70px"></label><label>Doanh thu <input id="s" type="number" value="56154" style="width:80px"></label></div><div class="calc" id="o"></div><p class="small">Mặc định gần số liệu Boeing 1998 (triệu USD).</p>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const E = g('e'), t = g('t') / 100, D = g('d'), Q = g('q'), I = g('i'), S = g('s'), C = D + Q;
+    const roc = E * (1 - t) / C, margin = E * (1 - t) / S, turn = S / C, i = D ? I / D : 0, roe = roc + D / Q * (roc - i * (1 - t));
+    o.innerHTML = `ROC sau thuế = EBIT(1−t) ÷ (D+E) = <b>${(roc * 100).toFixed(2)}%</b> = biên hoạt động sau thuế <b>${(margin * 100).toFixed(2)}%</b> × vòng quay vốn <b>${turn.toFixed(2)}</b><br>Lãi vay sổ sách i = ${(i * 100).toFixed(2)}% · D/E = ${(D / Q * 100).toFixed(1)}%<br>ROE = ROC + D/E × [ROC − i(1−t)] = <b>${(roe * 100).toFixed(2)}%</b> ${roc > i * (1 - t) ? '→ vay nợ <b>làm tăng</b> ROE' : '→ vay nợ làm giảm ROE'}`;
+  }
+  host.querySelectorAll('input').forEach(x => x.oninput = draw); draw();
+};
+
+// ---- Danh mục 2 tài sản & CAPM (Valuation ch4) ----
+WIDGETS['portfolio2'] = host => {
+  host.innerHTML = `<div class="row"><label>TS A: kỳ vọng % <input id="ra" type="number" value="8.4" style="width:60px"></label><label>σ A % <input id="sa" type="number" value="31" style="width:60px"></label><label>TS B: kỳ vọng % <input id="rb" type="number" value="49.8" style="width:60px"></label><label>σ B % <input id="sb" type="number" value="62" style="width:60px"></label></div>
+  <div class="row"><label style="flex:1">Tỷ trọng A: <b id="wv">50</b>% <input id="w" type="range" min="0" max="100" value="50"></label><label style="flex:1">Tương quan ρ: <b id="pv">0.20</b> <input id="p" type="range" min="-100" max="100" value="20"></label></div><div class="calc" id="o"></div><p class="small">Mặc định gần Boeing (A) và Home Depot (B) 1991–98. Kéo ρ xuống để thấy lợi ích đa dạng hoá.</p>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const w = g('w') / 100, p = g('p') / 100, sa = g('sa'), sb = g('sb'), ra = g('ra'), rb = g('rb');
+    host.querySelector('#wv').textContent = (w * 100).toFixed(0); host.querySelector('#pv').textContent = p.toFixed(2);
+    const var_ = w * w * sa * sa + (1 - w) * (1 - w) * sb * sb + 2 * w * (1 - w) * p * sa * sb, sd = Math.sqrt(Math.max(var_, 0));
+    const avg = w * sa + (1 - w) * sb;
+    o.innerHTML = `Lợi nhuận kỳ vọng danh mục = <b>${(w * ra + (1 - w) * rb).toFixed(2)}%</b><br>Độ lệch chuẩn danh mục = <b>${sd.toFixed(2)}%</b> (trung bình có trọng số của σ: ${avg.toFixed(2)}%) → <b style="color:var(--ok)">giảm rủi ro nhờ đa dạng hoá ${(avg - sd).toFixed(2)} điểm %</b>`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['capm'] = host => {
+  host.innerHTML = `<div class="row"><label>Lãi suất phi rủi ro % <input id="rf" type="number" value="5" step="0.1" style="width:60px"></label><label>Phần bù rủi ro thị trường % <input id="mp" type="number" value="5.5" step="0.1" style="width:60px"></label><label>Beta β <input id="b" type="number" value="1.2" step="0.05" style="width:60px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() { const rf = g('rf'), mp = g('mp'), b = g('b'); o.innerHTML = `E(R) = R<sub>f</sub> + β × (E(R<sub>m</sub>) − R<sub>f</sub>) = ${rf} + ${b} × ${mp} = <b>${(rf + b * mp).toFixed(2)}%</b> ${b > 1 ? '(rủi ro thị trường cao hơn trung bình)' : b < 1 ? '(thấp hơn trung bình)' : '(bằng thị trường)'}`; }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Phần bù rủi ro hàm ý & phần bù quốc gia (Valuation ch7) ----
+WIDGETS['implied-erp'] = host => {
+  host.innerHTML = `<div class="row"><label>Chỉ số <input id="p" type="number" value="1469" style="width:80px"></label><label>Tỷ suất cổ tức % <input id="d" type="number" value="1.68" step="0.01" style="width:60px"></label><label>Tăng trưởng 5 năm % <input id="g" type="number" value="10" style="width:55px"></label><label>Tăng trưởng ổn định % <input id="gs" type="number" value="6.5" step="0.1" style="width:55px"></label><label>Lãi suất phi rủi ro % <input id="rf" type="number" value="6.5" step="0.1" style="width:55px"></label></div><div class="calc" id="o"></div><p class="small">Mặc định: S&amp;P 500 ngày 31/12/1999 (mô hình hai giai đoạn). Giải ngược r sao cho hiện giá = mức chỉ số.</p>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function val(r, P, dy, g1, g2) {
+    let cf = P * dy, pv = 0;
+    for (let t = 1; t <= 5; t++) { cf *= 1 + g1; pv += cf / Math.pow(1 + r, t); }
+    const tv = cf * (1 + g2) / (r - g2); return pv + tv / Math.pow(1 + r, 5);
+  }
+  function draw() {
+    const P = g('p'), dy = g('d') / 100, g1 = g('g') / 100, g2 = g('gs') / 100, rf = g('rf') / 100;
+    let lo = g2 + 0.0001, hi = 0.5;
+    if (val(lo, P, dy, g1, g2) < P) { o.textContent = 'Không có nghiệm (giá trị luôn nhỏ hơn mức chỉ số).'; return; }
+    for (let i = 0; i < 80; i++) { const m = (lo + hi) / 2; if (val(m, P, dy, g1, g2) > P) lo = m; else hi = m; }
+    const r = (lo + hi) / 2;
+    o.innerHTML = `Lợi suất yêu cầu hàm ý <b>r = ${(r * 100).toFixed(2)}%</b> → <b>phần bù rủi ro hàm ý = ${((r - rf) * 100).toFixed(2)}%</b> (sách: 8,56% − 6,5% ≈ 2,06%)`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['country-erp'] = host => {
+  host.innerHTML = `<div class="row"><label>Phần bù thị trường trưởng thành % <input id="m" type="number" value="5.51" step="0.01" style="width:60px"></label><label>Default spread quốc gia % <input id="s" type="number" value="4.83" step="0.01" style="width:60px"></label><label>σ cổ phiếu quốc gia % <input id="se" type="number" value="30.64" style="width:60px"></label><label>σ trái phiếu quốc gia % <input id="sb" type="number" value="15.28" style="width:60px"></label><label>σ cổ phiếu Mỹ % <input id="su" type="number" value="20" style="width:55px"></label></div>
+  <div class="row"><label>Rf % <input id="rf" type="number" value="5" style="width:50px"></label><label>Beta <input id="b" type="number" value="1.2" step="0.05" style="width:50px"></label><label>λ (mức tiếp xúc rủi ro quốc gia) <input id="l" type="number" value="1" step="0.05" style="width:55px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const m = g('m'), s = g('s'), se = g('se'), sb = g('sb'), su = g('su'), rf = g('rf'), b = g('b'), l = g('l');
+    const c1 = s, c2 = m * se / su - m, c3 = s * se / sb;
+    const ke = c => (rf + b * m + l * c).toFixed(2);
+    o.innerHTML = `<table class="tb"><thead><tr><th>Cách ước tính</th><th>Phần bù quốc gia</th><th>Chi phí vốn chủ (Rf + β·ERP + λ·CRP)</th></tr></thead><tbody>
+      <tr><td>1. Default spread của trái phiếu quốc gia</td><td><b>${c1.toFixed(2)}%</b></td><td>${ke(c1)}%</td></tr>
+      <tr><td>2. Độ lệch chuẩn tương đối (cổ phiếu quốc gia ÷ cổ phiếu Mỹ)</td><td><b>${c2.toFixed(2)}%</b></td><td>${ke(c2)}%</td></tr>
+      <tr><td>3. Default spread × (σ cổ phiếu ÷ σ trái phiếu quốc gia)</td><td><b>${c3.toFixed(2)}%</b></td><td>${ke(c3)}%</td></tr></tbody></table><span class="small">Mặc định: Brazil 3/2000 – cách 3 ra 9,69%; chi phí vốn Aracruz (β 0,72, λ 0,25) ≈ 11,4%.</span>`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Beta đòn bẩy & chi phí vốn (Valuation ch8) ----
+WIDGETS['beta-lever'] = host => {
+  host.innerHTML = `<div class="row"><label>Beta hiện tại <input id="b" type="number" value="0.56" step="0.01" style="width:70px"></label><label>D/E hiện tại % <input id="de0" type="number" value="15.56" step="0.5" style="width:70px"></label><label>Thuế % <input id="t" type="number" value="35" step="1" style="width:60px"></label><label>D/E mới % <input id="de1" type="number" value="50" step="1" style="width:70px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const b = g('b'), de0 = g('de0') / 100, t = g('t') / 100, de1 = g('de1') / 100;
+    const bu = b / (1 + (1 - t) * de0), bl = bu * (1 + (1 - t) * de1);
+    o.innerHTML = `β<sub>không vay</sub> = ${b} ÷ (1 + (1−${t}) × ${de0.toFixed(4)}) = <b>${bu.toFixed(3)}</b><br>β<sub>mới</sub> = ${bu.toFixed(3)} × (1 + (1−${t}) × ${de1.toFixed(4)}) = <b>${bl.toFixed(3)}</b> (sách: Boeing 0,56 → 0,51; D/E 100% → 0,84)`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+WIDGETS['wacc-calc'] = host => {
+  host.innerHTML = `<div class="row"><label>Rf % <input id="rf" type="number" value="5" step="0.1" style="width:60px"></label><label>β <input id="b" type="number" value="0.9585" step="0.01" style="width:70px"></label><label>ERP % <input id="mp" type="number" value="5.51" step="0.1" style="width:60px"></label><label>Spread nợ % <input id="sp" type="number" value="1" step="0.1" style="width:60px"></label><label>Thuế biên % <input id="t" type="number" value="35" style="width:55px"></label><label>Nợ <input id="d" type="number" value="7847" style="width:75px"></label><label>Vốn CSH <input id="e" type="number" value="55197" style="width:80px"></label></div><div class="calc" id="o"></div>`;
+  const g = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const rf = g('rf'), b = g('b'), mp = g('mp'), sp = g('sp'), t = g('t') / 100, d = g('d'), e = g('e');
+    const ke = rf + b * mp, kd = (rf + sp) * (1 - t), w = d + e ? d / (d + e) : 0, wacc = ke * (1 - w) + kd * w;
+    o.innerHTML = `k<sub>e</sub> = ${ke.toFixed(2)}% · k<sub>d</sub> sau thuế = ${kd.toFixed(2)}% · D/(D+E) = ${(w * 100).toFixed(2)}%<br>Chi phí vốn (WACC) = <b>${wacc.toFixed(2)}%</b> (sách Boeing: 9,49%)`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
