@@ -808,3 +808,15 @@ WIDGETS['cagr'] = host => {
   }
   host.querySelector('#r').oninput = draw; draw();
 };
+
+// ---- Bảng kiểm doanh nghiệp tuyệt vời kiểu Buffett (Pick Stocks Like Warren Buffett ch.11) ----
+WIDGETS['buffett-checklist'] = host => {
+  const items = ['Tôi hiểu rõ cách công ty kiếm tiền (trong vòng tròn năng lực)', 'Sức sinh lợi ổn định, dự đoán được 10 năm tới', 'ROE ≥ 15% nhiều năm, không dùng đòn bẩy/mánh kế toán', 'Nợ thấp (nợ/vốn chủ ≤ 50%)', 'Lợi nhuận bằng tiền mặt, ít cần rót vốn mới', 'Có “hào”: thương hiệu/nhượng quyền, có thể tăng giá', 'Quản lý trung thực, tiết kiệm, nghĩ như chủ và đặt cổ phiếu lên trước', 'Giá thấp hơn giá trị nội tại tôi ước tính (biên an toàn)', 'Tôi sẵn sàng giữ 10 năm nếu thị trường đóng cửa', 'Tôi đã làm bài tập: đọc 5–10 năm báo cáo, hỏi đối thủ/khách hàng'];
+  host.innerHTML = '<div style="display:grid;gap:6px">' + items.map((t, i) => `<label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" data-i="${i}"> <span>${t}</span></label>`).join('') + '</div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  function draw() {
+    const n = host.querySelectorAll('input:checked').length;
+    o.innerHTML = `Điểm: <b>${n}/${items.length}</b> — ${n >= 9 ? 'gần như “chắc chắn”: đáng cân nhắc mua một vị thế đáng kể' : n >= 7 ? 'khá tốt nhưng còn điểm chưa rõ — nghiên cứu thêm' : n >= 4 ? 'còn nghi ngờ: Buffett sẽ bỏ qua cú ném này' : 'chưa đạt — chờ “cú ném béo”'}. (Buffett chỉ đánh khi gần như đạt hết.)`;
+  }
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};

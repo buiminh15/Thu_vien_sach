@@ -1,6 +1,27 @@
 // Danh sách sách. Thêm sách mới: thêm 1 object vào đây + 1 file data/<id>.js
 window.BOOKS = [
   {
+    id: "almanac",
+    title: "Stock Trader's Almanac 2005",
+    subtitle: "Niên giám nhà giao dịch chứng khoán – mùa vụ và chu kỳ thị trường",
+    author: "Yale Hirsch & Jeffrey A. Hirsch",
+    cat: "Đầu tư & Tài chính",
+    tags: ["mùa vụ","6 tháng tốt nhất","phong vũ biểu tháng 1","chu kỳ tổng thống","triple witching","macd","dow jones","s&p 500","nasdaq"],
+    level: "Cơ bản → Trung cấp",
+    emoji: "🗓",
+    color: "linear-gradient(135deg,#1e3a8a,#38bdf8)",
+    desc: "Thống kê tính mùa vụ của thị trường Mỹ (số liệu đến 2004): chỉ báo tháng Giêng, chiến lược 6 tháng tốt nhất + MACD, xếp hạng tháng, chu kỳ tổng thống/thập niên, thứ trong tuần, ngày đầu tháng, nghỉ lễ và triple witching. Có công cụ tương tác, flashcard, trắc nghiệm. Mô hình lịch sử không đảm bảo tương lai.",
+    chapters: [
+      { n: 1, title: "Đầu tư theo lịch: triết lý Almanac", ready: true },
+      { n: 2, title: "Chỉ báo tháng Giêng", ready: true },
+      { n: 3, title: "6 tháng tốt nhất (11–4) và MACD", ready: true },
+      { n: 4, title: "Mùa vụ trong năm: tháng, quý, rally", ready: true },
+      { n: 5, title: "Chính trị và chu kỳ: tổng thống, thập niên", ready: true },
+      { n: 6, title: "Ngày và tuần: thứ, đầu tháng, lễ, triple witching", ready: true },
+      { n: 7, title: "Dùng Almanac thực tế & tổng kết", ready: true }
+    ]
+  },
+  {
     id: "phantichtc",
     title: "Phân tích tài chính",
     subtitle: "Corporate Finance – Chương trình Giảng dạy Kinh tế Fulbright (FETP)",
@@ -511,6 +532,90 @@ window.BOOKS = [
     {
       "n": 8,
       "title": "Định giá cổ phiếu: ghép tất cả lại (Citigroup, Merrill Lynch, Berkshire, Washington REIT)",
+      "ready": true
+    }
+  ]
+}
+,
+{
+  "id": "buffett",
+  "title": "Chọn cổ phiếu như Warren Buffett (Pick Stocks Like Warren Buffett)",
+  "subtitle": "J.K. Lasser’s – chiến lược của Buffett và các nhà đầu tư giá trị",
+  "author": "Warren Boroson (John Wiley & Sons)",
+  "cat": "Tài chính đầu tư",
+  "tags": [
+    "buffett",
+    "đầu tư giá trị",
+    "graham",
+    "fisher",
+    "berkshire",
+    "biên an toàn",
+    "tâm lý đầu tư",
+    "sequoia"
+  ],
+  "level": "Cơ bản",
+  "emoji": "🧓",
+  "color": "linear-gradient(135deg,#7c2d12,#f59e0b)",
+  "desc": "12 nguyên tắc đầu tư của Buffett, ảnh hưởng của Graham và Fisher, các lỗi tâm lý cần tránh, danh mục tập trung hay đa dạng, và chân dung 20+ nhà đầu tư giá trị (Ruane, Hagstrom, Browne, Whitman, Schloss, Torray, Gipson, Price…).",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Đầu tư như Buffett: cách làm, thành tích và cuộc đời",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Hai người thầy: Graham, Fisher và giá trị vs tăng trưởng",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "12 nguyên tắc, không đánh bạc, mua giá “hời”",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Mua cái bạn hiểu, làm bài tập, đi ngược đám đông",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Công ty tuyệt vời và những người quản lý đáng tin",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Nhà đầu tư, không phải tay súng; hãy kinh doanh lạnh lùng",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Nhận sai lầm, tránh bẫy tâm lý, tập trung hay đa dạng",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Bộ lọc kiểu Buffett và những người đi theo (Ruane, Hagstrom, Simpson, Browne)",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Whitman, Schloss, Torray và Walczak: bốn phong cách giá trị",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Gipson, Price và các nhà đầu tư giá trị khác",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Tổng hợp: phẩm chất, công ty tuyệt vời và danh ngôn Buffett",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Phụ lục: Schloss, Whitman, đại hội Berkshire và Phil Carret",
       "ready": true
     }
   ]
