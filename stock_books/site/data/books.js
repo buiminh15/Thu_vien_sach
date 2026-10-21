@@ -1,6 +1,33 @@
 // Danh sách sách. Thêm sách mới: thêm 1 object vào đây + 1 file data/<id>.js
 window.BOOKS = [
   {
+    id: "reactref",
+    title: "React Reference – giáo trình tiếng Việt dễ hiểu",
+    subtitle: "Hooks, Components, APIs, Legacy và Rules of React (react.dev/reference/react)",
+    author: "Biên soạn tiếng Việt từ tài liệu chính thức react.dev",
+    cat: "Lập trình & AI",
+    tags: ["react","react 19","hooks","useState","useEffect","suspense","transition","server components","actions","rules of hooks"],
+    level: "Cơ bản → Nâng cao",
+    emoji: "⚛️",
+    color: "linear-gradient(135deg,#0c4a6e,#38bdf8)",
+    desc: "13 chương học React qua mục Reference: state, context, ref, Effect, ghi nhớ và React Compiler, Transition/Suspense, Actions và form (useActionState, useOptimistic), hook khác, component có sẵn (StrictMode, Activity, ViewTransition…), Server Components (cache, use client/server), Rules of React, API cũ và bản đồ tra cứu. Giải thích bằng ví dụ đời thường, có mô phỏng tương tác, flashcard, trắc nghiệm.",
+    chapters: [
+      { n: 1, title: "State: useState và useReducer", ready: true },
+      { n: 2, title: "Context: createContext, useContext và use", ready: true },
+      { n: 3, title: "Ref và DOM: useRef, useImperativeHandle", ready: true },
+      { n: 4, title: "Effect: useEffect, useEffectEvent, useLayoutEffect", ready: true },
+      { n: 5, title: "Ghi nhớ để tối ưu: useMemo, useCallback, memo, Compiler", ready: true },
+      { n: 6, title: "Giao diện mượt: Transition, DeferredValue, Suspense, lazy", ready: true },
+      { n: 7, title: "Form và dữ liệu: useActionState, useOptimistic, Actions", ready: true },
+      { n: 8, title: "Hook khác: useId, useSyncExternalStore, custom Hook", ready: true },
+      { n: 9, title: "Component có sẵn: Fragment, StrictMode, Profiler, Activity, ViewTransition", ready: true },
+      { n: 10, title: "Server Components: cache, use client, use server", ready: true },
+      { n: 11, title: "Quy tắc của React, act và captureOwnerStack", ready: true },
+      { n: 12, title: "API cũ (Legacy): class, Children, cloneElement, forwardRef", ready: true },
+      { n: 13, title: "Bản đồ tra cứu: chọn đúng API cho đúng việc", ready: true }
+    ]
+  },
+  {
     id: "nuxt4",
     title: "Nuxt 4 – giáo trình tiếng Việt dễ hiểu",
     subtitle: "Từ Get Started, Structure, Guide đến tra cứu API (nuxt.com/docs/4.x)",
