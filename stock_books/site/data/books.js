@@ -1,6 +1,32 @@
 // Danh sách sách. Thêm sách mới: thêm 1 object vào đây + 1 file data/<id>.js
 window.BOOKS = [
   {
+    id: "sysdesign",
+    title: "System Design Fundamentals (SDIR) – bản dễ hiểu",
+    subtitle: "Lộ trình phỏng vấn & nền tảng thiết kế hệ thống, có giải thích đời thường và bổ sung ngoài sách",
+    author: "System Design Interview Roadmap (Substack) – biên soạn tiếng Việt, bổ sung giải thích",
+    cat: "Lập trình & AI",
+    tags: ["system design","cap theorem","load balancing","caching","cdn","message queue","rate limiting","microservices","consistency","circuit breaker"],
+    level: "Cơ bản → Trung cấp",
+    emoji: "🏗",
+    color: "linear-gradient(135deg,#0f766e,#22d3ee)",
+    desc: "12 chương tự học thiết kế hệ thống: khung phỏng vấn, độ trễ/thông lượng, ước lượng nhanh, cân bằng tải, mạng, API, microservices, SQL/NoSQL, CAP và nhất quán, cache/CDN, hàng đợi, rate limiting, timeout/retry/circuit breaker. Mỗi khái niệm khó có ví dụ đời thường; chỗ nào sách chưa rõ có mục “Bổ sung ngoài sách”. Có mô phỏng tương tác, flashcard, trắc nghiệm.",
+    chapters: [
+      { n: 1, title: "Phỏng vấn thiết kế hệ thống: lộ trình 5 bước", ready: true },
+      { n: 2, title: "Hiệu năng: độ trễ, thông lượng, định luật Little", ready: true },
+      { n: 3, title: "Năm yêu cầu phi chức năng và “độ chín” sẵn sàng", ready: true },
+      { n: 4, title: "Ước lượng nhanh (back-of-the-envelope)", ready: true },
+      { n: 5, title: "Mở rộng dọc/ngang và cân bằng tải", ready: true },
+      { n: 6, title: "Mạng và giao thức: TCP, UDP, HTTP, thời gian thực", ready: true },
+      { n: 7, title: "API và định dạng dữ liệu: REST, GraphQL, gRPC; JSON, Protobuf, Avro", ready: true },
+      { n: 8, title: "Kiến trúc: monolith/microservices; proxy/API gateway", ready: true },
+      { n: 9, title: "Dữ liệu phân tán: SQL/NoSQL, CAP, nhất quán", ready: true },
+      { n: 10, title: "Tăng tốc: Caching và CDN", ready: true },
+      { n: 11, title: "Hàng đợi tin nhắn và giới hạn tốc độ", ready: true },
+      { n: 12, title: "Thiết kế cho sự cố: timeout, retry, circuit breaker", ready: true }
+    ]
+  },
+  {
     id: "claudehowto",
     title: "Claude Code How-To (bản tiếng Việt)",
     subtitle: "Từ lệnh slash đến hooks, MCP, plugins và tự động hóa CI",

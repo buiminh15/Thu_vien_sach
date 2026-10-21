@@ -820,3 +820,98 @@ WIDGETS['buffett-checklist'] = host => {
   }
   host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
 };
+
+// ---- Khuếch đại độ trễ đuôi (DDIA ch1) ----
+WIDGETS['tail-latency'] = host => {
+  host.innerHTML = `<div class="row"><label>Xác suất 1 call backend chậm % <input id="p" type="number" value="1" step="0.1" style="width:60px"></label><label>Số call backend / request người dùng <input id="n" type="number" value="100" style="width:70px"></label></div><div class="calc" id="o"></div>`;
+  const q = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const p = q('p') / 100, n = Math.max(1, Math.round(q('n'))), a = 1 - Math.pow(1 - p, n);
+    o.innerHTML = `Xác suất ít nhất một call chậm = 1 − (1 − p)<sup>n</sup> = <b>${(a * 100).toFixed(1)}%</b><br>Nghĩa là dù chỉ ${(p * 100).toFixed(2)}% call backend chậm, <b>${(a * 100).toFixed(1)}%</b> request của người dùng sẽ chậm. (p = 1%, n = 100 ⇒ 63,4%.)`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Chọn mô hình dữ liệu (DDIA ch2) ----
+WIDGETS['datamodel-picker'] = host => {
+  const qs = ['Dữ liệu chủ yếu là các tài liệu tự đủ (cây một-nhiều), thường tải cả tài liệu?', 'Có nhiều quan hệ nhiều-nhiều và JOIN giữa các thực thể?', 'Mọi thứ có thể liên quan tới mọi thứ (mạng xã hội, đường đi, gợi ý)?', 'Cần ràng buộc lược đồ chặt và giao dịch?', 'Cấu trúc dữ liệu thay đổi thường xuyên/không đồng nhất?'];
+  host.innerHTML = '<div style="display:grid;gap:6px">' + qs.map((t, i) => `<label style="display:flex;gap:8px"><input type="checkbox" data-i="${i}"> <span>${t}</span></label>`).join('') + '</div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  function draw() {
+    const c = [...host.querySelectorAll('input')].map(i => i.checked);
+    const s = { 'Document': c[0] * 3 + c[4] * 2 - c[1] * 2 - c[2] * 2, 'Quan hệ': c[1] * 3 + c[3] * 3 - c[2] + (c[0] ? 0 : 1), 'Đồ thị': c[2] * 4 + c[1] * 1 - c[0] };
+    const best = Object.entries(s).sort((a, b) => b[1] - a[1])[0][0];
+    o.innerHTML = `Gợi ý: <b>${best}</b> (điểm: ${Object.entries(s).map(([k, v]) => k + ' ' + v).join(' · ')}). Thực tế có thể kết hợp (JSON trong PostgreSQL, quan hệ + đồ thị…).`;
+  }
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};
+
+// ---- Sức chứa B-tree (DDIA ch3) ----
+WIDGETS['btree-capacity'] = host => {
+  host.innerHTML = `<div class="row"><label>Kích thước trang (KB) <input id="ps" type="number" value="4" style="width:55px"></label><label>Branching factor <input id="bf" type="number" value="500" style="width:65px"></label><label>Số tầng <input id="d" type="number" value="4" min="1" max="8" style="width:45px"></label></div><div class="calc" id="o"></div>`;
+  const q = id => parseFloat(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function fmt(b) { const u = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB']; let i = 0; while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; } return b.toFixed(1) + ' ' + u[i]; }
+  function draw() {
+    const ps = q('ps') * 1024, bf = q('bf'), d = Math.max(1, Math.round(q('d'))), pages = Math.pow(bf, d);
+    o.innerHTML = `Số trang lá ≈ ${bf}<sup>${d}</sup> = <b>${pages.toExponential(2)}</b> ⇒ dung lượng tối đa ≈ <b>${fmt(pages * ps)}</b><br>Tra 1 key cần ~<b>${d}</b> lần đọc trang. (Sách: 4 tầng, 4 KB, branching 500 ⇒ ~256 TB.) Gấp đôi branching factor làm tăng sức chứa 2<sup>${d}</sup> = ${Math.pow(2, d)} lần.`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Varint (DDIA ch4) ----
+WIDGETS['varint-calc'] = host => {
+  host.innerHTML = `<div class="row"><label>Số nguyên có dấu (zigzag) hoặc không dấu <input id="v" type="number" value="1337" style="width:120px"></label><label><input id="z" type="checkbox"> zigzag (có dấu)</label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    let v = Math.round(parseFloat(host.querySelector('#v').value) || 0); const z = host.querySelector('#z').checked;
+    let u = z ? (v >= 0 ? v * 2 : -v * 2 - 1) : Math.abs(v);
+    let n = 1, x = u; while (x >= 128) { x = Math.floor(x / 128); n++; }
+    o.innerHTML = `Giá trị mã hoá = ${u} ⇒ cần <b>${n} byte</b> (mỗi byte dùng 7 bit dữ liệu + 1 bit “còn tiếp”). Số cố định 64-bit luôn cần 8 byte. Sách: 1337 ⇒ 2 byte; −64…63 ⇒ 1 byte (zigzag).`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = i.onchange = draw); draw();
+};
+
+// ---- Quorum (DDIA ch5) ----
+WIDGETS['quorum-calc'] = host => {
+  host.innerHTML = `<div class="row"><label>n (số replica) <input id="n" type="number" value="3" min="1" style="width:55px"></label><label>w (ghi cần xác nhận) <input id="w" type="number" value="2" min="1" style="width:55px"></label><label>r (đọc hỏi) <input id="r" type="number" value="2" min="1" style="width:55px"></label></div><div class="calc" id="o"></div>`;
+  const q = id => parseInt(host.querySelector('#' + id).value) || 0, o = host.querySelector('#o');
+  function draw() {
+    const n = q('n'), w = q('w'), r = q('r');
+    if (w > n || r > n) { o.textContent = 'w và r không được lớn hơn n.'; return; }
+    const strict = w + r > n;
+    o.innerHTML = `${strict ? '✅ w + r = ' + (w + r) + ' &gt; n = ' + n + ' ⇒ tập ghi và tập đọc <b>giao nhau</b> ⇒ kỳ vọng đọc được giá trị mới nhất' : '⚠️ w + r = ' + (w + r) + ' ≤ n = ' + n + ' ⇒ có thể đọc phải giá trị cũ (nhưng độ trễ thấp, sẵn sàng cao hơn)'}<br>Chịu được <b>${n - w}</b> nút hỏng khi ghi và <b>${n - r}</b> nút hỏng khi đọc. (Vẫn có ngoại lệ: sloppy quorum, ghi đồng thời, lỗi một phần…)`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Rebalance: hash mod N vs partition cố định (DDIA ch6) ----
+WIDGETS['rebalance-mod'] = host => {
+  host.innerHTML = `<div class="row"><label>Số node ban đầu N <input id="n" type="number" value="10" min="1" style="width:55px"></label><label>Số node mới <input id="m" type="number" value="11" min="1" style="width:55px"></label><label>Số khoá mô phỏng <input id="k" type="number" value="100000" style="width:85px"></label></div><div class="calc" id="o"></div>`;
+  const q = id => parseInt(host.querySelector('#' + id).value) || 1, o = host.querySelector('#o');
+  function draw() {
+    const n = q('n'), m = q('m'), K = Math.min(q('k'), 1000000); let moved = 0;
+    for (let i = 0; i < K; i++) { const h = Math.imul(i + 1, 2654435761) >>> 0; if (h % n !== h % m) moved++; }
+    const ideal = m > n ? (m - n) / m : (n - m) / n;
+    o.innerHTML = `hash mod N: <b>${(moved / K * 100).toFixed(1)}%</b> khoá phải di chuyển khi ${n} → ${m} node<br>Số partition cố định / consistent: chỉ khoảng <b>${(ideal * 100).toFixed(1)}%</b> (phần tối thiểu cần nhường cho node mới) — ví dụ 10 → 11 node: ~9,1% so với ~90% của mod N.`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Mô phỏng write skew (DDIA ch7) ----
+WIDGETS['write-skew-sim'] = host => {
+  host.innerHTML = `<div class="row"><label>Chế độ <select id="m"><option value="si">Snapshot isolation (đọc snapshot, ghi hàng của mình)</option><option value="ser">Serializable (tuần tự hoá)</option><option value="lock">SELECT … FOR UPDATE</option></select></label><button id="go" type="button">Alice và Bob cùng xin nghỉ</button></div><div class="calc" id="o">Hai bác sĩ Alice, Bob đang trực. Quy tắc: luôn có ≥ 1 bác sĩ trực.</div>`;
+  const o = host.querySelector('#o');
+  host.querySelector('#go').onclick = () => {
+    const mode = host.querySelector('#m').value;
+    const A = { alice: true, bob: true };
+    if (mode === 'si') {
+      const a = Object.values(A).filter(Boolean).length, b = Object.values(A).filter(Boolean).length;
+      if (a >= 2) A.alice = false; if (b >= 2) A.bob = false;
+      o.innerHTML = `Cả hai giao dịch đọc từ snapshot cũ thấy <b>${a}</b> bác sĩ trực ⇒ cả hai đều đi nghỉ. Kết quả: trực = <b>${Object.values(A).filter(Boolean).length}</b> ⇒ <b style="color:#dc2626">vi phạm bất biến (write skew)</b>.`;
+    } else {
+      if (Object.values(A).filter(Boolean).length >= 2) A.alice = false;
+      const n = Object.values(A).filter(Boolean).length;
+      o.innerHTML = `${mode === 'ser' ? 'Giao dịch của Bob thấy xung đột (hoặc chạy sau)' : 'Bob phải chờ khoá hàng; sau khi Alice commit, nó đọc lại'} ⇒ chỉ ${n} người còn trực ⇒ yêu cầu Bob bị <b>từ chối/abort</b>. Kết quả: trực = <b>${n}</b> ⇒ <b style="color:#16a34a">bất biến được giữ</b>.`;
+    }
+  };
+};
