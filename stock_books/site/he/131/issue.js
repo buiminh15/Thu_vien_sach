@@ -1,0 +1,2 @@
+window.HE_ISSUES = window.HE_ISSUES || {};
+HE_ISSUES["131"] = {"id": "131", "title": "Hot English – số 131", "pageCount": 48, "pageDir": "he/131/pages/", "ratio": 1.4637, "tracks": [{"n": 8, "title": "Track 8", "pages": [], "marks": [], "file": "he/131/audio/trk08.mp3", "scriptPages": []}, {"n": 12, "title": "Track 12", "pages": [], "marks": [], "file": "he/131/audio/trk12.mp3", "scriptPages": []}, {"n": 15, "title": "Track 15", "pages": [], "marks": [], "file": "he/131/audio/trk15.mp3", "scriptPages": []}]};
