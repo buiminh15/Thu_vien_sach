@@ -915,3 +915,100 @@ WIDGETS['write-skew-sim'] = host => {
     }
   };
 };
+
+// ---- Fencing token (DDIA ch8) ----
+WIDGETS['fencing-sim'] = host => {
+  host.innerHTML = `<div class="row"><label><input id="f" type="checkbox" checked> Storage kiểm tra fencing token</label><button id="go" type="button">Chạy kịch bản</button></div><div class="calc" id="o">Client 1 lấy lease (token 33) rồi bị GC dừng lâu; lease hết hạn; client 2 lấy token 34 và ghi; client 1 tỉnh lại và ghi.</div>`;
+  const o = host.querySelector('#o');
+  host.querySelector('#go').onclick = () => {
+    const fence = host.querySelector('#f').checked; let maxTok = 0, file = [];
+    const write = (c, t) => { if (fence && t < maxTok) return `Client ${c} (token ${t}): <b style="color:#16a34a">bị từ chối</b> (đã thấy token ${maxTok})`; maxTok = Math.max(maxTok, t); file.push(c); return `Client ${c} (token ${t}): ghi thành công`; };
+    const l1 = write(2, 34), l2 = write(1, 33);
+    o.innerHTML = l1 + '<br>' + l2 + '<br>' + (file.length > 1 ? '⚠️ <b style="color:#dc2626">Hai client cùng ghi ⇒ file bị hỏng</b>' : '✅ Chỉ client 2 ghi ⇒ file an toàn');
+  };
+};
+
+// ---- Lamport timestamps (DDIA ch9) ----
+WIDGETS['lamport-sim'] = host => {
+  host.innerHTML = `<div class="row"><button id="la" type="button">Node A có sự kiện</button><button id="lb" type="button">Node B có sự kiện</button><button id="ab" type="button">A gửi cho B</button><button id="ba" type="button">B gửi cho A</button><button id="rs" type="button">Làm lại</button></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o'); let A, B, log;
+  function reset() { A = 0; B = 0; log = []; draw(); }
+  function ev(x) { return x === 'A' ? ++A : ++B; }
+  function draw() { o.innerHTML = `Counter hiện tại: <b>A = ${A}</b>, <b>B = ${B}</b><br>${log.length ? log.slice(-8).join('<br>') : 'Nhấn các nút để tạo sự kiện. Mỗi lần nhận thông điệp, counter nhảy lên max(của mình, của thông điệp) + 1.'}`; }
+  host.querySelector('#la').onclick = () => { log.push(`A: sự kiện (${ev('A')}, A)`); draw(); };
+  host.querySelector('#lb').onclick = () => { log.push(`B: sự kiện (${ev('B')}, B)`); draw(); };
+  host.querySelector('#ab').onclick = () => { const t = ++A; B = Math.max(B, t) + 1; log.push(`A gửi (${t}, A) → B nhận, B = ${B}`); draw(); };
+  host.querySelector('#ba').onclick = () => { const t = ++B; A = Math.max(A, t) + 1; log.push(`B gửi (${t}, B) → A nhận, A = ${A}`); draw(); };
+  host.querySelector('#rs').onclick = reset; reset();
+};
+
+// ---- Mô phỏng MapReduce đếm từ (DDIA ch10) ----
+WIDGETS['mapreduce-wc'] = host => {
+  host.innerHTML = `<div class="row"><label>Văn bản đầu vào (mỗi dòng một bản ghi)<br><textarea id="t" rows="4" style="width:100%">to be or not to be\nto code or not to code</textarea></label><label>Số reducer <input id="r" type="number" value="2" min="1" max="4" style="width:50px"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  const h = s => { let x = 0; for (const c of s) x = (x * 31 + c.charCodeAt(0)) >>> 0; return x; };
+  function draw() {
+    const lines = host.querySelector('#t').value.split('\n').filter(Boolean), R = Math.max(1, parseInt(host.querySelector('#r').value) || 1);
+    const mapped = lines.map(l => l.toLowerCase().split(/\s+/).filter(Boolean).map(w => [w, 1]));
+    const parts = Array.from({ length: R }, () => ({}));
+    mapped.flat().forEach(([w, c]) => { (parts[h(w) % R][w] = parts[h(w) % R][w] || []).push(c); });
+    o.innerHTML = `<b>Map</b> (${lines.length} mapper): ` + mapped.map((m, i) => `m${i + 1}: ${m.map(x => x[0]).join(' ')}`).join(' · ') + '<br><b>Shuffle + sort</b> theo hash(key) mod ' + R + '<br>' + parts.map((p, i) => `<b>Reducer ${i + 1}</b>: ` + Object.keys(p).sort().map(w => `${w}→${p[w].reduce((a, b) => a + b, 0)}`).join(', ')).join('<br>');
+  }
+  host.querySelectorAll('textarea,input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Log phân vùng và offset (DDIA ch11) ----
+WIDGETS['log-offsets'] = host => {
+  host.innerHTML = `<div class="row"><button id="p" type="button">Producer thêm thông điệp</button><button id="a" type="button">Consumer A đọc</button><button id="b" type="button">Consumer B đọc</button><button id="rb" type="button">Đặt lại B về offset 0 (phát lại)</button></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o'); let log = [], A = 0, B = 0;
+  function draw() { o.innerHTML = `Log: ${log.map((m, i) => `<span style="display:inline-block;border:1px solid #888;padding:1px 6px;margin:1px;background:${i < A && i < B ? '#dcfce7' : i < Math.max(A, B) ? '#fef9c3' : 'transparent'}">${i}:${m}</span>`).join('') || '(trống)'}<br>Offset consumer A = <b>${A}</b> (độ trễ ${log.length - A}); B = <b>${B}</b> (độ trễ ${log.length - B}). Đọc không xoá thông điệp; mỗi consumer có offset riêng.`; }
+  host.querySelector('#p').onclick = () => { log.push('m' + log.length); draw(); };
+  host.querySelector('#a').onclick = () => { if (A < log.length) A++; draw(); };
+  host.querySelector('#b').onclick = () => { if (B < log.length) B++; draw(); };
+  host.querySelector('#rb').onclick = () => { B = 0; draw(); }; draw();
+};
+
+// ---- Cửa sổ thời gian (DDIA ch11) ----
+WIDGETS['window-sim'] = host => {
+  host.innerHTML = `<div class="row"><label>Timestamp sự kiện (giây), phân cách bằng dấu phẩy <input id="e" type="text" value="3,18,25,61,64,125" style="width:100%"></label><label>Độ dài cửa sổ (giây) <input id="w" type="number" value="60" style="width:60px"></label><label>Bước nhảy hopping (giây) <input id="h" type="number" value="30" style="width:60px"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const ev = host.querySelector('#e').value.split(',').map(parseFloat).filter(x => !isNaN(x)).sort((a, b) => a - b), w = Math.max(1, parseFloat(host.querySelector('#w').value) || 60), h = Math.max(1, parseFloat(host.querySelector('#h').value) || w);
+    const tum = {}; ev.forEach(t => { const k = Math.floor(t / w) * w; (tum[k] = tum[k] || []).push(t); });
+    const hop = {}; ev.forEach(t => { for (let s = Math.floor(t / h) * h; s > t - w; s -= h) { if (s < 0) break; (hop[s] = hop[s] || []).push(t); } });
+    const fmt = d => Object.keys(d).map(Number).sort((a, b) => a - b).map(k => `[${k},${k + w}): ${d[k].length} sự kiện (${d[k].join(', ')})`).join('<br>');
+    o.innerHTML = `<b>Tumbling ${w}s</b> (mỗi sự kiện đúng 1 cửa sổ):<br>${fmt(tum)}<br><br><b>Hopping ${w}s, bước ${h}s</b> (chồng lấn, sự kiện xuất hiện ở nhiều cửa sổ):<br>${fmt(hop)}`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Write path vs read path (DDIA ch12) ----
+WIDGETS['write-read-path'] = host => {
+  host.innerHTML = `<div class="row"><label>Chiến lược <select id="s"><option value="0">Không index (quét hết)</option><option value="1" selected>Index đảo</option><option value="2">Tính trước mọi truy vấn</option></select></label><label>Số tài liệu <input id="n" type="number" value="1000000" style="width:110px"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const s = +host.querySelector('#s').value, n = Math.max(1, +host.querySelector('#n').value || 1);
+    const d = [
+      ['Ghi: không việc gì (O(1))', `Đọc: quét ${n.toLocaleString('vi-VN')} tài liệu (như grep)`, 'Ghi rẻ, đọc rất đắt.'],
+      ['Ghi: cập nhật mục index của mọi từ trong tài liệu', 'Đọc: tra từng từ rồi AND/OR các danh sách', 'Cân bằng — lựa chọn phổ biến.'],
+      ['Ghi: cập nhật kết quả cho mọi truy vấn có thể (vô hạn/luỹ thừa)', 'Đọc: tra thẳng một kết quả', 'Đọc rẻ nhất nhưng ghi bất khả thi; thực tế chỉ cache truy vấn phổ biến.']
+    ][s];
+    o.innerHTML = `<b>${d[0]}</b><br><b>${d[1]}</b><br>${d[2]}<br><i>Index, cache và materialized view chỉ là các điểm khác nhau trên trục dịch chuyển ranh giới write path / read path.</i>`;
+  }
+  host.querySelectorAll('select,input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Retry idempotent (DDIA ch12) ----
+WIDGETS['idempotent-retry'] = host => {
+  host.innerHTML = `<div class="row"><label><input id="id" type="checkbox"> Dùng request ID + UNIQUE</label><label>Số tiền <input id="a" type="number" value="11" style="width:70px"></label><button id="send" type="button">Gửi yêu cầu</button><button id="retry" type="button">Mạng lỗi → người dùng gửi lại</button><button id="rs" type="button">Đặt lại</button></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o'); let bal = 100, seen = new Set(), log = [];
+  function apply() {
+    const amt = +host.querySelector('#a').value || 0, uid = host.querySelector('#id').checked;
+    if (uid && seen.has('REQ-1')) { log.push('INSERT request_id=REQ-1 trùng ⇒ abort, không đổi số dư'); return; }
+    if (uid) seen.add('REQ-1'); bal -= amt; log.push(`Trừ ${amt} ⇒ số dư ${bal}`);
+  }
+  function draw() { o.innerHTML = `Số dư người trả: <b>${bal}</b><br>${log.join('<br>') || '(chưa có yêu cầu)'}`; }
+  host.querySelector('#send').onclick = () => { apply(); draw(); };
+  host.querySelector('#retry').onclick = () => { log.push('(client không nhận được phản hồi, gửi lại)'); apply(); draw(); };
+  host.querySelector('#rs').onclick = () => { bal = 100; seen = new Set(); log = []; draw(); }; draw();
+};

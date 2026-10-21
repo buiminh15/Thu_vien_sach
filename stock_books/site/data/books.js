@@ -1,6 +1,29 @@
 // Danh sách sách. Thêm sách mới: thêm 1 object vào đây + 1 file data/<id>.js
 window.BOOKS = [
   {
+    id: "vuebook",
+    title: "Fullstack Vue (bản tiếng Việt dễ hiểu)",
+    subtitle: "Vue.js, Vuex, Router, Form, Unit test – kèm chương bổ sung Vue 3",
+    author: "Hassan Djirdeh, Nate Murray, Ari Lerner (Fullstack.io, 2018) – biên soạn tiếng Việt",
+    cat: "Lập trình & AI",
+    tags: ["vue","vue.js","vuex","vue-router","components","form","unit test","pinia","vue 3","composition api"],
+    level: "Cơ bản → Trung cấp",
+    emoji: "💚",
+    color: "linear-gradient(135deg,#064e3b,#34d399)",
+    desc: "9 chương học Vue theo dự án: UpVote!, component một file, sự kiện tùy chỉnh, Vuex, giỏ hàng gọi API, form có kiểm tra hợp lệ, vue-router với đăng nhập, unit test. Sách gốc là Vue 2 (2018) nên có thêm chương bổ sung chuyển sang Vue 3 (Composition API, Pinia, Vite, Vitest). Giải thích bằng ví dụ đời thường, có mô phỏng tương tác, flashcard, trắc nghiệm.",
+    chapters: [
+      { n: 1, title: "Ứng dụng Vue đầu tiên: UpVote!", ready: true },
+      { n: 2, title: "Component một file (.vue) và cách xây app từ đầu", ready: true },
+      { n: 3, title: "Sự kiện tùy chỉnh và Event Bus", ready: true },
+      { n: 4, title: "Vuex nhập môn: quản lý trạng thái kiểu Flux", ready: true },
+      { n: 5, title: "Vuex và máy chủ: giỏ hàng có lưu dữ liệu", ready: true },
+      { n: 6, title: "Xử lý form: nhập liệu, kiểm tra, lưu bất đồng bộ", ready: true },
+      { n: 7, title: "Routing: nhiều “trang” trong một ứng dụng một trang", ready: true },
+      { n: 8, title: "Unit test cho component Vue", ready: true },
+      { n: 9, title: "Vue 3 hiện đại: Composition API, Pinia, Vite (bổ sung)", ready: true }
+    ]
+  },
+  {
     id: "sysdesign",
     title: "System Design Fundamentals (SDIR) – bản dễ hiểu",
     subtitle: "Lộ trình phỏng vấn & nền tảng thiết kế hệ thống, có giải thích đời thường và bổ sung ngoài sách",
@@ -670,5 +693,86 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "ddia",
+  "title": "Thiết kế ứng dụng nặng dữ liệu (Designing Data-Intensive Applications)",
+  "subtitle": "Nền tảng của hệ thống đáng tin cậy, mở rộng được, dễ bảo trì",
+  "author": "Martin Kleppmann (O’Reilly)",
+  "cat": "Lập trình & AI",
+  "tags": [
+    "CSDL",
+    "Hệ phân tán",
+    "Kafka",
+    "Giao dịch",
+    "Kiến trúc"
+  ],
+  "level": "Nâng cao",
+  "emoji": "🗄️",
+  "color": "#0e7490",
+  "desc": "12 chương: mô hình dữ liệu, storage engine, mã hoá, replication, partitioning, giao dịch, hệ phân tán, consensus, batch, stream và tương lai hệ dữ liệu.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Ứng dụng đáng tin cậy, mở rộng được, dễ bảo trì",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Mô hình dữ liệu và ngôn ngữ truy vấn",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Lưu trữ và truy xuất (storage engine)",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Mã hoá (encoding) và tiến hoá lược đồ",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Nhân bản dữ liệu (Replication)",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Phân vùng dữ liệu (Partitioning / Sharding)",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Giao dịch (Transactions) và mức cô lập",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Rắc rối của hệ thống phân tán",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Nhất quán (Consistency) và đồng thuận (Consensus)",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Xử lý theo lô (Batch Processing)",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Xử lý luồng (Stream Processing)",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Tương lai của hệ thống dữ liệu",
+      "ready": true
+    }
+  ]
 }
 ];
+
