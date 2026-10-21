@@ -15,7 +15,7 @@ Muốn sửa tay track↔trang: tạo HE/<số>/tracks_override.json, ví dụ {
 
 
 """
-import sys, re, json, shutil
+import sys, re, json, shutil, subprocess
 from pathlib import Path
 import pymupdf
 
@@ -87,6 +87,16 @@ def region_text(doc, page_no, y_from, y_to):
     return txt.strip()
 
 
+def id3_track(f):
+    """Đọc số track từ tag ID3 'title' dạng '02_HE141_jokes' (khi tên file không có số)."""
+    try:
+        o = subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format_tags=title', '-of', 'csv=p=0', str(f)], capture_output=True, text=True).stdout
+        m = re.match(r'\s*0*(\d{1,2})[\s_-]', o)
+        return m
+    except Exception:
+        return None
+
+
 def build_issue(folder: Path):
     num = folder.name
     pdfs = sorted(folder.glob('*.pdf')) + sorted(folder.glob('*.PDF'))
@@ -107,7 +117,7 @@ def build_issue(folder: Path):
     # MP3
     mp3 = {}
     for f in folder.rglob('*.mp3'):
-        m = re.search(r'(?:trk|track)\s*0*(\d+)', f.name, re.I)
+        m = re.search(r'(?:trk|track)\s*0*(\d+)', f.name, re.I) or re.search(r'HE\s*\d{3}[\s_-]+0*(\d{1,2})(?!\d)', f.name, re.I) or re.search(r'^0*(\d{1,2})[\s_-]+HE\s*\d{3}', f.name, re.I) or id3_track(f)
         if m:
             n = int(m.group(1)); mp3[n] = f
             dst = out / 'audio' / f'trk{n:02d}.mp3'
