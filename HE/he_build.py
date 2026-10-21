@@ -12,6 +12,8 @@ Mỗi thư mục số báo cần: một file *.pdf và thư mục chứa các fi
 Kết quả ghi vào stock_books/site/he/<số>/ : pages/*.jpg, audio/*.mp3, issue.js
 và stock_books/site/he/index.js (danh sách số báo).
 Muốn sửa tay track↔trang: tạo HE/<số>/tracks_override.json, ví dụ {"18": {"pages": [44]}, "1": {"pages": [4]}}
+
+
 """
 import sys, re, json, shutil
 from pathlib import Path
