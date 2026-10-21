@@ -1,0 +1,5 @@
+
+# Hot English: dữ liệu nặng, dựng lại bằng HE/he_build.py
+HE/raw/
+HE/[0-9]*/
+# stock_books/site/he/
