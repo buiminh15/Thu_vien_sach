@@ -1,6 +1,31 @@
 // Danh sách sách. Thêm sách mới: thêm 1 object vào đây + 1 file data/<id>.js
 window.BOOKS = [
   {
+    id: "claudehowto",
+    title: "Claude Code How-To (bản tiếng Việt)",
+    subtitle: "Từ lệnh slash đến hooks, MCP, plugins và tự động hóa CI",
+    author: "Cộng đồng claude-howto (bản dịch tiếng Việt, Claude Code 2.1.302)",
+    cat: "Lập trình & AI",
+    tags: ["claude code","slash commands","claude.md","skills","subagents","mcp","hooks","plugins","checkpoints","cli","plan mode","auto mode"],
+    level: "Cơ bản → Nâng cao",
+    emoji: "🤖",
+    color: "linear-gradient(135deg,#4c1d95,#a78bfa)",
+    desc: "Giáo trình 11 chương tự học Claude Code: lệnh slash, bộ nhớ CLAUDE.md, Agent Skills, tác nhân con, MCP, hooks, plugins, checkpoints, plan/thinking/auto mode, quyền, sandbox, worktree và tham chiếu CLI. Có trình tạo cấu hình tương tác, flashcard, trắc nghiệm, ghép đôi.",
+    chapters: [
+      { n: 1, title: "Lệnh Slash", ready: true },
+      { n: 2, title: "Bộ nhớ: CLAUDE.md và Auto Memory", ready: true },
+      { n: 3, title: "Agent Skills", ready: true },
+      { n: 4, title: "Tác nhân con (Subagents)", ready: true },
+      { n: 5, title: "MCP – Model Context Protocol", ready: true },
+      { n: 6, title: "Hooks – tự động hóa theo sự kiện", ready: true },
+      { n: 7, title: "Plugins – đóng gói và chia sẻ", ready: true },
+      { n: 8, title: "Checkpoints và Rewind", ready: true },
+      { n: 9, title: "Nâng cao (1): Plan, Thinking, Auto, Quyền, Nền, Print, Phiên", ready: true },
+      { n: 10, title: "Nâng cao (2): Phím tắt, Từ xa, Worktree, Sandbox, Quản trị", ready: true },
+      { n: 11, title: "Tham chiếu CLI và tự động hóa", ready: true }
+    ]
+  },
+  {
     id: "almanac",
     title: "Stock Trader's Almanac 2005",
     subtitle: "Niên giám nhà giao dịch chứng khoán – mùa vụ và chu kỳ thị trường",
