@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Hot English – đọc & nghe</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/hotenglish.css">
+</head>
+<body class="he-page">
+<header class="topbar"><div class="wrap he-top">
+  <a class="brand" href="index.html">📚 <span class="hide-sm">Thư viện </span><span>Tự học</span></a>
+  <div class="grow"></div>
+  <select id="issue" class="he-sel" aria-label="Số báo"></select>
+  <a class="btn sm" href="index.html">← Sách</a>
+  <button class="btn sm" id="theme">🌓</button>
+</div></header>
+
+<div class="he" id="he">
+  <!-- ===== KHUNG ĐỌC PDF ===== -->
+  <section class="reader" id="reader">
+    <div class="rbar">
+      <span id="pginfo" class="pginfo">Trang 1 / –</span>
+      <input id="pgjump" type="number" min="1" class="he-num" aria-label="Tới trang" placeholder="Tới…">
+      <div class="grow"></div>
+      <button class="btn sm" id="zout" aria-label="Thu nhỏ">−</button>
+      <button class="btn sm" id="zfit" aria-label="Vừa khung">⤢</button>
+      <button class="btn sm" id="zin" aria-label="Phóng to">+</button>
+    </div>
+    <div class="scroller" id="scroller"><div id="pages" class="pages"></div></div>
+    <div class="here" id="here" hidden></div>
+  </section>
+
+  <!-- ===== PLAYLIST + TRÌNH PHÁT ===== -->
+  <aside class="player" id="player">
+    <button class="grab" id="grab" aria-label="Mở/đóng danh sách phát"><span></span></button>
+    <div class="mini" id="mini">
+      <button class="mbtn" id="mplay" aria-label="Phát/Tạm dừng">▶</button>
+      <div class="mtxt" id="mtitle">Chưa chọn track</div>
+      <button class="mbtn" id="mexp" aria-label="Mở danh sách">▴</button>
+    </div>
+    <div class="pbody" id="pbody">
+      <div class="now">
+        <div class="ntitle" id="ntitle">Chưa chọn track</div>
+        <div class="nsub" id="nsub"></div>
+        <input type="range" id="seek" min="0" max="1000" value="0" aria-label="Tua">
+        <div class="times"><span id="tcur">0:00</span><span id="tdur">0:00</span></div>
+        <div class="ctl">
+          <button class="cbtn" id="prev" aria-label="Track trước">⏮</button>
+          <button class="cbtn" id="back" aria-label="Lùi 10 giây">↺10</button>
+          <button class="cbtn big" id="play" aria-label="Phát/Tạm dừng">▶</button>
+          <button class="cbtn" id="fwd" aria-label="Tiến 10 giây">10↻</button>
+          <button class="cbtn" id="next" aria-label="Track sau">⏭</button>
+        </div>
+        <div class="opts">
+          <label>Tốc độ <select id="rate" class="he-sel"><option>0.6</option><option>0.75</option><option selected>1</option><option>1.25</option><option>1.5</option></select>×</label>
+          <label><input type="checkbox" id="loop"> Lặp track</label>
+          <label><input type="checkbox" id="auto" checked> Tự sang track kế</label>
+        </div>
+        <div class="ab">
+          <span class="small">Lặp đoạn:</span>
+          <button class="btn sm" id="seta">A</button><button class="btn sm" id="setb">B</button><button class="btn sm" id="clrab">✕</button>
+          <span class="small" id="abinfo"></span>
+        </div>
+        <div class="acts">
+          <button class="btn sm" id="gopage">📖 Tới trang</button>
+          <button class="btn sm" id="goscript" hidden>📄 Tapescript</button>
+          <button class="btn sm" id="ttoggle">📝 Văn bản</button>
+        </div>
+        <div class="ttxt" id="ttxt" hidden></div>
+      </div>
+      <div class="plh"><b>Danh sách phát</b><label class="small"><input type="checkbox" id="onlyfile"> chỉ track có file</label></div>
+      <div class="pl" id="pl"></div>
+    </div>
+  </aside>
+</div>
+
+<audio id="audio" preload="metadata"></audio>
+<div class="toast" id="toast" hidden></div>
+
+<script src="js/common.js"></script>
+<script src="he/index.js"></script>
+<script src="js/hotenglish.js"></script>
+</body>
+</html>

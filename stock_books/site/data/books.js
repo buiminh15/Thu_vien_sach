@@ -1,6 +1,22 @@
 // Danh sách sách. Thêm sách mới: thêm 1 object vào đây + 1 file data/<id>.js
 window.BOOKS = [
   {
+    id: "hotenglish",
+    href: "hotenglish.html",
+    title: "Hot English Magazine – đọc & nghe",
+    subtitle: "Tạp chí tiếng Anh kèm CD: đọc PDF và nghe từng track ngay tại trang",
+    author: "Hot English Publishing",
+    cat: "Tiếng Anh",
+    tags: ["hot english","tạp chí","listening","nghe","tiếng anh","mp3","phrasal verbs","idioms"],
+    level: "Trung cấp → Nâng cao",
+    emoji: "🎧",
+    color: "linear-gradient(135deg,#9f1239,#fb7185)",
+    desc: "Trình xem PDF tạp chí Hot English kèm danh sách phát MP3: nút ▶ nằm ngay tại trang có track, tua/lặp đoạn/đổi tốc độ, xem văn bản, dùng được trên điện thoại. Dùng chung cho nhiều số báo (thêm bằng script HE/he_build.py).",
+    chapters: [
+      { n: 1, title: "Số 108 – đọc kèm nghe", ready: true }
+    ]
+  },
+  {
     id: "reactref",
     title: "React Reference – giáo trình tiếng Việt dễ hiểu",
     subtitle: "Hooks, Components, APIs, Legacy và Rules of React (react.dev/reference/react)",
