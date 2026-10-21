@@ -1,6 +1,34 @@
 // Danh sách sách. Thêm sách mới: thêm 1 object vào đây + 1 file data/<id>.js
 window.BOOKS = [
   {
+    id: "nuxt4",
+    title: "Nuxt 4 – giáo trình tiếng Việt dễ hiểu",
+    subtitle: "Từ Get Started, Structure, Guide đến tra cứu API (nuxt.com/docs/4.x)",
+    author: "Biên soạn tiếng Việt từ tài liệu chính thức Nuxt 4.x",
+    cat: "Lập trình & AI",
+    tags: ["nuxt","nuxt 4","vue","ssr","nitro","routing","data fetching","routerules","modules","layers","hydration"],
+    level: "Cơ bản → Nâng cao",
+    emoji: "🟢",
+    color: "linear-gradient(135deg,#065f46,#00dc82)",
+    desc: "14 chương học Nuxt 4 theo tài liệu chính thức: giới thiệu, cài đặt và cấu hình, cấu trúc thư mục (app/), giao diện, routing và middleware, lấy dữ liệu, state/lỗi/SEO, server Nitro, chế độ render và deploy, vòng đời, chất lượng (hydration, hiệu năng, tiếp cận, test), modules và layers, recipes và tra cứu API. Giải thích bằng ví dụ đời thường, có mô phỏng tương tác, flashcard, trắc nghiệm.",
+    chapters: [
+      { n: 1, title: "Nuxt là gì và vì sao dùng?", ready: true },
+      { n: 2, title: "Cài đặt, nuxt.config và các loại cấu hình", ready: true },
+      { n: 3, title: "Cấu trúc thư mục Nuxt 4", ready: true },
+      { n: 4, title: "Giao diện: app.vue, components, layouts, assets, styling", ready: true },
+      { n: 5, title: "Routing, điều hướng và middleware", ready: true },
+      { n: 6, title: "Lấy dữ liệu: $fetch, useFetch, useAsyncData", ready: true },
+      { n: 7, title: "State, xử lý lỗi và SEO", ready: true },
+      { n: 8, title: "Server của Nuxt: Nitro, API và middleware", ready: true },
+      { n: 9, title: "Chế độ render, prerender và deploy", ready: true },
+      { n: 10, title: "Vòng đời, auto-imports, plugins và Nuxt context", ready: true },
+      { n: 11, title: "Chất lượng: hydration, hiệu năng, tiếp cận, TypeScript, test", ready: true },
+      { n: 12, title: "Modules và Layers: mở rộng và chia sẻ", ready: true },
+      { n: 13, title: "Recipes và chủ đề nâng cao", ready: true },
+      { n: 14, title: "Tra cứu API nhanh: composables, utils, components, CLI", ready: true }
+    ]
+  },
+  {
     id: "vuebook",
     title: "Fullstack Vue (bản tiếng Việt dễ hiểu)",
     subtitle: "Vue.js, Vuex, Router, Form, Unit test – kèm chương bổ sung Vue 3",
