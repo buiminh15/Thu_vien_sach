@@ -1012,3 +1012,147 @@ WIDGETS['idempotent-retry'] = host => {
   host.querySelector('#retry').onclick = () => { log.push('(client không nhận được phản hồi, gửi lại)'); apply(); draw(); };
   host.querySelector('#rs').onclick = () => { bal = 100; seen = new Set(); log = []; draw(); }; draw();
 };
+
+// ---- Next.js widgets ----
+WIDGETS['route-mapper'] = host => {
+  host.innerHTML = `<div class="row"><label>Đường dẫn file <input id="p" type="text" value="app/(shop)/blog/[slug]/page.tsx" style="width:100%"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const p = host.querySelector('#p').value.trim().split(String.fromCharCode(92)).join('/'), parts = p.split('/');
+    const file = parts.pop() || '', base = file.replace(/\.[^.]+$/, '');
+    if (parts[0] !== 'app') { o.textContent = 'Đường dẫn phải bắt đầu bằng app/'; return; }
+    const segs = parts.slice(1).filter(s => !/^\(.*\)$/.test(s) && !s.startsWith('@'));
+    const priv = parts.some(s => s.startsWith('_'));
+    const url = '/' + segs.join('/');
+    let msg;
+    if (priv) msg = 'Nằm trong private folder (_...) ⇒ không thành route.';
+    else if (base === 'page') msg = `Route công khai: <b>${url}</b>`;
+    else if (base === 'route') msg = `API endpoint: <b>${url}</b> (không được cùng cấp với page)`;
+    else if (['layout', 'template', 'loading', 'error', 'not-found'].includes(base)) msg = `Giao diện bọc/hỗ trợ cho <b>${url}</b>, chưa tự tạo route công khai.`;
+    else msg = 'File thường (colocation): không thành route.';
+    const dyn = segs.filter(s => /^\[.*\]$/.test(s)).map(s => s.replace(/[\[\]\.]/g, ''));
+    o.innerHTML = msg + (dyn.length && !priv ? `<br>Tham số động: ${dyn.join(', ')}` : '') + (parts.some(s => /^\(.*\)$/.test(s)) ? '<br>Route group bị bỏ khỏi URL.' : '');
+  }
+  host.querySelector('#p').oninput = draw; draw();
+};
+
+WIDGETS['nav-sim'] = host => {
+  host.innerHTML = `<div class="row"><label>Loại route <select id="t"><option value="s">Tĩnh</option><option value="d">Động</option></select></label><label><input id="l" type="checkbox"> Có loading.tsx</label><label>Server render (ms) <input id="r" type="number" value="800" style="width:70px"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const t = host.querySelector('#t').value, l = host.querySelector('#l').checked, r = +host.querySelector('#r').value || 0;
+    let wait, why;
+    if (t === 's') { wait = 0; why = 'Route tĩnh được prefetch toàn bộ ⇒ chuyển trang tức thì.'; }
+    else if (l) { wait = 0; why = `Prefetch một phần: hiện skeleton ngay, nội dung (${r} ms) stream vào sau.`; }
+    else { wait = r; why = `Không có loading.tsx: client phải chờ server ${r} ms rồi mới chuyển.`; }
+    o.innerHTML = `Thời gian thấy phản hồi: <b>${wait} ms</b><br>${why}`;
+  }
+  host.querySelectorAll('select,input').forEach(i => i.oninput = draw); draw();
+};
+
+WIDGETS['rsc-picker'] = host => {
+  const need = [['Dùng useState / sự kiện onClick', 1], ['Đọc DB hoặc API key bí mật', 0], ['Dùng window / localStorage', 1], ['Giảm JavaScript gửi cho trình duyệt', 0], ['Dùng useEffect', 1], ['Render nội dung tĩnh (bài viết)', 0]];
+  host.innerHTML = need.map((n, i) => `<div class="row"><span>${n[0]}</span> <button data-i="${i}" data-v="0" type="button">Server</button> <button data-i="${i}" data-v="1" type="button">Client</button> <span id="r${i}"></span></div>`).join('');
+  host.querySelectorAll('button').forEach(b => b.onclick = () => { const i = +b.dataset.i, ok = +b.dataset.v === need[i][1]; host.querySelector('#r' + i).textContent = ok ? '✅ Đúng' : '❌ Sai: nên dùng ' + (need[i][1] ? 'Client' : 'Server'); });
+};
+
+WIDGETS['fetch-waterfall'] = host => {
+  host.innerHTML = `<div class="row"><label>Request A (ms) <input id="a" type="number" value="300" style="width:70px"></label><label>Request B (ms) <input id="b" type="number" value="500" style="width:70px"></label><label>Request C (ms) <input id="c" type="number" value="200" style="width:70px"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const v = ['a', 'b', 'c'].map(k => +host.querySelector('#' + k).value || 0);
+    const seq = v.reduce((x, y) => x + y, 0), par = Math.max(...v);
+    o.innerHTML = `Tuần tự (await liên tiếp): <b>${seq} ms</b><br>Song song (Promise.all): <b>${par} ms</b><br>Tiết kiệm: <b>${seq - par} ms</b> (${seq ? Math.round((seq - par) / seq * 100) : 0}%)`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+WIDGETS['action-flow'] = host => {
+  const steps = ['Người dùng submit form (<form action={createPost}>)', 'Next.js gửi POST tới server', 'Server Function chạy: kiểm tra auth, ghi dữ liệu', 'revalidatePath / revalidateTag (hoặc refresh)', 'redirect() nếu cần', 'Server trả UI mới + dữ liệu trong một vòng'];
+  host.innerHTML = `<button id="n" type="button">Bước tiếp</button> <button id="r" type="button">Làm lại</button><ol id="o"></ol>`;
+  let k = 0; const o = host.querySelector('#o');
+  function draw() { o.innerHTML = steps.slice(0, k).map(s => `<li>${s}</li>`).join(''); }
+  host.querySelector('#n').onclick = () => { if (k < steps.length) k++; draw(); };
+  host.querySelector('#r').onclick = () => { k = 0; draw(); }; draw();
+};
+
+WIDGETS['cachelife-table'] = host => {
+  const P = { default: ['5 phút', '15 phút', 'không bao giờ'], seconds: ['30 giây', '1 giây', '60 giây'], minutes: ['5 phút', '1 phút', '1 giờ'], hours: ['5 phút', '1 giờ', '1 ngày'], days: ['5 phút', '1 ngày', '1 tuần'], weeks: ['5 phút', '1 tuần', '30 ngày'], max: ['5 phút', '30 ngày', '1 năm'] };
+  host.innerHTML = `<label>Profile <select id="s">${Object.keys(P).map(k => `<option>${k}</option>`).join('')}</select></label><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const k = host.querySelector('#s').value, p = P[k];
+    o.innerHTML = `<b>stale</b> (trình duyệt coi là tươi): ${p[0]}<br><b>revalidate</b> (sau đó server làm mới): ${p[1]}<br><b>expire</b> (hết hạn hẳn): ${p[2]}<br>` + (k === 'seconds' ? '⚠️ Ngắn hạn ⇒ bị loại khỏi prerender (dynamic hole).' : 'Có thể vào static shell.');
+  }
+  host.querySelector('#s').onchange = draw; draw();
+};
+
+WIDGETS['proxy-matcher'] = host => {
+  host.innerHTML = `<div class="row"><label>matcher <input id="m" type="text" value="/about/:path*" style="width:160px"></label><label>URL <input id="u" type="text" value="/about/team" style="width:160px"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const m = host.querySelector('#m').value.trim(), u = host.querySelector('#u').value.trim();
+    let re;
+    try { re = new RegExp('^' + m.replace(/\/:([a-z]+)\*/gi, '(?:/.*)?').replace(/:([a-z]+)/gi, '[^/]+') + '$'); } catch (e) { o.textContent = 'matcher không hợp lệ'; return; }
+    o.innerHTML = re.test(u) ? '✅ Proxy <b>chạy</b> cho URL này.' : '⛔ Proxy <b>không chạy</b> cho URL này.';
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ---- Next.js widgets (Guides / Architecture) ----
+WIDGETS['suspense-timeline'] = host => {
+  host.innerHTML = `<div class="row"><label>Revenue (ms) <input id="a" type="number" value="200" style="width:70px"></label><label>Orders (ms) <input id="b" type="number" value="1000" style="width:70px"></label><label>Recommendations (ms) <input id="c" type="number" value="3000" style="width:70px"></label><label>Shell (ms) <input id="s" type="number" value="50" style="width:60px"></label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const v = ['a', 'b', 'c'].map(k => +host.querySelector('#' + k).value || 0), s = +host.querySelector('#s').value || 0;
+    const names = ['Revenue', 'Orders', 'Recommendations'];
+    const blocked = s + Math.max(...v);
+    o.innerHTML = `<b>Có Suspense riêng từng phần</b>:<br>• Static shell hiện ở ${s} ms<br>` + v.map((x, i) => `• ${names[i]} hiện ở ${s + x} ms`).join('<br>') + `<br><br><b>Không Suspense (chờ hết)</b>: mọi thứ hiện ở ${blocked} ms.`;
+  }
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+WIDGETS['auth-layers'] = host => {
+  const cases = [
+    ['Ẩn nút “Xoá” cho người không phải admin', 'Optimistic (cookie) — chỉ là UX, chưa bảo vệ dữ liệu'],
+    ['Chặn /dashboard khi chưa đăng nhập, không gọi DB', 'Proxy — kiểm tra lạc quan chỉ đọc cookie'],
+    ['Xoá bài viết qua Server Action', 'Kiểm tra bên trong action: auth + quyền sở hữu (chống IDOR)'],
+    ['Route Handler cho admin khi thiếu quyền', 'Trả 403 (401 nếu chưa đăng nhập) sau verifySession()'],
+    ['Trả dữ liệu hồ sơ cho UI', 'DAL + DTO: chỉ trường được phép nhìn thấy']
+  ];
+  host.innerHTML = `<select id="s">${cases.map((c, i) => `<option value="${i}">${c[0]}</option>`).join('')}</select><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() { o.innerHTML = '<b>Lớp phù hợp:</b> ' + cases[+host.querySelector('#s').value][1]; }
+  host.querySelector('#s').onchange = draw; draw();
+};
+
+WIDGETS['env-resolver'] = host => {
+  host.innerHTML = `<div class="row"><label>NODE_ENV <select id="n"><option>development</option><option>production</option><option>test</option></select></label></div><div class="row"><label><input type="checkbox" id="p"> process.env</label><label><input type="checkbox" id="a" checked> .env.$(NODE_ENV).local</label><label><input type="checkbox" id="l" checked> .env.local</label><label><input type="checkbox" id="e" checked> .env.$(NODE_ENV)</label><label><input type="checkbox" id="d" checked> .env</label></div><div class="calc" id="o"></div>`;
+  const o = host.querySelector('#o');
+  function draw() {
+    const n = host.querySelector('#n').value;
+    const order = [['p', 'process.env'], ['a', '.env.' + n + '.local'], ['l', '.env.local'], ['e', '.env.' + n], ['d', '.env']];
+    const rows = order.map(([k, label]) => {
+      const has = host.querySelector('#' + k).checked;
+      const skipped = k === 'l' && n === 'test';
+      return `${has && !skipped ? '' : '<s>'}${label}${skipped ? ' (bỏ qua khi test)' : ''}${has && !skipped ? '' : '</s>'}`;
+    });
+    const win = order.find(([k]) => host.querySelector('#' + k).checked && !(k === 'l' && n === 'test'));
+    o.innerHTML = 'Thứ tự tra cứu:<br>' + rows.map((r, i) => (i + 1) + '. ' + r).join('<br>') + `<br><b>Giá trị được lấy từ:</b> ${win ? win[1] : '(không có nguồn nào)'}`;
+  }
+  host.querySelectorAll('input,select').forEach(i => i.onchange = draw); draw();
+};
+
+WIDGETS['prod-checklist'] = host => {
+  const items = ['next build chạy sạch lỗi', 'Đã đo bằng next start', 'Có global-error và not-found tuỳ chỉnh', 'Server Action kiểm tra auth bên trong', '.env* nằm trong .gitignore', 'Chỉ biến công khai dùng NEXT_PUBLIC_', 'Có metadata, sitemap, robots', 'Đã chạy Lighthouse và phân tích bundle'];
+  host.innerHTML = items.map((t, i) => `<label style="display:block"><input type="checkbox" data-i="${i}"> ${t}</label>`).join('') + '<div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  function draw() { const n = host.querySelectorAll('input:checked').length; o.textContent = `Hoàn thành ${n}/${items.length}` + (n === items.length ? ' — sẵn sàng!' : ''); }
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};
+
+WIDGETS['fast-refresh-quiz'] = host => {
+  const cs = [['Function component với useState, chỉ export component', true], ['Class component', false], ['export default () => <div/> (arrow ẩn danh)', false], ['File export thêm một hằng số cùng component', false], ['Sửa nội dung JSX của function component có tên', true]];
+  host.innerHTML = cs.map((c, i) => `<div class="row"><span>${c[0].replace(/</g, '&lt;')}</span> <button data-i="${i}" data-v="1" type="button">Giữ state</button> <button data-i="${i}" data-v="0" type="button">Mất state</button> <span id="r${i}"></span></div>`).join('');
+  host.querySelectorAll('button').forEach(b => b.onclick = () => { const i = +b.dataset.i, ok = (b.dataset.v === '1') === cs[i][1]; host.querySelector('#r' + i).textContent = ok ? '✅ Đúng' : '❌ Sai'; });
+};

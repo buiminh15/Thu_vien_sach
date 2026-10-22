@@ -72,6 +72,57 @@ window.BOOKS = [
     ]
   },
   {
+    id: "vue3guide",
+    title: "Vue 3 Guide – giáo trình tiếng Việt dễ hiểu",
+    subtitle: "Từ Introduction đến Extras: reactivity, component, composable, TypeScript, hiệu năng (vuejs.org/guide)",
+    author: "Biên soạn tiếng Việt từ tài liệu chính thức vuejs.org",
+    cat: "Lập trình & AI",
+    tags: ["vue","vue 3","composition api","script setup","ref","computed","watch","props","slots","composable","pinia","typescript"],
+    level: "Cơ bản → Nâng cao",
+    emoji: "💚",
+    color: "linear-gradient(135deg,#1f6f4a,#42b883)",
+    desc: "13 chương theo Guide chính thức của Vue 3 (ưu tiên Composition API + script setup): reactivity, template, component, slots, provide/inject, composable, built-in components, router/Pinia/SSR/test, TypeScript, hiệu năng/a11y/bảo mật và bản đồ chọn đúng tính năng.",
+    chapters: [
+      { n: 1, title: "Vue là gì? Bắt đầu nhanh, ứng dụng và SFC", ready: true },
+      { n: 2, title: "Template, reactivity cơ bản và computed", ready: true },
+      { n: 3, title: "Giao diện theo dữ liệu: class/style, v-if, v-for, sự kiện, form", ready: true },
+      { n: 4, title: "Watcher, vòng đời và template ref", ready: true },
+      { n: 5, title: "Component cơ bản: props, events, đăng ký", ready: true },
+      { n: 6, title: "Component nâng cao: attrs, slots, provide/inject, v-model, async", ready: true },
+      { n: 7, title: "Tái sử dụng logic: composable, directive tùy biến, plugin", ready: true },
+      { n: 8, title: "Component dựng sẵn: Transition, KeepAlive, Teleport, Suspense", ready: true },
+      { n: 9, title: "Mở rộng quy mô: SFC, công cụ, router, state, SSR, test", ready: true },
+      { n: 10, title: "Vue với TypeScript", ready: true },
+      { n: 11, title: "Thực hành tốt: triển khai, hiệu năng, tiếp cận, bảo mật", ready: true },
+      { n: 12, title: "Nâng cao: reactivity sâu, cơ chế render, render function, web components", ready: true },
+      { n: 13, title: "Bản đồ tra cứu: chọn đúng tính năng cho đúng việc", ready: true }
+    ]
+  },
+  {
+    id: "piniaguide",
+    title: "Pinia – quản lý state cho Vue (tiếng Việt dễ hiểu)",
+    subtitle: "Core Concepts, Plugins, SSR/Nuxt, Testing (pinia.vuejs.org)",
+    author: "Biên soạn tiếng Việt từ tài liệu chính thức Pinia",
+    cat: "Lập trình & AI",
+    tags: ["pinia","vue","state management","store","defineStore","getters","actions","storeToRefs","plugins","ssr","nuxt","testing"],
+    level: "Cơ bản → Nâng cao",
+    emoji: "🍍",
+    color: "linear-gradient(135deg,#b45309,#fbbf24)",
+    desc: "10 chương theo tài liệu chính thức Pinia: store (Option/Setup), state, getters, actions, dùng store ngoài component và ghép store, plugins, SSR và Nuxt, testing, HMR, chuyển từ Vuex và bản đồ tra cứu.",
+    chapters: [
+      { n: 1, title: "Pinia là gì, vì sao dùng và cài đặt", ready: true },
+      { n: 2, title: "Định nghĩa store: Option store, Setup store, storeToRefs", ready: true },
+      { n: 3, title: "State: đọc, ghi, $patch, $reset và $subscribe", ready: true },
+      { n: 4, title: "Getters: giá trị dẫn xuất của store", ready: true },
+      { n: 5, title: "Actions: logic nghiệp vụ và theo dõi action", ready: true },
+      { n: 6, title: "Store ngoài component, ghép store và dùng composable", ready: true },
+      { n: 7, title: "Plugins: mở rộng mọi store", ready: true },
+      { n: 8, title: "SSR và Nuxt", ready: true },
+      { n: 9, title: "Testing, HMR và chuyển từ Vuex", ready: true },
+      { n: 10, title: "Bản đồ tra cứu và lời khuyên tổng kết", ready: true }
+    ]
+  },
+  {
     id: "vuebook",
     title: "Fullstack Vue (bản tiếng Việt dễ hiểu)",
     subtitle: "Vue.js, Vuex, Router, Form, Unit test – kèm chương bổ sung Vue 3",
@@ -844,6 +895,102 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "nextjs",
+  "title": "Next.js (App Router)",
+  "subtitle": "Getting Started, Guides và Architecture",
+  "author": "Tài liệu chính thức nextjs.org/docs",
+  "cat": "Lập trình & AI",
+  "tags": [
+    "Next.js",
+    "React",
+    "Server Components",
+    "Caching",
+    "Streaming"
+  ],
+  "level": "Trung cấp",
+  "emoji": "▲",
+  "color": "#111827",
+  "desc": "15 chương từ tài liệu Next.js: cài đặt, routing, Server/Client Components, dữ liệu, Server Actions, Cache Components, auth, bảo mật, production và kiến trúc bên trong.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Giới thiệu và cài đặt",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Cấu trúc dự án và routing theo file",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Layouts, Pages và điều hướng",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Server Components và Client Components",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Lấy dữ liệu và streaming",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Thay đổi dữ liệu: Server Functions và Actions",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Caching và Revalidating (Cache Components)",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Xử lý lỗi và CSS",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Tối ưu ảnh, font và metadata",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Route Handlers, Proxy và triển khai",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Guides: Triết lý render và Streaming chuyên sâu",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Guides: Xác thực và bảo mật dữ liệu",
+      "ready": true
+    },
+    {
+      "n": 13,
+      "title": "Guides: Biến môi trường và Redirect",
+      "ready": true
+    },
+    {
+      "n": 14,
+      "title": "Guides: Checklist đưa lên production",
+      "ready": true
+    },
+    {
+      "n": 15,
+      "title": "Architecture: Accessibility, Fast Refresh, Compiler, Browsers",
+      "ready": true
+    }
+  ]
 }
 ];
+
 
