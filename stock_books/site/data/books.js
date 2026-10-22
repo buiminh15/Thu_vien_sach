@@ -182,12 +182,14 @@ window.BOOKS = [
     level: "Thực hành",
     emoji: "❄️",
     color: "linear-gradient(135deg,#0e7490,#38bdf8)",
-    desc: "Sổ tay thực hành sửa chữa và bảo dưỡng hệ thống lạnh bằng tiếng Việt: mỗi bước thao tác có ảnh cắt từ sách gốc, bản dịch, thuật ngữ Anh–Việt, trắc nghiệm và xem được trang gốc. Đã có chương 5, 6, 7, 8, 11, 14, 15; các chương còn lại đang soạn.",
+    desc: "Sổ tay thực hành sửa chữa và bảo dưỡng hệ thống lạnh bằng tiếng Việt: mỗi bước thao tác có ảnh cắt từ sách gốc, bản dịch, thuật ngữ Anh–Việt, trắc nghiệm và xem được trang gốc. Đã có chương 5, 6, 7, 8, 9, 10, 11, 14, 15; các chương còn lại đang soạn.",
     chapters: [
       { n: 5, title: "Lắp ráp hệ thống lạnh", ready: true },
       { n: 6, title: "Uốn ống", ready: true },
       { n: 7, title: "Hàn đồng (Brazing)", ready: true },
       { n: 8, title: "Loe ống (Flaring)", ready: true },
+      { n: 9, title: "Tủ lạnh gia dụng", ready: true },
+      { n: 10, title: "Tủ lạnh gia dụng dùng HC", ready: true },
       { n: 11, title: "Bấm ép ống (Pressing)", ready: true },
       { n: 14, title: "An toàn lao động", ready: true },
       { n: 15, title: "Phụ lục: Thuật ngữ và viết tắt", ready: true }
