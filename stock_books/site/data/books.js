@@ -182,11 +182,15 @@ window.BOOKS = [
     level: "Thực hành",
     emoji: "❄️",
     color: "linear-gradient(135deg,#0e7490,#38bdf8)",
-    desc: "Sổ tay thực hành sửa chữa và bảo dưỡng hệ thống lạnh bằng tiếng Việt: mỗi bước thao tác có ảnh cắt từ sách gốc, bản dịch, thuật ngữ Anh–Việt, trắc nghiệm và xem được trang gốc. Đã có chương 7 (Hàn đồng), 8 (Loe ống), 14 (An toàn); các chương còn lại đang soạn.",
+    desc: "Sổ tay thực hành sửa chữa và bảo dưỡng hệ thống lạnh bằng tiếng Việt: mỗi bước thao tác có ảnh cắt từ sách gốc, bản dịch, thuật ngữ Anh–Việt, trắc nghiệm và xem được trang gốc. Đã có chương 5, 6, 7, 8, 11, 14, 15; các chương còn lại đang soạn.",
     chapters: [
+      { n: 5, title: "Lắp ráp hệ thống lạnh", ready: true },
+      { n: 6, title: "Uốn ống", ready: true },
       { n: 7, title: "Hàn đồng (Brazing)", ready: true },
       { n: 8, title: "Loe ống (Flaring)", ready: true },
-      { n: 14, title: "An toàn lao động", ready: true }
+      { n: 11, title: "Bấm ép ống (Pressing)", ready: true },
+      { n: 14, title: "An toàn lao động", ready: true },
+      { n: 15, title: "Phụ lục: Thuật ngữ và viết tắt", ready: true }
     ]
   },
   {
@@ -1277,8 +1281,64 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "refrig",
+  "title": "Sổ tay kỹ thuật viên tủ lạnh nén (WHO/EPI)",
+  "subtitle": "Phần A: Kỹ thuật bảo dưỡng và sửa chữa",
+  "author": "WHO – Expanded Programme on Immunization (bản sửa 09/1985)",
+  "cat": "Kỹ thuật",
+  "tags": [
+    "Tủ lạnh",
+    "Chu trình lạnh",
+    "Mạch điện",
+    "Chuỗi lạnh vắc-xin",
+    "R12"
+  ],
+  "level": "Trung cấp",
+  "emoji": "🧊",
+  "color": "#0891b2",
+  "desc": "7 chương từ sổ tay WHO/EPI (tài liệu lịch sử, môi chất R12): ống đồng và hàn, đấu nối, chu trình làm lạnh có hoạt hình, đồng hồ phân tích, hút chân không và nạp gas, sơ đồ mạch điện tương tác và đo kiểm điện.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Ống đồng tủ lạnh: cắt, doa, uốn, loe, nong",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Hàn đồng (brazing), hàn thiếc (soldering) và sửa tạm",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Đấu nối vào hệ thống và an toàn khi dùng R12",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Chu trình làm lạnh và đồng hồ phân tích (system analyser)",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Xả môi chất, hút chân không, nạp gas và tìm rò rỉ",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "An toàn điện và mạch điện của tủ lạnh nén",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Đo kiểm điện, ống chữ T và bảng đổi áp suất",
+      "ready": true
+    }
+  ]
 }
 ];
+
 
 
 

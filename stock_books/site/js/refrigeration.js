@@ -14,7 +14,7 @@
   function renderNav() {
     const d = done(); let html = '', part = '';
     LIST.forEach(c => {
-      if (c.part !== part) { part = c.part; html += `<h4>${part === 'I' ? 'Phần I – Dụng cụ và thiết bị' : 'Phần II – Kỹ năng và thao tác'}</h4>`; }
+      if (c.part !== part) { part = c.part; html += `<h4>${{ I: 'Phần I – Dụng cụ và thiết bị', II: 'Phần II – Kỹ năng và thao tác', A: 'Phụ lục' }[part]}</h4>`; }
       html += `<button data-n="${c.n}" class="${S.cur === c.n ? 'on' : ''} ${d.includes(c.n) ? 'done' : ''} ${c.ready ? '' : 'lock'}"><span class="n">${d.includes(c.n) ? '✓' : c.n}</span><span>${esc(c.title)}${c.ready ? '' : '<small>Đang soạn…</small>'}<span class="en"><br>${esc(c.en || '')}</span></span></button>`;
     });
     $('#nav').innerHTML = html;
@@ -38,6 +38,8 @@
       case 'table': return `<table class="rf-tbl"><thead><tr>${b.head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${b.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
       case 'step': return `<div class="rf-step"><div class="rf-figs">${b.figs.map((f, i) => `<figure class="rf-fig"><img loading="lazy" data-fig="${f}" src="${img(f)}" alt="${esc(b.cap)}">${i === 0 ? `<figcaption>${esc(b.cap)}</figcaption>` : ''}</figure>`).join('')}</div><div class="rf-stx"><h3>${b.title}</h3>${en(b.en)}${/^</.test(b.x) ? b.x : `<p>${b.x}</p>`}${b.callouts ? `<div class="rf-co">${b.callouts.map(c => `<span>${c}</span>`).join('')}</div>` : ''}${b.ref ? `<span class="rf-ref">↪ Tham chiếu: ${b.ref}</span>` : ''}</div></div>`;
       case 'grid': return `<div class="rf-gcap">${esc(b.cap || '')}</div><div class="rf-grid" style="grid-template-columns:repeat(${b.cols || 2},minmax(0,1fr))">${b.items.map(i => `<figure><img loading="lazy" data-fig="${i.fig}" src="${img(i.fig)}" alt="${esc(i.label)}"><figcaption><b>${i.label}</b>${en(i.en)}</figcaption></figure>`).join('')}</div>`;
+      case 'glossary': return `<input class="rf-gf" data-gf placeholder="🔎 Tìm thuật ngữ (Anh hoặc Việt)…" aria-label="Tìm thuật ngữ"><div class="rf-gl">${b.items.map(i => `<div class="rf-gi" data-k="${esc(norm(i.en + ' ' + i.vi + ' ' + i.d.replace(/<[^>]+>/g, '')))}"><b>${esc(i.en)}</b> — <span class="rf-vi">${esc(i.vi)}</span><p>${i.d}</p></div>`).join('')}</div>`;
+      case 'acro': return `<input class="rf-gf" data-gf placeholder="🔎 Tìm từ viết tắt…" aria-label="Tìm từ viết tắt"><div class="rf-terms rf-gl">${b.items.map(i => `<div class="rf-gi" data-k="${esc(norm(i.join(' ')))}"><b>${esc(i[0])}</b>${esc(i[1])}<br><span class="rf-vi">${esc(i[2])}</span></div>`).join('')}</div>`;
       case 'order': return orderBlock(b);
       case 'figquiz': return figQuiz(b);
       case 'quiz': return quiz(b);
@@ -101,6 +103,7 @@
   function showModal() { const m = S.modal[S.mi]; $('#mtitle').textContent = m.t; $('#mbody').innerHTML = `<img src="${m.src}" alt="${esc(m.t)}">`; $('#modal').hidden = false; $('#mprev').style.visibility = $('#mnext').style.visibility = S.modal.length > 1 ? 'visible' : 'hidden'; }
   function openFig(im) { S.modal = [{ t: im.alt || 'Hình', src: im.src }]; S.mi = 0; showModal(); }
   function openPages(pgs, title) { S.modal = pgs.map(p => ({ t: `${title} – trang gốc ${p - 8} (PDF ${p})`, src: `rf/${S.ch.dir}/page_${p}.jpg` })); S.mi = 0; showModal(); }
+  document.addEventListener('input', e => { const f = e.target.closest('[data-gf]'); if (!f) return; const q = norm(f.value.trim()); f.nextElementSibling.querySelectorAll('.rf-gi').forEach(x => { x.hidden = q && !x.dataset.k.includes(q); }); });
   $('#mclose').onclick = () => { $('#modal').hidden = true; };
   $('#mprev').onclick = () => { S.mi = (S.mi + S.modal.length - 1) % S.modal.length; showModal(); };
   $('#mnext').onclick = () => { S.mi = (S.mi + 1) % S.modal.length; showModal(); };

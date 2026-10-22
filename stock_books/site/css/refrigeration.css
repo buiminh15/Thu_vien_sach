@@ -79,3 +79,6 @@ body.show-en .en{display:block}
   .rf-figs{flex-direction:row;flex-wrap:wrap}.rf-fig{flex:1 1 220px}
   .rf-hero h1{font-size:20px}
 }
+
+.rf-gf{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:inherit;font:inherit;margin:6px 0}
+.rf-gl{margin-top:6px}.rf-gi{margin:6px 0;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}.rf-gi[hidden]{display:none}.rf-gi p{margin:4px 0 0;font-size:14px}.rf-vi{color:var(--brand);font-weight:600}

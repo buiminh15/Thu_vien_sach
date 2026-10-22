@@ -1455,3 +1455,400 @@ WIDGETS['sound-dose-calc'] = host => {
   };
   host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
 };
+
+// ---- Tủ lạnh nén (EPI): widget ----
+const RF_NS = 'http://www.w3.org/2000/svg';
+function rfEl(tag, attrs, parent, text) {
+  const e = document.createElementNS(RF_NS, tag);
+  for (const k in (attrs || {})) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  if (parent) parent.appendChild(e);
+  return e;
+}
+
+// ===== Chu trình làm lạnh (chi tiết, hoạt hình) =====
+WIDGETS['rf-cycle'] = host => {
+  host.innerHTML = '<div class="row"><button id="nx" type="button">Bước tiếp</button> <button id="au" type="button">▶ Chạy tự động</button> <label><input type="checkbox" id="oil"> Làm mát dầu (2 dàn ngưng)</label> <label><input type="checkbox" id="hx"> Mao dẫn tiếp xúc ống hút</label></div><svg viewBox="0 0 740 440" style="width:100%;max-width:760px;height:auto;display:block" id="sv" role="img" aria-label="Sơ đồ chu trình làm lạnh"></svg><div class="calc" id="info"></div>';
+  const svg = host.querySelector('#sv'), info = host.querySelector('#info');
+  const C = { hot: '#ef4444', warm: '#f97316', cold: '#38bdf8', cool: '#0ea5e9', pipe: 'currentColor' };
+  // các đoạn (stage): tên, màu, điểm
+  function zig(x1, x2, y, n, amp) { const pts = []; const step = (x2 - x1) / n; for (let i = 0; i <= n; i++) pts.push([x1 + i * step, y + (i % 2 ? amp : -amp)]); return pts; }
+  const seg = [
+    { n: 'Máy nén', c: C.hot, pts: [[150, 330], [150, 300]], t: '<b>Máy nén (compressor)</b> hút khí môi chất áp thấp từ ống hút và <b>nén lên áp cao</b> — khí nóng lên (như bơm xe đạp nóng ở đầu bơm). Đẩy khí qua ống đẩy.' },
+    { n: 'Ống đẩy', c: C.hot, pts: [[150, 300], [150, 70], [200, 70]], t: '<b>Ống đẩy (delivery pipe)</b>: dẫn khí <b>áp cao, nóng</b> lên phía trên tủ tới dàn ngưng. Ống này <b>nóng</b> khi tủ chạy. Đồng hồ <b>đỏ</b> (áp cao) nối ở phía này.' },
+    { n: 'Dàn ngưng', c: C.warm, pts: zig(200, 470, 70, 14, 16), t: '<b>Dàn ngưng (condenser)</b> tỏa nhiệt ra không khí. Khí nóng <b>ngưng tụ thành chất lỏng mát</b> ở cuối dàn. Khi tủ chạy đúng, dàn ngưng <b>nóng ở trên, mát hơn ở dưới</b>.' },
+    { n: 'Bộ lọc hút ẩm', c: C.warm, pts: [[470, 70], [560, 70], [560, 120], [560, 175]], t: '<b>Bộ lọc hút ẩm (filter drier)</b> lọc chất lỏng (bụi, hơi ẩm) trước khi vào ống mao dẫn. Chất lỏng vẫn <b>áp cao</b>.' },
+    { n: 'Ống mao dẫn', c: C.cold, pts: [[560, 175], [560, 200], [640, 200], [640, 215], [630, 225]], t: '<b>Ống mao dẫn (capillary)</b> dài và mảnh nên chất lỏng bị <b>phun</b> vào dàn bay hơi: áp suất <b>giảm đột ngột</b> và nhiệt độ hạ (như xả nhanh khí ở van lốp thấy lạnh).' },
+    { n: 'Dàn bay hơi', c: C.cool, pts: [[630, 225], [540, 235], [680, 255], [540, 275], [680, 295], [540, 315], [530, 330]], t: '<b>Dàn bay hơi (evaporator)</b>: chất lỏng áp thấp <b>bay hơi thành khí</b> và <b>hút nhiệt</b> từ bên trong tủ → ngăn lạnh (có thể đóng sương muối). Đây là nơi sinh “lạnh”.' },
+    { n: 'Ống hút', c: C.cool, pts: [[530, 330], [530, 345], [150, 345], [150, 330]], t: '<b>Ống hút (suction pipe)</b>: đưa khí <b>áp thấp, lạnh</b> về máy nén. Đồng hồ <b>xanh</b> (áp thấp) nối ở phía này. Chu trình bắt đầu lại.' }
+  ];
+  // vẽ tĩnh
+  rfEl('rect', { x: 500, y: 205, width: 210, height: 140, rx: 8, fill: 'none', stroke: 'currentColor', 'stroke-dasharray': '5 4', opacity: .5 }, svg);
+  rfEl('text', { x: 605, y: 198, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 12 }, svg, 'BÊN TRONG TỦ (cần làm lạnh)');
+  rfEl('rect', { x: 110, y: 330, width: 90, height: 55, rx: 12, fill: '#64748b', opacity: .85 }, svg);
+  rfEl('text', { x: 155, y: 363, 'text-anchor': 'middle', fill: '#fff', 'font-size': 13 }, svg, 'Máy nén');
+  rfEl('rect', { x: 205, y: 340, width: 56, height: 22, rx: 4, fill: '#a78bfa' }, svg);
+  rfEl('text', { x: 233, y: 355, 'text-anchor': 'middle', fill: '#fff', 'font-size': 10 }, svg, 'Rơ-le KĐ');
+  const paths = seg.map((s, i) => {
+    const d = 'M' + s.pts.map(p => p.join(' ')).join(' L');
+    return rfEl('path', { d, fill: 'none', stroke: s.c, 'stroke-width': i === 4 ? 2.2 : 5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: .35 }, svg);
+  });
+  rfEl('rect', { x: 540, y: 118, width: 40, height: 52, rx: 6, fill: '#f59e0b', opacity: .9 }, svg);
+  rfEl('text', { x: 560, y: 148, 'text-anchor': 'middle', fill: '#fff', 'font-size': 10 }, svg, 'Lọc');
+  rfEl('text', { x: 335, y: 38, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 13 }, svg, 'Dàn ngưng');
+  rfEl('text', { x: 385, y: 372, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 12 }, svg, 'Ống hút →');
+  rfEl('text', { x: 98, y: 190, 'text-anchor': 'end', fill: 'currentColor', 'font-size': 12 }, svg, 'Ống đẩy ↑');
+  rfEl('text', { x: 585, y: 230, fill: 'currentColor', 'font-size': 11 }, svg, 'Mao dẫn');
+  // thermostat
+  rfEl('circle', { cx: 700, cy: 225, r: 11, fill: '#14b8a6' }, svg);
+  rfEl('text', { x: 700, y: 229, 'text-anchor': 'middle', fill: '#fff', 'font-size': 9 }, svg, 'Th');
+  rfEl('text', { x: 700, y: 248, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 10 }, svg, 'Thermostat');
+  // đồng hồ
+  [['ÁP CAO (đỏ)', 100, 120, '#ef4444'], ['ÁP THẤP (xanh)', 395, 318, '#0ea5e9']].forEach(g => { rfEl('circle', { cx: g[1], cy: g[2], r: 15, fill: 'none', stroke: g[3], 'stroke-width': 3 }, svg); rfEl('text', { x: g[1], y: g[2] + 30, 'text-anchor': 'middle', fill: g[3], 'font-size': 10 }, svg, g[0]); });
+  // phần tuỳ chọn
+  const oilG = rfEl('g', { style: 'display:none' }, svg);
+  rfEl('rect', { x: 205, y: 100, width: 90, height: 22, rx: 4, fill: '#fb923c' }, oilG);
+  rfEl('text', { x: 250, y: 115, 'text-anchor': 'middle', fill: '#fff', 'font-size': 10 }, oilG, 'Dàn ngưng 2');
+  rfEl('path', { d: 'M110 357 L90 357 L90 250 L110 250', fill: 'none', stroke: '#fb923c', 'stroke-width': 3, 'stroke-dasharray': '6 4' }, oilG);
+  rfEl('text', { x: 86, y: 300, 'text-anchor': 'end', fill: '#fb923c', 'font-size': 10 }, oilG, 'làm mát dầu');
+  const hxG = rfEl('g', { style: 'display:none' }, svg);
+  rfEl('rect', { x: 515, y: 322, width: 80, height: 30, rx: 6, fill: 'none', stroke: '#16a34a', 'stroke-width': 2, 'stroke-dasharray': '4 3' }, hxG);
+  rfEl('text', { x: 555, y: 370, 'text-anchor': 'middle', fill: '#16a34a', 'font-size': 10 }, hxG, 'trao đổi nhiệt mao dẫn–ống hút');
+  const dots = []; for (let i = 0; i < 26; i++) dots.push(rfEl('circle', { r: 4, fill: '#fff', stroke: '#111', 'stroke-width': .6 }, svg));
+  const lens = paths.map(p => p.getTotalLength()), total = lens.reduce((a, b) => a + b, 0);
+  let t = 0, stage = 0, auto = false, timer = null;
+  function posAt(d) { d = ((d % total) + total) % total; for (let i = 0; i < lens.length; i++) { if (d <= lens[i]) return { i, p: paths[i].getPointAtLength(d) }; d -= lens[i]; } return { i: 0, p: paths[0].getPointAtLength(0) }; }
+  function frame() {
+    t += 1.6;
+    dots.forEach((c, k) => { const r = posAt(t + k * total / dots.length); const s = seg[r.i]; c.setAttribute('cx', r.p.x); c.setAttribute('cy', r.p.y); c.setAttribute('fill', s.c); const gas = r.i === 0 || r.i === 1 || r.i === 6 || (r.i === 2 && (t + k * total / dots.length) % total < lens[0] + lens[1] + lens[2] * 0.5) ; c.setAttribute('r', gas ? 3.2 : 4.6); c.setAttribute('opacity', gas ? 0.75 : 1); });
+    raf = requestAnimationFrame(frame);
+  }
+  let raf = requestAnimationFrame(frame);
+  function show() {
+    paths.forEach((p, i) => p.setAttribute('opacity', i === stage ? 1 : 0.3));
+    paths[stage].setAttribute('stroke-width', stage === 4 ? 3.5 : 8);
+    paths.forEach((p, i) => { if (i !== stage) p.setAttribute('stroke-width', i === 4 ? 2.2 : 5); });
+    info.innerHTML = `<b>Bước ${stage + 1}/${seg.length}: ${seg[stage].n}</b><br>${seg[stage].t}<br><i>Chấm tròn nhỏ = khí; chấm lớn = chất lỏng; màu đỏ/cam = nóng, xanh = lạnh.</i>`;
+  }
+  host.querySelector('#nx').onclick = () => { stage = (stage + 1) % seg.length; show(); };
+  host.querySelector('#au').onclick = e => { auto = !auto; e.target.textContent = auto ? '⏸ Dừng' : '▶ Chạy tự động'; clearInterval(timer); if (auto) timer = setInterval(() => { stage = (stage + 1) % seg.length; show(); }, 3200); };
+  host.querySelector('#oil').onchange = e => { oilG.style.display = e.target.checked ? '' : 'none'; };
+  host.querySelector('#hx').onchange = e => { hxG.style.display = e.target.checked ? '' : 'none'; };
+  show();
+  new MutationObserver(() => { if (!document.body.contains(host)) { cancelAnimationFrame(raf); clearInterval(timer); } }).observe(document.body, { childList: true, subtree: true });
+};
+
+WIDGETS['rf-cycle-quiz'] = host => quizBtns(host, [
+  ['Sau máy nén, trong ống đẩy', 0, ['Khí áp cao, nóng', 'Lỏng áp cao', 'Khí áp thấp, lạnh', 'Lỏng áp thấp']],
+  ['Cuối dàn ngưng', 1, ['Khí áp cao, nóng', 'Lỏng áp cao, mát', 'Khí áp thấp, lạnh', 'Lỏng áp thấp']],
+  ['Ngay khi qua ống mao dẫn vào dàn bay hơi', 3, ['Khí áp cao, nóng', 'Lỏng áp cao', 'Khí áp thấp', 'Lỏng áp thấp, lạnh (phun)']],
+  ['Trong ống hút về máy nén', 2, ['Khí áp cao, nóng', 'Lỏng áp cao', 'Khí áp thấp, lạnh', 'Lỏng áp thấp']],
+  ['Đồng hồ đỏ đo ở', 0, ['Phía áp cao (ống đẩy)', 'Phía áp thấp (ống hút)']]
+]);
+
+// ===== Mô phỏng manifold =====
+WIDGETS['rf-manifold'] = host => {
+  host.innerHTML = '<div class="row"><label>Van xanh (thấp) <select id="b"><option value="0">đóng</option><option value="1">mở</option></select></label><label>Van đỏ (cao) <select id="r"><option value="0">đóng</option><option value="1">mở</option></select></label></div><svg viewBox="0 0 520 250" style="width:100%;max-width:560px;height:auto" id="sv"></svg><div class="calc" id="o"></div>';
+  const svg = host.querySelector('#sv'), o = host.querySelector('#o');
+  rfEl('rect', { x: 150, y: 120, width: 220, height: 40, rx: 6, fill: '#64748b' }, svg);
+  rfEl('circle', { cx: 150, cy: 70, r: 42, fill: 'none', stroke: '#0ea5e9', 'stroke-width': 5 }, svg);
+  rfEl('circle', { cx: 370, cy: 70, r: 42, fill: 'none', stroke: '#ef4444', 'stroke-width': 5 }, svg);
+  rfEl('text', { x: 150, y: 20, 'text-anchor': 'middle', fill: '#0ea5e9', 'font-size': 12 }, svg, 'Đồng hồ XANH (thấp)');
+  rfEl('text', { x: 370, y: 20, 'text-anchor': 'middle', fill: '#ef4444', 'font-size': 12 }, svg, 'Đồng hồ ĐỎ (cao)');
+  const nb = rfEl('line', { x1: 150, y1: 70, x2: 150, y2: 40, stroke: '#0ea5e9', 'stroke-width': 3 }, svg);
+  const nr = rfEl('line', { x1: 370, y1: 70, x2: 370, y2: 40, stroke: '#ef4444', 'stroke-width': 3 }, svg);
+  const vb = rfEl('circle', { cx: 190, cy: 140, r: 14 }, svg), vr = rfEl('circle', { cx: 330, cy: 140, r: 14 }, svg);
+  rfEl('text', { x: 190, y: 190, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 11 }, svg, 'Van xanh');
+  rfEl('text', { x: 330, y: 190, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 11 }, svg, 'Van đỏ');
+  rfEl('line', { x1: 150, y1: 160, x2: 150, y2: 215, stroke: '#0ea5e9', 'stroke-width': 6 }, svg);
+  rfEl('line', { x1: 260, y1: 160, x2: 260, y2: 215, stroke: '#eab308', 'stroke-width': 6 }, svg);
+  rfEl('line', { x1: 370, y1: 160, x2: 370, y2: 215, stroke: '#ef4444', 'stroke-width': 6 }, svg);
+  rfEl('text', { x: 150, y: 235, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 11 }, svg, 'Ống hút/ống xử lý');
+  rfEl('text', { x: 260, y: 235, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 11 }, svg, 'Giữa: bình/bơm');
+  rfEl('text', { x: 370, y: 235, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 11 }, svg, 'Ống đẩy');
+  const flow = rfEl('text', { x: 260, y: 110, 'text-anchor': 'middle', fill: '#16a34a', 'font-size': 12 }, svg, '');
+  function draw() {
+    const b = +host.querySelector('#b').value, r = +host.querySelector('#r').value;
+    vb.setAttribute('fill', b ? '#22c55e' : '#94a3b8'); vr.setAttribute('fill', r ? '#22c55e' : '#94a3b8');
+    let msg, ang;
+    if (!b && !r) { msg = '<b>Chế độ ĐO ÁP SUẤT</b>: cả hai van đóng — môi chất chỉ tới đồng hồ, không ra cổng giữa. Xanh = áp ống hút, đỏ = áp ống đẩy.'; flow.textContent = 'chỉ tới đồng hồ'; }
+    else if (b && !r) { msg = '<b>Chế độ NẠP GAS</b>: van xanh mở, van đỏ đóng — R12 từ bình (cổng giữa) vào ống hút; vẫn đo được cả áp hút lẫn áp đẩy.'; flow.textContent = 'giữa → xanh (nạp)'; }
+    else if (b && r) { msg = '<b>Chế độ HÚT CHÂN KHÔNG</b>: cả hai van mở — cổng giữa nối bơm chân không, hai cổng kia nối hệ thống. Mục tiêu ≥ 28 inch Hg (−0,9 bar).'; flow.textContent = 'hệ thống → bơm (hút)'; }
+    else { msg = 'Van đỏ mở, van xanh đóng: không phải vị trí chuẩn trong sổ tay (chỉ nên dùng ba chế độ: đo, nạp, hút chân không).'; flow.textContent = ''; }
+    nb.setAttribute('x2', 150 + (b && r ? -25 : b ? 0 : 20)); nb.setAttribute('y2', b && r ? 62 : 40);
+    nr.setAttribute('x2', 370 + (b && r ? -25 : 20)); nr.setAttribute('y2', b && r ? 62 : 40);
+    o.innerHTML = msg;
+  }
+  host.querySelectorAll('select').forEach(s => s.onchange = draw); draw();
+};
+
+// ===== Mạch điện đầy đủ =====
+WIDGETS['rf-circuit'] = host => {
+  host.innerHTML = '<div class="row"><label><input type="radio" name="sd" value="rel" checked> Rơ-le từ</label><label><input type="radio" name="sd" value="ptc"> PTC</label><label><input type="checkbox" id="cap"> Tụ khởi động</label><label><input type="checkbox" id="door"> Cửa mở</label><button id="ov" type="button">⚠ Gây quá tải</button><button id="pw" type="button">⏻ Mất điện / có điện</button></div><div class="row"><label>Nhiệt độ trong tủ (°C) <input id="tmp" type="range" min="0" max="14" step="0.1" value="9" style="width:200px"> <b id="tv">9</b></label></div><svg viewBox="0 0 760 450" style="width:100%;max-width:780px;height:auto;display:block" id="sv" role="img" aria-label="Sơ đồ mạch điện tủ lạnh nén"></svg><div class="calc" id="st"></div>';
+  const svg = host.querySelector('#sv'), st = host.querySelector('#st');
+  const Y = 70, N = 410;
+  const W = {}; // dây
+  function wire(id, pts, parent) { W[id] = rfEl('polyline', { points: pts.map(p => p.join(',')).join(' '), fill: 'none', 'stroke-width': 4, 'stroke-linejoin': 'round' }, svg); return W[id]; }
+  // dây
+  wire('Lrail1', [[40, Y], [170, Y]]);
+  wire('th_pr', [[250, Y], [290, Y]]);
+  wire('pr_co', [[345, Y], [395, Y]]);
+  wire('co_B', [[455, Y], [520, Y]]);
+  wire('B_run', [[520, Y], [520, 130]]);
+  wire('run_C', [[520, 290], [520, 350]]);
+  wire('B_st', [[520, Y], [640, Y], [640, 100]]);
+  wire('st_cap', [[640, 160], [640, 185]]);
+  wire('cap_sw', [[640, 235], [640, 250]]);
+  wire('stw_C', [[640, 330], [640, 350]]);
+  wire('C_N', [[520, 350], [640, 350]]);
+  wire('C_N2', [[580, 350], [580, N]]);
+  wire('N_rail', [[40, N], [760 - 40, N]]);
+  wire('lamp1', [[110, Y], [110, 130]]);
+  wire('lamp2', [[110, 190], [110, 235]]);
+  wire('lamp3', [[110, 295], [110, N]]);
+  wire('L_to_lamp', [[40, Y], [110, Y]]);
+  wire('L_to_th', [[110, Y], [170, Y]]);
+  wire('N_plug', [[40, N], [40, 330]]);
+  wire('L_plug', [[40, Y], [40, 150]]);
+  // phích cắm
+  rfEl('rect', { x: 20, y: 150, width: 40, height: 180, rx: 6, fill: 'none', stroke: 'currentColor', 'stroke-width': 2 }, svg);
+  rfEl('text', { x: 40, y: 245, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 11, transform: 'rotate(-90 40 245)' }, svg, 'NGUỒN (phích)');
+  rfEl('text', { x: 14, y: Y - 8, fill: 'currentColor', 'font-size': 12 }, svg, 'L');
+  rfEl('text', { x: 14, y: N + 16, fill: 'currentColor', 'font-size': 12 }, svg, 'N');
+  // linh kiện: hàm hộp
+  function box(x, y, w, h, label, fill) { const g = rfEl('g', {}, svg); const r = rfEl('rect', { x, y, width: w, height: h, rx: 6, fill: fill || 'none', stroke: 'currentColor', 'stroke-width': 2 }, g); const t = rfEl('text', { x: x + w / 2, y: y + h / 2 + 4, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 10 }, g, label); return { g, r, t }; }
+  // đèn + công tắc cửa
+  const doorSw = rfEl('line', { x1: 98, y1: 132, x2: 128, y2: 150, stroke: 'currentColor', 'stroke-width': 4 }, svg);
+  rfEl('circle', { cx: 110, cy: 130, r: 3, fill: 'currentColor' }, svg); rfEl('circle', { cx: 110, cy: 190, r: 3, fill: 'currentColor' }, svg);
+  rfEl('text', { x: 140, y: 165, fill: 'currentColor', 'font-size': 10 }, svg, 'Công tắc cửa');
+  const lamp = rfEl('circle', { cx: 110, cy: 265, r: 26, fill: '#475569', stroke: 'currentColor', 'stroke-width': 2 }, svg);
+  rfEl('text', { x: 110, y: 269, 'text-anchor': 'middle', fill: '#fff', 'font-size': 10 }, svg, 'Đèn');
+  // thermostat
+  const thSw = rfEl('line', { x1: 170, y1: Y, x2: 235, y2: Y - 22, stroke: 'currentColor', 'stroke-width': 4 }, svg);
+  rfEl('circle', { cx: 170, cy: Y, r: 3, fill: 'currentColor' }, svg); rfEl('circle', { cx: 250, cy: Y, r: 3, fill: 'currentColor' }, svg);
+  const thTxt = rfEl('text', { x: 210, y: Y + 22, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 10 }, svg, 'Thermostat');
+  // bảo vệ
+  const prBox = box(290, Y - 14, 55, 28, 'Bảo vệ ĐC', 'none');
+  // cuộn rơ-le
+  const coil = box(395, Y - 14, 60, 28, 'Cuộn rơ-le', 'none');
+  // động cơ
+  rfEl('rect', { x: 470, y: 108, width: 230, height: 262, rx: 12, fill: 'none', stroke: 'currentColor', 'stroke-dasharray': '6 4', opacity: .6 }, svg);
+  rfEl('text', { x: 585, y: 126, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 11 }, svg, 'ĐỘNG CƠ MÁY NÉN');
+  const runW = rfEl('rect', { x: 500, y: 130, width: 40, height: 160, rx: 8, fill: 'none', stroke: 'currentColor', 'stroke-width': 3, 'stroke-dasharray': '3 3' }, svg);
+  rfEl('text', { x: 520, y: 215, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 10, transform: 'rotate(-90 520 215)' }, svg, 'CUỘN CHẠY (R)');
+  const stW = rfEl('rect', { x: 620, y: 250, width: 40, height: 80, rx: 8, fill: 'none', stroke: 'currentColor', 'stroke-width': 3, 'stroke-dasharray': '3 3' }, svg);
+  rfEl('text', { x: 640, y: 295, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 9, transform: 'rotate(-90 640 295)' }, svg, 'CUỘN KĐ (S)');
+  rfEl('text', { x: 545, y: 358, fill: 'currentColor', 'font-size': 11 }, svg, 'C');
+  // thiết bị khởi động (tiếp điểm rơ-le hoặc PTC)
+  const relSw = rfEl('line', { x1: 640, y1: 100, x2: 660, y2: 130, stroke: 'currentColor', 'stroke-width': 4 }, svg);
+  const relTxt = rfEl('text', { x: 672, y: 120, fill: 'currentColor', 'font-size': 10 }, svg, 'Tiếp điểm rơ-le');
+  const ptcBox = box(615, 100, 50, 60, 'PTC', 'none');
+  const capBox = box(615, 185, 50, 50, 'Tụ KĐ', 'none');
+  rfEl('circle', { cx: 640, cy: 100, r: 3, fill: 'currentColor' }, svg); rfEl('circle', { cx: 640, cy: 160, r: 3, fill: 'currentColor' }, svg);
+  // trạng thái
+  let thermoClosed = true, temp = 9, door = false, power = true, motor = 'off', startTicks = 0, ptc = 0, protectOpen = false, coolTicks = 0, mode = 'rel';
+  const COL = { run: '#f59e0b', start: '#22c55e', lamp: '#eab308', off: 'currentColor' };
+  function setW(ids, col) { ids.forEach(id => { W[id].setAttribute('stroke', col); W[id].setAttribute('opacity', col === 'currentColor' ? .4 : 1); }); }
+  function render() {
+    const powered = power && thermoClosed && !protectOpen;
+    const runCur = powered, startCur = powered && motor === 'starting';
+    const lampOn = power && door;
+    setW(['Lrail1', 'L_plug', 'N_plug', 'N_rail'], power ? COL.run : COL.off);
+    W['Lrail1'].setAttribute('stroke', power ? COL.run : COL.off); W['L_to_th'].setAttribute('stroke', power ? COL.run : COL.off); W['L_to_th'].setAttribute('opacity', power ? 1 : .4);
+    setW(['th_pr', 'pr_co', 'co_B', 'B_run', 'run_C', 'C_N', 'C_N2'], runCur ? COL.run : COL.off);
+    setW(['B_st', 'st_cap', 'cap_sw', 'stw_C'], startCur ? COL.start : COL.off);
+    setW(['L_to_lamp', 'lamp1', 'lamp2', 'lamp3'], lampOn ? COL.lamp : COL.off);
+    W['C_N'].setAttribute('stroke', runCur || startCur ? COL.run : COL.off);
+    // công tắc
+    thSw.setAttribute('x2', 235); thSw.setAttribute('y2', thermoClosed ? Y : Y - 22);
+    doorSw.setAttribute('x2', 110); doorSw.setAttribute('y2', door ? 190 : 150);
+    doorSw.setAttribute('x2', door ? 112 : 128); doorSw.setAttribute('y2', door ? 188 : 150);
+    lamp.setAttribute('fill', lampOn ? '#facc15' : '#475569');
+    const capOn = host.querySelector('#cap').checked && mode === 'rel';
+    capBox.g.style.display = capOn ? '' : 'none';
+    W['st_cap'].style.display = capOn ? '' : 'none';
+    W['cap_sw'].style.display = capOn ? '' : 'none';
+    ptcBox.g.style.display = mode === 'ptc' ? '' : 'none'; relSw.style.display = mode === 'rel' ? '' : 'none'; relTxt.style.display = mode === 'rel' ? '' : 'none';
+    coil.g.style.display = mode === 'rel' ? '' : 'none';
+    relSw.setAttribute('x2', motor === 'starting' ? 640 : 660); relSw.setAttribute('y2', motor === 'starting' ? 160 : 130);
+    prBox.r.setAttribute('fill', protectOpen ? '#fecaca' : 'none'); prBox.t.textContent = protectOpen ? 'BV: MỞ' : 'Bảo vệ ĐC';
+    ptcBox.r.setAttribute('fill', ptc > .5 ? '#fecaca' : '#bae6fd'); ptcBox.t.textContent = ptc > .5 ? 'PTC nóng' : 'PTC nguội';
+    runW.setAttribute('stroke', runCur ? COL.run : 'currentColor'); stW.setAttribute('stroke', startCur ? COL.start : 'currentColor');
+    thTxt.textContent = thermoClosed ? 'Thermostat: ĐÓNG' : 'Thermostat: MỞ';
+    let msg;
+    if (!power) msg = 'Mất điện: tủ không chạy; đèn tắt dù cửa mở.';
+    else if (protectOpen) msg = `Bảo vệ động cơ đã <b>mở</b> (quá dòng/quá nóng): máy nén dừng. Chờ nguội khoảng 5–10 phút thực tế (mô phỏng còn ${(coolTicks / 10).toFixed(0)} s).`;
+    else if (!thermoClosed) msg = 'Nhiệt độ đủ thấp: <b>thermostat mở</b> → không có điện tới động cơ, máy nén dừng.';
+    else if (motor === 'blocked') msg = '<b>PTC còn nóng</b>: điện trở cao, cuộn khởi động không có dòng → máy nén chưa khởi động được. Cần vài phút cho PTC nguội (đã mô phỏng nhanh).';
+    else if (motor === 'starting') msg = 'Máy nén <b>đang khởi động</b>: ' + (mode === 'rel' ? 'dòng lớn qua cuộn rơ-le nâng pit-tông → tiếp điểm đóng → dòng tới cuộn khởi động.' : 'PTC nguội điện trở thấp → dòng qua cuộn khởi động; PTC đang nóng dần.');
+    else if (motor === 'running') msg = 'Máy nén <b>chạy</b>: chỉ cuộn chạy có dòng; ' + (mode === 'rel' ? 'tiếp điểm rơ-le đã mở.' : 'PTC nóng, điện trở cao ngắt cuộn khởi động.');
+    else msg = 'Chờ.';
+    st.innerHTML = `Nhiệt độ trong tủ: <b>${temp.toFixed(1)} °C</b> (thermostat đóng khi ≥ 8 °C, mở khi ≤ 4 °C — dải bảo quản vắc-xin +4 đến +8 °C).<br>${msg}<br>${door && power ? 'Cửa mở → công tắc cửa đóng → <b>đèn sáng</b> (mạch đèn độc lập với máy nén).' : 'Cửa đóng → công tắc cửa mở → đèn tắt.'}<br><span style="color:#f59e0b">■</span> dòng cuộn chạy/chính &nbsp; <span style="color:#22c55e">■</span> dòng cuộn khởi động &nbsp; <span style="color:#eab308">■</span> dòng đèn`;
+  }
+  function tick() {
+    if (temp >= 8) thermoClosed = true; else if (temp <= 4) thermoClosed = false;
+    if (protectOpen) { coolTicks--; if (coolTicks <= 0) protectOpen = false; }
+    const powered = power && thermoClosed && !protectOpen;
+    if (!powered) { motor = 'off'; startTicks = 0; ptc = Math.max(0, ptc - 0.01); }
+    else if (motor === 'off') { motor = (mode === 'ptc' && ptc >= .5) ? 'blocked' : 'starting'; startTicks = 0; }
+    else if (motor === 'blocked') { ptc = Math.max(0, ptc - .01); if (ptc < .5) { motor = 'starting'; startTicks = 0; } }
+    else if (motor === 'starting') { startTicks++; if (mode === 'ptc') ptc = Math.min(1, ptc + .5 / 30); if (startTicks >= 30) motor = 'running'; }
+    else if (motor === 'running') { if (mode === 'ptc') ptc = Math.min(1, ptc + .02); }
+    if (motor === 'running') temp -= .05; else if (motor === 'starting') temp -= .01; else temp += .03;
+    temp = Math.max(0, Math.min(14, temp));
+    host.querySelector('#tmp').value = temp; host.querySelector('#tv').textContent = temp.toFixed(1);
+    render();
+  }
+  host.querySelector('#tmp').oninput = e => { temp = +e.target.value; host.querySelector('#tv').textContent = temp.toFixed(1); render(); };
+  host.querySelectorAll('input[name=sd]').forEach(r => r.onchange = () => { mode = r.value; if (mode === 'ptc') host.querySelector('#cap').checked = false; motor = 'off'; render(); });
+  host.querySelector('#cap').onchange = () => { if (mode === 'ptc') host.querySelector('#cap').checked = false; render(); };
+  host.querySelector('#door').onchange = e => { door = e.target.checked; render(); };
+  host.querySelector('#ov').onclick = () => { protectOpen = true; coolTicks = 60; render(); };
+  host.querySelector('#pw').onclick = () => { power = !power; render(); };
+  render();
+  const iv = setInterval(() => { if (!document.body.contains(host)) { clearInterval(iv); return; } tick(); }, 100);
+};
+
+WIDGETS['rf-start-device'] = host => quizBtns(host, [
+  ['Dòng lớn qua cuộn nâng pit-tông, đóng tiếp điểm tới cuộn khởi động', 0, ['Rơ-le từ', 'PTC']],
+  ['Nguội: điện trở thấp; nóng: điện trở rất cao', 1, ['Rơ-le từ', 'PTC']],
+  ['Sau khi máy dừng cần vài phút mới khởi động lại được', 1, ['Rơ-le từ', 'PTC']],
+  ['Lắp được tụ khởi động', 0, ['Rơ-le từ', 'PTC']]
+]);
+WIDGETS['rf-elec-safety'] = host => quizBtns(host, [
+  ['Sửa phần điện khi vẫn cắm phích', 1, ['Được', 'Không — rút phích trước']],
+  ['Cầm tụ điện ngay sau khi rút phích', 1, ['An toàn', 'Nguy hiểm — phải xả tụ trước']],
+  ['Phải làm khi đang cắm điện: đứng trên nền ẩm', 1, ['Được', 'Không — đứng gỗ/thảm cao su']],
+  ['Dây điện cũ giòn', 0, ['Thay sớm', 'Dùng tiếp']],
+  ['Nắp hộp đấu dây sau khi sửa', 0, ['Lắp chặt lại', 'Để hở cho mát']]
+]);
+
+// ===== Dụng cụ đơn giản =====
+WIDGETS['rf-tools'] = host => {
+  host.innerHTML = '<svg viewBox="0 0 720 150" style="width:100%;max-width:740px;height:auto" id="sv"></svg><div class="calc" id="o">Bấm vào một dụng cụ.</div>';
+  const svg = host.querySelector('#sv'), o = host.querySelector('#o');
+  const tools = [
+    ['Dao cắt ống', 'Tay vặn + 2 con lăn + bánh cắt. Đặt bánh cắt thẳng vết dũa, vặn dần, xoay quanh ống.', 50],
+    ['Dụng cụ doa', 'Một đầu doa mặt trong, đầu kia doa mặt ngoài ống để hết bavia. Giữ đầu ống chúc xuống.', 190],
+    ['Khối loe + côn', 'Khối có 5 lỗ theo cỡ ống, 2 đai ốc tay giữ ống, kẹp (yoke) và côn ép tạo mặt loe.', 330],
+    ['Khối nong + chày', 'Khối có lỗ cho ống; chày thép + kẹp nong đầu ống để ống kia lồng vào.', 470],
+    ['Lò xo uốn ống', 'Lồng ngoài ống để uốn đều, không gập.', 610]
+  ];
+  tools.forEach((t, i) => {
+    const g = rfEl('g', { style: 'cursor:pointer' }, svg);
+    rfEl('rect', { x: t[2] - 45, y: 15, width: 100, height: 80, rx: 8, fill: '#e2e8f0', stroke: '#64748b', 'stroke-width': 2 }, g);
+    if (i === 0) { rfEl('circle', { cx: t[2], cy: 55, r: 22, fill: 'none', stroke: '#334155', 'stroke-width': 4 }, g); rfEl('circle', { cx: t[2], cy: 55, r: 6, fill: '#334155' }, g); }
+    if (i === 1) { rfEl('path', { d: `M${t[2] - 30} 70 L${t[2] + 30} 40`, stroke: '#334155', 'stroke-width': 8, 'stroke-linecap': 'round' }, g); }
+    if (i === 2) { rfEl('rect', { x: t[2] - 28, y: 55, width: 56, height: 18, fill: '#334155' }, g); rfEl('path', { d: `M${t[2] - 12} 55 L${t[2]} 30 L${t[2] + 12} 55`, fill: '#94a3b8', stroke: '#334155' }, g); }
+    if (i === 3) { rfEl('rect', { x: t[2] - 28, y: 55, width: 56, height: 18, fill: '#334155' }, g); rfEl('rect', { x: t[2] - 5, y: 28, width: 10, height: 27, fill: '#94a3b8', stroke: '#334155' }, g); }
+    if (i === 4) { rfEl('path', { d: `M${t[2] - 32} 70 q8 -22 16 0 t16 0 t16 0 t16 0`, fill: 'none', stroke: '#334155', 'stroke-width': 4 }, g); }
+    rfEl('text', { x: t[2] + 5, y: 118, 'text-anchor': 'middle', fill: 'currentColor', 'font-size': 12 }, g, t[0]);
+    g.onclick = () => { o.innerHTML = `<b>${t[0]}</b>: ${t[1]}`; };
+  });
+};
+WIDGETS['flare-calc'] = host => {
+  host.innerHTML = '<div class="row"><label>Đường kính ngoài ống (mm) <input id="d" type="number" value="6" style="width:70px"></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const d = +host.querySelector('#d').value || 0; o.innerHTML = `Loe: đầu ống nhô <b>${(d / 3).toFixed(1)} mm</b> trên mặt khối (đường kính ÷ 3); nếu loe quá lỏng, làm lại với ~${(d / 3 + 1).toFixed(1)} mm.<br>Nong: đầu ống nhô <b>${(d + 3).toFixed(1)} mm</b> (đường kính + 3 mm, tức + 1/8 inch).`; };
+  host.querySelector('#d').oninput = draw; draw();
+};
+WIDGETS['rf-anneal'] = host => quizBtns(host, [
+  ['Đỏ sẫm (dull red)', 0, ['Đúng nhiệt', 'Quá nóng', 'Chưa đủ']],
+  ['Đỏ sáng (bright red)', 1, ['Đúng nhiệt', 'Quá nóng', 'Chưa đủ']],
+  ['Chưa đổi màu', 2, ['Đúng nhiệt', 'Quá nóng', 'Chưa đủ']]
+]);
+WIDGETS['rf-torch'] = host => quizBtns(host, [
+  ['Axetylen: ngọn lửa đúng', 0, ['Xanh, chóp sáng nhọn', 'Vàng, mờ']],
+  ['Propan: lửa vàng', 1, ['Đúng', 'Cần thêm khí']],
+  ['Propan so với axetylen cùng cỡ', 0, ['Dùng lửa nhỏ hơn', 'Dùng lửa lớn hơn']],
+  ['Kiểm rò khí trước khi châm lửa', 1, ['Ngửi', 'Nước xà phòng']]
+]);
+WIDGETS['rf-leak-choice'] = host => quizBtns(host, [
+  ['Rò áp thấp', 0, ['Epoxy hai thành phần', 'Que hàn nhiệt']],
+  ['Rò áp cao (tạm)', 1, ['Epoxy hai thành phần', 'Que hàn nhiệt']],
+  ['Sửa bền rò áp cao', 2, ['Epoxy', 'Que hàn nhiệt', 'Hàn đồng']]
+]);
+WIDGETS['rf-connect-pick'] = host => quizBtns(host, [
+  ['Kết nối tạm nhanh', 2, ['Mối loe', 'Mối hàn đồng', 'Khớp nối nhanh']],
+  ['Mối chắc, vĩnh viễn', 1, ['Mối loe', 'Mối hàn đồng', 'Khớp nối nhanh']],
+  ['Đáng tin mà không muốn hàn', 0, ['Mối loe', 'Mối hàn đồng', 'Khớp nối nhanh']]
+]);
+WIDGETS['rf-cylinder'] = host => {
+  host.innerHTML = '<div class="row"><label>Khối lượng nạp tối đa ghi trên bình (kg) <input id="m" type="number" value="13.6" step="0.1" style="width:80px"></label><label>Đã nạp (kg) <input id="f" type="number" value="9" step="0.1" style="width:80px"></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const m = +host.querySelector('#m').value || 1, f = +host.querySelector('#f').value || 0; const p = f / m * 100; o.innerHTML = `Mức nạp ≈ <b>${p.toFixed(0)}%</b> khối lượng tối đa. ` + (f > m ? '⛔ Vượt khối lượng ghi trên bình!' : p > 75 ? '⚠ Trên 3/4 — có nguy cơ không đủ chỗ cho chất lỏng giãn nở.' : '✅ Trong giới hạn (≤ 3/4). Đừng xả cạn bình: luôn chừa chút R12.'); };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['rf-vacuum'] = host => {
+  host.innerHTML = '<div class="row"><label>Chân không đạt (inch Hg) <input id="v" type="number" value="28.5" step="0.5" style="width:80px"></label><label>Sau khi tắt bơm, kim <select id="k"><option value="s">đứng yên</option><option value="u">nhích dần lên</option></select></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const v = +host.querySelector('#v').value || 0, k = host.querySelector('#k').value; o.innerHTML = (v < 28 ? '⛔ Chưa đạt tối thiểu 28 inch Hg (≈ 710 mm Hg, −0,9 bar): tiếp tục hút. ' : '✅ Đạt chân không tối thiểu. ') + (k === 'u' ? '<br>⛔ Kim nhích lên = <b>rò không khí</b> vào hệ thống → siết mọi mối nối ống rồi làm lại.' : '<br>✅ Chân không được giữ — để hệ thống dưới chân không, sẵn sàng nạp R12.'); };
+  host.querySelectorAll('input,select').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['rf-charge-seq'] = host => {
+  const right = ['Hút chân không hệ thống', 'Chuyển R12 vào bình dịch vụ', 'Nối ống nạp, đuổi không khí khỏi ống', 'Cho chút R12 vào hệ thống (khi còn chân không)', 'Khởi động máy nén để hút R12 vào', 'Dừng khi có sương muối trên ống hút', 'Đóng van, bóp ống xử lý 2 lần, hàn bít, thử rò'];
+  const shuffled = right.map((t, i) => [t, i]).sort((a, b) => ((a[1] * 7 + 3) % 5) - ((b[1] * 7 + 3) % 5) || a[1] - b[1]);
+  host.innerHTML = '<div>Bấm các bước theo đúng thứ tự khi nạp gas:</div><div id="b"></div><div class="calc" id="o"></div><button id="r" type="button">Làm lại</button>';
+  const b = host.querySelector('#b'), o = host.querySelector('#o'); let next = 0;
+  function init() { next = 0; b.innerHTML = ''; o.textContent = ''; shuffled.forEach(s => { const x = document.createElement('button'); x.type = 'button'; x.textContent = s[0]; x.style.display = 'block'; x.style.margin = '4px 0'; x.onclick = () => { if (s[1] === next) { x.disabled = true; x.textContent = (next + 1) + '. ' + s[0] + ' ✅'; next++; o.textContent = next === right.length ? '🎉 Đúng toàn bộ thứ tự!' : ''; } else o.textContent = '❌ Chưa đúng — bước kế tiếp là bước khác.'; }; b.appendChild(x); }); }
+  host.querySelector('#r').onclick = init; init();
+};
+WIDGETS['rf-leak-flame'] = host => quizBtns(host, [
+  ['Lửa xanh nhạt', 0, ['Bình thường, chưa thấy R12', 'Có R12']],
+  ['Lửa chuyển xanh lục khi đưa ống dò dưới mối nối', 1, ['Bình thường', 'Chỗ này đang rò R12']],
+  ['Lửa xanh lục ngay cả khi chưa đưa vào mối nối', 1, ['Bình thường', 'Nhiều R12 trong phòng — phải thông gió']]
+]);
+
+// ===== Thử linh kiện điện =====
+WIDGETS['rf-relay-test'] = host => {
+  host.innerHTML = '<div class="row"><label>Rơ-le đang thử <select id="f"><option value="ok">Tốt</option><option value="coil">Cuộn bị đứt</option><option value="stuck">Tiếp điểm dính (luôn đóng)</option><option value="open">Tiếp điểm không đóng được</option></select></label></div><div class="row"><button data-t="coil" type="button">Đèn vào hai đầu cuộn</button><button data-t="up" type="button">Đèn vào tiếp điểm (dựng đứng)</button><button data-t="down" type="button">Đèn vào tiếp điểm (lật ngược, lắc)</button></div><div class="calc" id="o">Chọn phép thử.</div>';
+  const o = host.querySelector('#o');
+  host.querySelectorAll('button').forEach(b => b.onclick = () => {
+    const f = host.querySelector('#f').value, t = b.dataset.t; let lit, want;
+    if (t === 'coil') { lit = f !== 'coil'; want = true; } else if (t === 'up') { lit = f === 'stuck'; want = false; } else { lit = f !== 'open'; want = true; }
+    o.innerHTML = `Đèn thử: <b>${lit ? '💡 sáng' : '⚫ không sáng'}</b> — ${lit === want ? 'kết quả đúng như kỳ vọng' : '<b>sai kỳ vọng → rơ-le hỏng</b>'} (kỳ vọng: ${want ? 'sáng' : 'không sáng'}).`;
+  });
+};
+WIDGETS['rf-ptc-test'] = host => {
+  host.innerHTML = '<div class="row"><label>PTC <select id="f"><option value="ok">Tốt</option><option value="open">Hở mạch</option><option value="short">Chập (không ngắt)</option></select></label><label>Đường thử <select id="p"><option value="run">Tới cuộn chạy</option><option value="start">Tới cuộn khởi động</option></select></label><label>Thời gian (phút) <input id="t" type="range" min="0" max="5" step="0.1" value="0" style="width:160px"> <b id="tv">0</b></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const f = host.querySelector('#f').value, p = host.querySelector('#p').value, t = +host.querySelector('#t').value; host.querySelector('#tv').textContent = t.toFixed(1); let lit; if (f === 'open') lit = false; else if (p === 'run') lit = true; else lit = f === 'short' ? true : t < 3; o.innerHTML = `Đèn thử: <b>${lit ? '💡 sáng' : '⚫ tắt'}</b><br>` + (f === 'ok' ? (p === 'run' ? 'PTC tốt: đường chạy sáng liên tục.' : 'PTC tốt: đường khởi động sáng lúc đầu rồi <b>tắt sau ~3 phút</b> (đèn 100 W, 240 V).') : f === 'open' ? 'Đèn không sáng → PTC hỏng (hở mạch).' : 'Đèn cứ sáng không tắt ở đường khởi động → PTC hỏng (không ngắt).'); };
+  host.querySelectorAll('input,select').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['rf-capacitor'] = host => {
+  host.innerHTML = '<div class="row"><label>Tụ <select id="f"><option value="ok">Tốt</option><option value="short">Chập (kim xuống thấp, ở lại)</option><option value="open">Hở (kim không động)</option></select></label><button id="go" type="button">Đo bằng ohm kế (thang cao nhất)</button></div><svg viewBox="0 0 300 150" style="width:100%;max-width:320px" id="sv"></svg><div class="calc" id="o"></div>';
+  const svg = host.querySelector('#sv'), o = host.querySelector('#o');
+  rfEl('path', { d: 'M30 130 A120 120 0 0 1 270 130', fill: 'none', stroke: 'currentColor', 'stroke-width': 2 }, svg);
+  rfEl('text', { x: 30, y: 148, fill: 'currentColor', 'font-size': 11 }, svg, 'THẤP Ω'); rfEl('text', { x: 270, y: 148, 'text-anchor': 'end', fill: 'currentColor', 'font-size': 11 }, svg, 'CAO Ω');
+  const needle = rfEl('line', { x1: 150, y1: 130, x2: 262, y2: 115, stroke: '#ef4444', 'stroke-width': 3 }, svg);
+  function setAng(a) { const r = 115, rad = (180 - a) * Math.PI / 180; needle.setAttribute('x2', 150 + r * Math.cos(rad) * -1); needle.setAttribute('y2', 130 - r * Math.sin(rad)); }
+  // a: 0 = thấp ở trái ... 180 = cao ở phải? dùng góc từ trái
+  function pos(x) { const rad = Math.PI * (1 - x); needle.setAttribute('x2', 150 + 115 * Math.cos(rad)); needle.setAttribute('y2', 130 - 115 * Math.sin(rad)); }
+  pos(1);
+  host.querySelector('#go').onclick = () => {
+    const f = host.querySelector('#f').value; let steps;
+    if (f === 'ok') steps = [1, .6, .2, .05, .05, .2, .5, .8, .95, 1]; else if (f === 'short') steps = [1, .6, .2, .05, .05, .05, .05, .05, .05, .05]; else steps = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+    let i = 0; const iv = setInterval(() => { pos(steps[i]); i++; if (i >= steps.length) { clearInterval(iv); o.innerHTML = f === 'ok' ? '✅ Kim xuống thấp rồi <b>trở về</b> điện trở cao: tụ tốt.' : f === 'short' ? '⛔ Kim xuống thấp và <b>ở lại</b>: tụ hỏng (chập).' : '⛔ Kim <b>không nhúc nhích</b>: tụ hỏng (hở). '; } }, 300);
+    o.textContent = 'Đang đo…';
+  };
+};
+WIDGETS['rf-terminals'] = host => {
+  host.innerHTML = '<div class="row"><label>A–B (Ω) <input id="ab" type="number" value="4" step="0.1" style="width:70px"></label><label>B–C (Ω) <input id="bc" type="number" value="12" step="0.1" style="width:70px"></label><label>A–C (Ω) <input id="ac" type="number" value="8" step="0.1" style="width:70px"></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => {
+    const m = { 'A–B': +host.querySelector('#ab').value, 'B–C': +host.querySelector('#bc').value, 'A–C': +host.querySelector('#ac').value };
+    const e = Object.entries(m).sort((x, y) => x[1] - y[1]); const [lo, mid, hi] = e;
+    const L = n => n.split('–'); const sh = a => a.filter(x => L(mid[0]).includes(x));
+    const common = L(lo[0]).filter(x => L(mid[0]).includes(x))[0];
+    const run = L(lo[0]).filter(x => x !== common)[0], start = L(mid[0]).filter(x => x !== common)[0];
+    const sum = Math.abs(hi[1] - (lo[1] + mid[1])) < Math.max(0.5, hi[1] * .15);
+    o.innerHTML = `Thấp nhất ${lo[0]} = ${lo[1]} Ω → Common–Run; trung bình ${mid[0]} = ${mid[1]} Ω → Common–Start; cao nhất ${hi[0]} = ${hi[1]} Ω → Start–Run.<br>⇒ <b>Common (C) = ${common}</b>, <b>Run (R) = ${run}</b>, <b>Start (S) = ${start}</b>.<br>${sum ? '✅ Cao nhất ≈ tổng hai giá trị còn lại — số đo hợp lý.' : '⚠ Cao nhất không xấp xỉ tổng hai giá trị kia — kiểm tra lại phép đo hoặc cuộn dây.'}`;
+  };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['rf-pressure-conv'] = host => {
+  host.innerHTML = '<label>Áp suất (bar) <input id="b" type="number" value="1.5" step="0.1" style="width:80px"></label><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const b = +host.querySelector('#b').value || 0; o.innerHTML = `${b} bar ≈ <b>${(b * 14.5).toFixed(1)} PSI</b> ≈ <b>${(b * 1.0197).toFixed(2)} kg/cm²</b>` + (b < 0 ? ` ≈ <b>${(-b * 29.53).toFixed(1)} inch Hg chân không</b>` : '') + (b >= 1.3 && b <= 1.7 ? '<br>≈ vùng “áp thấp bình thường” 1,5 bar trong bảng của sổ tay.' : ''); };
+  host.querySelector('#b').oninput = draw; draw();
+};

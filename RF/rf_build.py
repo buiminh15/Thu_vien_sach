@@ -24,8 +24,10 @@ OUT = ROOT / 'stock_books' / 'site' / 'rf'
 OFFSET = 8
 # chương: (trang in đầu, trang in cuối)
 CH = {1: (5, 17), 2: (18, 31), 3: (32, 40), 4: (41, 52), 5: (55, 76), 6: (77, 80), 7: (81, 89), 8: (90, 94), 9: (95, 103),
-      10: (104, 120), 11: (121, 128), 12: (129, 147), 13: (148, 163), 14: (164, 169)}
+      10: (104, 120), 11: (121, 128), 12: (129, 147), 13: (148, 163), 14: (164, 169), 15: (170, 175)}
 FIG_DPI, PAGE_DPI, PAD = 200, 95, 2
+OVR = json.loads((Path(__file__).with_name('fig_overrides.json')).read_text(encoding='utf8')) if (Path(__file__).with_name('fig_overrides.json')).exists() else {}
+# fig_overrides.json: {"<trang>_<k>": [x0,y0,x1,y1] | null, "<trang>_c": [clip]} – cắt tay hình có chấm/số chú thích hoặc ghép nhiều ảnh
 
 
 def clean(t):
@@ -65,10 +67,25 @@ def build_chapter(doc, n, dump):
         if not pf.exists(): p.get_pixmap(dpi=PAGE_DPI).save(pf, jpg_quality=70)
         ids = []
         for k, r in enumerate(figs, 1):
-            c = pymupdf.Rect(r.x0 - PAD, r.y0 - PAD, r.x1 + PAD, r.y1 + PAD) & p.rect
-            f = out / f'fig_{pg}_{k}.jpg'
+            key = f'{pg}_{k}'
+            if key in OVR and OVR[key] is None:
+                continue                                    # hình đã gộp vào hình ghép (composite)
+            o = OVR.get(key)
+            if isinstance(o, dict):
+                for m in o.get('mask', []): p.draw_rect(pymupdf.Rect(*m), color=None, fill=(1, 1, 1))   # xóa chữ tràn vào khung
+                o = o['clip']
+            c = pymupdf.Rect(*o) if o else pymupdf.Rect(r.x0 - PAD, r.y0 - PAD, r.x1 + PAD, r.y1 + PAD)
+            c &= p.rect
+            f = out / f'fig_{key}.jpg'
             p.get_pixmap(dpi=FIG_DPI, clip=c).save(f, jpg_quality=80)
             ids.append((k, [round(x) for x in r]))
+        for key, clip in OVR.items():                         # hình ghép: khóa dạng '<trang>_c'
+            if key.startswith(f'{pg}_c') and clip:
+                if isinstance(clip, dict):
+                    for m in clip.get('mask', []): p.draw_rect(pymupdf.Rect(*m), color=None, fill=(1, 1, 1))
+                    clip = clip['clip']
+                p.get_pixmap(dpi=FIG_DPI, clip=pymupdf.Rect(*clip) & p.rect).save(out / f'fig_{key}.jpg', jpg_quality=80)
+                ids.append((key, clip))
         if dump:
             print(f'\n##### PDF {pg} (in {pg - OFFSET})')
             for k, r in ids: print(f'  [FIG {pg}_{k}] at {r}')
