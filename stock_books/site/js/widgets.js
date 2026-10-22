@@ -1382,3 +1382,76 @@ WIDGETS['chre-event'] = host => quizBtns(host, [
   ['Nhận sự kiện (timer, cảm biến, thông điệp)', 1, ['nanoappStart()', 'nanoappHandleEvent()', 'nanoappEnd()']],
   ['Được gọi khi nanoapp kết thúc', 2, ['nanoappStart()', 'nanoappHandleEvent()', 'nanoappEnd()']]
 ]);
+
+// ---- Android audio widgets ----
+WIDGETS['audio-layers'] = host => quizBtns(host, [
+  ['AudioFlinger', 2, ['App framework', 'Native framework', 'Media server', 'Kernel driver']],
+  ['Lớp native tương ứng android.media (libmedia)', 1, ['App framework', 'Native framework', 'Media server', 'Kernel driver']],
+  ['ALSA', 3, ['App framework', 'Native framework', 'Media server', 'Kernel driver']],
+  ['Gói android.media', 0, ['App framework', 'Native framework', 'Media server', 'Kernel driver']]
+]);
+WIDGETS['audio-hal-map'] = host => quizBtns(host, [
+  ['IDevice (HIDL)', 0, ['IModule', 'IConfig', 'IFactory']],
+  ['IEffectsFactory (HIDL)', 2, ['IModule', 'IConfig', 'IFactory']],
+  ['Cấu hình hệ thống trước nằm trong XML', 1, ['IModule', 'IConfig', 'IFactory']]
+]);
+WIDGETS['audio-q'] = host => {
+  host.innerHTML = '<label>Số bit <input id="b" type="number" value="16" style="width:70px"></label><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const b = +host.querySelector('#b').value || 0; o.innerHTML = `Dải động lý thuyết ≈ <b>${(6.02 * b).toFixed(0)} dB</b> (6,02 dB mỗi bit). Số mức lượng tử: ${Math.pow(2, Math.min(b, 52)).toLocaleString('en-US')}.`; };
+  host.querySelector('#b').oninput = draw; draw();
+};
+WIDGETS['audio-usage'] = host => quizBtns(host, [
+  ['Báo thức đồng hồ', 1, ['USAGE_MEDIA', 'USAGE_ALARM', 'USAGE_NOTIFICATION']],
+  ['Phát nhạc / video', 0, ['USAGE_MEDIA', 'USAGE_ALARM', 'USAGE_NOTIFICATION']],
+  ['Âm thông báo tin nhắn', 2, ['USAGE_MEDIA', 'USAGE_ALARM', 'USAGE_NOTIFICATION']]
+]);
+WIDGETS['audio-latency-calc'] = host => {
+  host.innerHTML = '<div class="row"><label>Kích thước buffer (frame) <input id="f" type="number" value="192" style="width:80px"></label><label>Số buffer <input id="n" type="number" value="2" style="width:60px"></label><label>Sample rate (Hz) <input id="r" type="number" value="48000" style="width:80px"></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const f = +host.querySelector('#f').value || 0, n = +host.querySelector('#n').value || 0, r = +host.querySelector('#r').value || 1; o.innerHTML = `Mỗi buffer ≈ <b>${(f / r * 1000).toFixed(2)} ms</b>; tổng trễ do buffer ≈ <b>${(f * n / r * 1000).toFixed(2)} ms</b> (chưa tính trễ DSP/ứng dụng).`; };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['mmap-policy'] = host => quizBtns(host, [
+  ['Chỉ dùng đường AudioFlinger cũ', 0, ['1 (NEVER)', '2 (AUTO)', '3 (ALWAYS)']],
+  ['Thử MMAP rồi fallback đường cũ', 1, ['1 (NEVER)', '2 (AUTO)', '3 (ALWAYS)']],
+  ['Chỉ MMAP, không fallback', 2, ['1 (NEVER)', '2 (AUTO)', '3 (ALWAYS)']]
+]);
+WIDGETS['resampler-pick'] = host => quizBtns(host, [
+  ['Phát nhạc chất lượng cao', 1, ['Linear / Cubic', 'Sinc']],
+  ['Tiếng bấm phím (ít đòi hỏi)', 0, ['Linear / Cubic', 'Sinc']]
+]);
+WIDGETS['midi-transport'] = host => quizBtns(host, [
+  ['Cần CONFIG_SND_RAWMIDI và CONFIG_SND_USB_MIDI', 0, ['USB host', 'BLE', 'Virtual']],
+  ['Luôn bật trên thiết bị hỗ trợ BLE', 1, ['USB host', 'BLE', 'Virtual']],
+  ['Giao tiếp liên ứng dụng, luôn bật', 2, ['USB host', 'BLE', 'Virtual']]
+]);
+WIDGETS['usb-audio-limits'] = host => {
+  host.innerHTML = '<div class="row"><label>Bit depth <select id="b"><option>8</option><option selected>16</option><option>24</option><option>32</option></select></label><label>Kênh <select id="c"><option>1</option><option selected>2</option><option>6</option></select></label><label>Sample rate (Hz) <input id="r" type="number" value="48000" style="width:80px"></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const rates = [48000, 44100, 32000, 24000, 22050, 16000, 12000, 11025, 8000];
+  const draw = () => { const b = +host.querySelector('#b').value, c = +host.querySelector('#c').value, r = +host.querySelector('#r').value; const bad = []; if (![16, 24, 32].includes(b)) bad.push('bit depth'); if (c > 2) bad.push('số kênh (chỉ mono/stereo)'); if (!rates.includes(r)) bad.push('sample rate'); o.innerHTML = bad.length ? '⛔ Không nằm trong tập hỗ trợ ở host mode: ' + bad.join(', ') : '✅ Hợp lệ với USB audio host mode (Android 5.0+).'; };
+  host.querySelectorAll('input,select').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['soundtrigger-flow'] = host => quizBtns(host, [
+  ['Trả về handle của model', 0, ['loadSoundModel()', 'startRecognition()', 'unloadModel()']],
+  ['Bắt đầu nghe hotword', 1, ['loadSoundModel()', 'startRecognition()', 'unloadModel()']],
+  ['Giải phóng model không hoạt động', 2, ['loadSoundModel()', 'startRecognition()', 'unloadModel()']]
+]);
+WIDGETS['spatial-latency'] = host => {
+  host.innerHTML = '<div class="row"><label>Trễ cảm biến (ms) <input id="a" type="number" value="30" style="width:60px"></label><label>Xử lý (ms) <input id="b" type="number" value="40" style="width:60px"></label><label>Truyền tai nghe (ms) <input id="c" type="number" value="60" style="width:60px"></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const t = ['a', 'b', 'c'].reduce((s, k) => s + (+host.querySelector('#' + k).value || 0), 0); o.innerHTML = `Tổng độ trễ vòng ≈ <b>${t} ms</b> — ${t < 150 ? '✅ dưới' : '⛔ vượt'} khuyến nghị 150 ms.`; };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['sound-dose-calc'] = host => {
+  host.innerHTML = '<div class="row"><label>Mức MEL trung bình (dBA) <input id="m" type="number" value="85" style="width:70px"></label><label>Giờ nghe mỗi ngày <input id="h" type="number" value="2" style="width:60px"></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => {
+    const m = +host.querySelector('#m').value || 0, h = +host.querySelector('#h').value || 0;
+    const allowed = 40 * Math.pow(2, (80 - m) / 3);
+    const weekly = h * 7, pct = weekly / allowed * 100;
+    o.innerHTML = `Mô hình đơn giản (ngưỡng 40 giờ/tuần ở 80 dBA, mỗi +3 dB giảm một nửa thời gian cho phép): cho phép ≈ <b>${allowed.toFixed(1)} giờ/tuần</b> ở ${m} dBA; bạn nghe ${weekly} giờ ⇒ CSD ≈ <b>${pct.toFixed(0)}%</b>${pct >= 100 ? ' ⇒ hệ thống cảnh báo ở mốc 100%.' : '.'}<br><i>Chỉ minh hoạ khái niệm; công thức chuẩn theo IEC 62368-1/EN 50332-3.</i>`;
+  };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};

@@ -151,6 +151,27 @@ window.BOOKS = [
     ]
   },
   {
+    id: "aospdata",
+    title: "Android Data Use (AOSP)",
+    subtitle: "Data Saver, eBPF traffic monitoring, xt_qtaguid, tethering offload (source.android.com/docs/core/data)",
+    author: "source.android.com/docs/core/data",
+    cat: "Bảo mật & CNTT",
+    tags: ["AOSP","data usage","Data Saver","eBPF","xt_qtaguid","NetworkStatsService","tethering","offload","netd"],
+    level: "Nâng cao",
+    emoji: "📶",
+    color: "#3ddc84",
+    desc: "7 chương theo mục Android data use của AOSP: tổng quan theo dõi dữ liệu, Data Saver, xt_qtaguid/quota2 và tag, eBPF traffic monitoring, thống kê interface và driver, chu kỳ/loại mạng/tethering offload, bản đồ tra cứu.",
+    chapters: [
+      { n: 1, title: "Tổng quan: Android theo dõi và kiểm soát dữ liệu mạng thế nào", ready: true },
+      { n: 2, title: "Data Saver: chế độ tiết kiệm dữ liệu", ready: true },
+      { n: 3, title: "Kernel cũ: xt_qtaguid, quota2 và “tag” lưu lượng", ready: true },
+      { n: 4, title: "eBPF traffic monitoring: cơ chế hiện đại (Android 9+)", ready: true },
+      { n: 5, title: "Thống kê theo interface và điều kiện với driver mạng", ready: true },
+      { n: 6, title: "Chu kỳ dùng dữ liệu, loại trừ loại mạng và tethering", ready: true },
+      { n: 7, title: "Bản đồ tra cứu: vấn đề → cơ chế → cách kiểm tra", ready: true }
+    ]
+  },
+  {
     id: "vuebook",
     title: "Fullstack Vue (bản tiếng Việt dễ hiểu)",
     subtitle: "Vue.js, Vuex, Router, Form, Unit test – kèm chương bổ sung Vue 3",
@@ -1192,8 +1213,55 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "aospaudio",
+  "title": "Android Audio (AOSP)",
+  "subtitle": "Audio HAL, latency, MIDI/USB, spatial audio, sound dose",
+  "author": "source.android.com/docs/core/audio",
+  "cat": "Bảo mật & CNTT",
+  "tags": [
+    "AOSP",
+    "Audio",
+    "HAL",
+    "AAudio",
+    "MIDI",
+    "Spatial audio"
+  ],
+  "level": "Nâng cao",
+  "emoji": "🔊",
+  "color": "#db2777",
+  "desc": "5 chương theo menu Audio của AOSP: kiến trúc và AIDL Audio HAL, định dạng/attributes/effects, latency và AAudio, MIDI/USB/TV/debug, các tính năng nâng cao.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Kiến trúc audio, thuật ngữ và Audio HAL (AIDL/HIDL)",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Định dạng dữ liệu, audio attributes và effects",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Latency: FAST mixer, AAudio/MMAP, priority inversion, resampling",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "MIDI, USB audio, TV audio, debugging và warmup",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Tính năng nâng cao: concurrent capture, Sound Trigger, spatial audio, sound dose, soundbar, SCO",
+      "ready": true
+    }
+  ]
 }
 ];
+
 
 
 
