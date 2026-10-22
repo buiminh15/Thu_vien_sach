@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kỹ thuật lạnh – Good Practices in Refrigeration (bản dịch)</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/refrigeration.css">
+</head>
+<body class="rf-page">
+<header class="topbar"><div class="wrap rf-top">
+  <a class="brand" href="index.html">📚 <span class="hide-sm">Thư viện </span><span>Tự học</span></a>
+  <div class="grow"></div>
+  <button class="btn sm" id="tglen" aria-pressed="false" title="Hiện tên tiếng Anh">🇬🇧 EN</button>
+  <button class="btn sm hide-lg" id="tglnav">☰ Chương</button>
+  <a class="btn sm" href="index.html">← Sách</a>
+  <button class="btn sm" id="theme">🌓</button>
+</div></header>
+
+<div class="rf">
+  <nav class="rf-nav" id="nav" aria-label="Danh sách chương"></nav>
+  <main class="rf-main" id="main"></main>
+</div>
+
+<div class="rf-modal" id="modal" hidden>
+  <div class="rf-mbar"><b id="mtitle"></b><div class="grow"></div><button class="btn sm" id="mprev">◀</button><button class="btn sm" id="mnext">▶</button><button class="btn sm" id="mclose">✕ Đóng</button></div>
+  <div class="rf-mbody" id="mbody"></div>
+</div>
+
+<script src="js/common.js"></script>
+<script src="rf/index.js"></script>
+<script src="js/refrigeration.js"></script>
+</body>
+</html>

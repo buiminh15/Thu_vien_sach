@@ -172,6 +172,24 @@ window.BOOKS = [
     ]
   },
   {
+    id: "refrigeration",
+    href: "refrigeration.html",
+    title: "Kỹ thuật lạnh – Good Practices in Refrigeration (bản dịch)",
+    subtitle: "Thao tác thực hành có ảnh: hàn đồng, loe ống, an toàn… (GIZ Proklima, 2010)",
+    author: "GIZ Proklima – dịch và chú giải tiếng Việt",
+    cat: "Kỹ thuật lạnh",
+    tags: ["kỹ thuật lạnh","điều hòa","môi chất","hàn đồng","brazing","loe ống","flaring","an toàn lao động","refrigeration","GIZ"],
+    level: "Thực hành",
+    emoji: "❄️",
+    color: "linear-gradient(135deg,#0e7490,#38bdf8)",
+    desc: "Sổ tay thực hành sửa chữa và bảo dưỡng hệ thống lạnh bằng tiếng Việt: mỗi bước thao tác có ảnh cắt từ sách gốc, bản dịch, thuật ngữ Anh–Việt, trắc nghiệm và xem được trang gốc. Đã có chương 7 (Hàn đồng), 8 (Loe ống), 14 (An toàn); các chương còn lại đang soạn.",
+    chapters: [
+      { n: 7, title: "Hàn đồng (Brazing)", ready: true },
+      { n: 8, title: "Loe ống (Flaring)", ready: true },
+      { n: 14, title: "An toàn lao động", ready: true }
+    ]
+  },
+  {
     id: "vuebook",
     title: "Fullstack Vue (bản tiếng Việt dễ hiểu)",
     subtitle: "Vue.js, Vuex, Router, Form, Unit test – kèm chương bổ sung Vue 3",
