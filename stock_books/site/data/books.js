@@ -990,7 +990,74 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "aosparch",
+  "title": "Android Architecture (AOSP)",
+  "subtitle": "HAL, Kernel/GKI, Treble, AIDL/Binder, Bootloader, Partitions",
+  "author": "source.android.com/docs/core/architecture",
+  "cat": "Bảo mật & CNTT",
+  "tags": [
+    "AOSP",
+    "HAL",
+    "GKI",
+    "Binder",
+    "Bootloader",
+    "Treble"
+  ],
+  "level": "Nâng cao",
+  "emoji": "🤖",
+  "color": "#3ddc84",
+  "desc": "9 chương theo menu Architecture của AOSP: tổng quan, HAL/HIDL, kernel/GKI, configuration & DTO, VNDK/VINTF, AIDL/Binder, bootloader, partitions và 16 KB page size.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Tổng quan kiến trúc AOSP",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Hardware Abstraction Layer (HAL) và HIDL",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Kernel: ACK, GKI và KMI",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Configuration và Device Tree Overlays",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "VNDK, VINTF và Vendor API level",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "AIDL và Binder (IPC)",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Bootloader",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Partitions (phân vùng)",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "16 KB page size",
+      "ready": true
+    }
+  ]
 }
 ];
+
 
 

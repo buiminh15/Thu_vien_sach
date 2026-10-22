@@ -1156,3 +1156,88 @@ WIDGETS['fast-refresh-quiz'] = host => {
   host.innerHTML = cs.map((c, i) => `<div class="row"><span>${c[0].replace(/</g, '&lt;')}</span> <button data-i="${i}" data-v="1" type="button">Giữ state</button> <button data-i="${i}" data-v="0" type="button">Mất state</button> <span id="r${i}"></span></div>`).join('');
   host.querySelectorAll('button').forEach(b => b.onclick = () => { const i = +b.dataset.i, ok = (b.dataset.v === '1') === cs[i][1]; host.querySelector('#r' + i).textContent = ok ? '✅ Đúng' : '❌ Sai'; });
 };
+
+// ---- Android architecture widgets ----
+function quizBtns(host, cases) {
+  host.innerHTML = cases.map((c, i) => `<div class="row"><span>${c[0]}</span> ${c[2].map((o, j) => `<button data-i="${i}" data-j="${j}" type="button">${o}</button>`).join(' ')} <span id="r${i}"></span></div>`).join('');
+  host.querySelectorAll('button').forEach(b => b.onclick = () => { const i = +b.dataset.i, j = +b.dataset.j; host.querySelector('#r' + i).textContent = j === cases[i][1] ? '✅ Đúng' : '❌ Sai: ' + cases[i][2][cases[i][1]]; });
+}
+WIDGETS['aosp-stack'] = host => quizBtns(host, [
+  ['Biên dịch bytecode của app thành lệnh CPU', 4, ['Kernel', 'HAL', 'Framework', 'System services', 'ART']],
+  ['Giao diện chuẩn do vendor phần cứng cài đặt', 1, ['Kernel', 'HAL', 'Framework', 'System services', 'ART']],
+  ['system_server, SurfaceFlinger, MediaService', 3, ['Kernel', 'HAL', 'Framework', 'System services', 'ART']],
+  ['Quản lý giao tiếp trực tiếp với phần cứng', 0, ['Kernel', 'HAL', 'Framework', 'System services', 'ART']]
+]);
+WIDGETS['hal-type-picker'] = host => quizBtns(host, [
+  ['Viết HAL mới cho Android hiện đại', 0, ['AIDL', 'HIDL', 'Passthrough']],
+  ['Server là thư viện được client dlopen, cùng tiến trình', 2, ['AIDL', 'HIDL binderized', 'Passthrough']],
+  ['HAL chạy tiến trình riêng, đăng ký với service manager', 1, ['Same Process HAL', 'Binderized HAL', 'Wrapped HAL']],
+  ['Vulkan, OpenGL driver nạp vào tiến trình framework', 0, ['Same Process HAL', 'Binderized HAL', 'Wrapped HAL']]
+]);
+WIDGETS['gki-split'] = host => quizBtns(host, [
+  ['Trình quản lý bộ nhớ, scheduler (độc lập phần cứng)', 0, ['Lõi GKI', 'Vendor module']],
+  ['Driver GPU riêng của một SoC', 1, ['Lõi GKI', 'Vendor module']],
+  ['Driver màn hình riêng của một board', 1, ['Lõi GKI', 'Vendor module']],
+  ['Hệ thống file và networking stack chung', 0, ['Lõi GKI', 'Vendor module']]
+]);
+WIDGETS['config-picker'] = host => quizBtns(host, [
+  ['Giá trị đọc từ phần cứng (ví dụ khả năng của một cảm biến)', 1, ['System property', 'HAL method', 'XML', 'RRO']],
+  ['Dữ liệu tĩnh phức tạp với schema ổn định', 2, ['System property', 'HAL method', 'XML + xsd_config', 'RRO']],
+  ['Đổi giá trị tài nguyên của app lúc chạy', 3, ['System property', 'HAL method', 'XML', 'RRO']],
+  ['Chọn biến thể phần cứng trước khi service khởi động', 0, ['init_dev_config', 'HAL method', 'XML', 'RRO']]
+]);
+WIDGETS['dto-flow'] = host => {
+  const steps = ['Viết DTS (device tree source)', 'Biên dịch bằng dtc → DTB / DTBO', 'Flash vào nơi bootloader truy cập được (nối vào kernel hoặc partition DTB)', 'Bootloader nạp DTB vào bộ nhớ và áp DTBO overlay lên cây chung', 'Bootloader truyền địa chỉ device tree cho kernel và khởi động'];
+  host.innerHTML = '<button id="n" type="button">Bước tiếp</button> <button id="r" type="button">Làm lại</button><ol id="o"></ol>';
+  let k = 0; const o = host.querySelector('#o');
+  const draw = () => { o.innerHTML = steps.slice(0, k).map(s => '<li>' + s + '</li>').join(''); };
+  host.querySelector('#n').onclick = () => { if (k < steps.length) k++; draw(); };
+  host.querySelector('#r').onclick = () => { k = 0; draw(); };
+};
+WIDGETS['vndk-classify'] = host => quizBtns(host, [
+  ['libc.so, liblog.so, libvulkan.so', 0, ['LL-NDK', 'Eligible VNDK', 'FWK-ONLY']],
+  ['Thư viện nội bộ framework, vendor không được dùng', 2, ['LL-NDK', 'Eligible VNDK', 'FWK-ONLY']],
+  ['Có thể nạp an toàn hai lần (framework + vendor)', 1, ['LL-NDK', 'Eligible VNDK', 'FWK-ONLY']]
+]);
+WIDGETS['vintf-match'] = host => {
+  host.innerHTML = '<div class="row"><label>Target FCM của device manifest <input id="t" type="number" value="8" style="width:60px"></label><label>FCM tối thiểu framework đòi hỏi <input id="m" type="number" value="7" style="width:60px"></label><label>HAL version device cung cấp <input id="h" type="number" value="2" style="width:60px"></label><label>HAL version framework đòi hỏi tối thiểu <input id="q" type="number" value="1" style="width:60px"></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const v = id => +host.querySelector('#' + id).value;
+  const draw = () => { const ok = v('t') >= v('m') && v('h') >= v('q'); o.innerHTML = ok ? '✅ Manifest <b>khớp</b> matrix: OTA framework được chấp nhận.' : '⛔ <b>Không khớp</b>: ' + (v('t') < v('m') ? 'Target FCM thấp hơn mức framework đòi hỏi. ' : '') + (v('h') < v('q') ? 'HAL version device cung cấp thấp hơn mức đòi hỏi.' : ''); };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['binder-deadlock'] = host => quizBtns(host, [
+  ['Giữ mutex rồi gọi binder đồng bộ sang tiến trình khác', 1, ['An toàn', 'Nguy cơ deadlock']],
+  ['Copy dữ liệu ra ngoài khoá, thả khoá, rồi mới gọi binder', 0, ['An toàn', 'Nguy cơ deadlock']],
+  ['Giữ khoá khi gọi oneway', 1, ['An toàn', 'Nguy cơ deadlock (có thể đổi thành đồng bộ sau)']]
+]);
+WIDGETS['aidl-compat'] = host => quizBtns(host, [
+  ['Thêm method vào cuối interface', 0, ['Tương thích', 'Không tương thích']],
+  ['Xoá một method đã freeze', 1, ['Tương thích', 'Không tương thích']],
+  ['Thêm trường vào cuối parcelable kèm giá trị mặc định', 0, ['Tương thích', 'Không tương thích']],
+  ['Đổi kiểu của một trường parcelable đã freeze', 1, ['Tương thích', 'Không tương thích']],
+  ['Thêm enumerator mới (Android 11+)', 0, ['Tương thích', 'Không tương thích']]
+]);
+WIDGETS['bootimg-version'] = host => {
+  host.innerHTML = '<label>Android ra mắt <select id="a"><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option></select></label><div class="calc" id="o"></div>';
+  const M = { 9: 'Header ≥ v1 (VTS kiểm tra)', 10: 'Header v2', 11: 'Header v3 cho boot image GKI chính', 12: 'Header v3 hoặc v4 (GKI: v4 là chính)', 13: 'Header v3 hoặc v4 (GKI: v4 chính, os_version phải bằng 0, phiên bản lấy từ AVB properties)' };
+  const o = host.querySelector('#o');
+  const draw = () => { o.textContent = M[host.querySelector('#a').value]; };
+  host.querySelector('#a').onchange = draw; draw();
+};
+WIDGETS['partition-quiz'] = host => quizBtns(host, [
+  ['Generic ramdisk (Android 13+)', 0, ['init_boot', 'vendor_boot', 'system_ext', 'odm']],
+  ['Module kernel GKI', 2, ['init_boot', 'vendor_boot', 'system_dlkm', 'odm']],
+  ['Dữ liệu Verified Boot cho mọi partition', 1, ['userdata', 'vbmeta', 'metadata', 'misc']],
+  ['Khoá mã hoá metadata', 2, ['userdata', 'vbmeta', 'metadata', 'misc']]
+]);
+WIDGETS['page-waste'] = host => {
+  host.innerHTML = '<div class="row"><label>Kích thước yêu cầu (KB) <input id="s" type="number" value="5" style="width:70px"></label><label>Số vùng <input id="n" type="number" value="2" style="width:60px"></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => {
+    const s = +host.querySelector('#s').value || 0, n = +host.querySelector('#n').value || 1;
+    const t = p => Math.ceil(s / p) * p * n;
+    o.innerHTML = `Trang 4 KB: <b>${t(4)} KB</b><br>Trang 16 KB: <b>${t(16)} KB</b><br>Lãng phí thêm: ${t(16) - t(4)} KB.` + (n > 1 ? `<br>Gộp thành một vùng ${s * n} KB: 4 KB → ${Math.ceil(s * n / 4) * 4} KB, 16 KB → ${Math.ceil(s * n / 16) * 16} KB.` : '');
+  };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
