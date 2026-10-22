@@ -1241,3 +1241,144 @@ WIDGETS['page-waste'] = host => {
   };
   host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
 };
+
+// ---- Android connectivity widgets ----
+WIDGETS['ble-role'] = host => quizBtns(host, [
+  ['Thiết bị phát advertisement', 0, ['Peripheral', 'Central']],
+  ['Thiết bị quét tìm advertisement', 1, ['Peripheral', 'Central']],
+  ['Thiết bị gửi thông tin trong GATT', 0, ['GATT server', 'GATT client']],
+  ['Thiết bị Bluetooth 4.1 trở xuống chỉ hỗ trợ', 1, ['Peripheral', 'Central']]
+]);
+WIDGETS['asha-latency'] = host => {
+  host.innerHTML = '<label>Connection interval (ms) <input id="i" type="number" value="20" style="width:70px"></label><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const i = +host.querySelector('#i').value || 0; o.innerHTML = `Bộ đệm 8 frame ⇒ trễ mạng ≈ <b>${8 * i} ms</b>. Frame G.722 16 kHz: ${16 * i} mẫu. Interval ngắn hơn ⇒ trễ thấp hơn.`; };
+  host.querySelector('#i').oninput = draw; draw();
+};
+WIDGETS['secure-nfc'] = host => {
+  host.innerHTML = '<div class="row"><label><input type="checkbox" id="e"> Secure NFC bật</label><label><input type="checkbox" id="u"> Màn hình đã mở khoá</label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const e = host.querySelector('#e').checked, u = host.querySelector('#u').checked; o.innerHTML = (!e || u) ? '✅ Off-host card emulation <b>được phép</b>.' : '⛔ Off-host emulation <b>bị chặn</b> (hiện “Unlock to use NFC”).'; };
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};
+WIDGETS['ims-binding'] = host => {
+  host.innerHTML = '<div class="row"><label><input type="checkbox" id="s" checked> Có SIM</label><label><input type="checkbox" id="c" checked> Có carrier override khớp SIM</label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const s = host.querySelector('#s').checked, c = host.querySelector('#c').checked; o.innerHTML = (s && c) ? 'Bind <b>carrier override ImsService</b> (kiểm tra trước).' : 'Bind <b>device default ImsService</b> (phải hỗ trợ Emergency MMTel).'; };
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};
+WIDGETS['emergency-number'] = host => {
+  host.innerHTML = '<label>Số <input id="n" type="text" value="112" style="width:90px"></label> <label><input type="checkbox" id="s"> Không có SIM</label><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => {
+    const n = host.querySelector('#n').value.trim(), noSim = host.querySelector('#s').checked;
+    const always = ['112', '911'], extra = ['000', '08', '110', '999', '118', '119'];
+    o.textContent = always.includes(n) ? 'Luôn là số khẩn cấp mặc định (3GPP).' : (noSim && extra.includes(n)) ? 'Là số khẩn cấp mặc định khi không có SIM.' : 'Không nằm trong danh sách mặc định (có thể đến từ SIM/mạng/modem/database).';
+  };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['carrier-config-priority'] = host => {
+  host.innerHTML = '<div class="row"><label><input type="checkbox" id="a"> Carrier app có giá trị</label><label><input type="checkbox" id="p" checked> Platform CarrierConfig app có giá trị</label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const a = host.querySelector('#a').checked, p = host.querySelector('#p').checked; o.innerHTML = 'Giá trị được lấy từ: <b>' + (a ? 'carrier app' : p ? 'platform CarrierConfig app' : 'mặc định cứng của framework') + '</b>.'; };
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};
+WIDGETS['esim-flow'] = host => quizBtns(host, [
+  ['LPA bind ICarrierEuiccProvisioningService để xin activation code', 0, ['Activation code qua AIDL', 'Carrier UI từ LPA']],
+  ['LPA mở màn hình kích hoạt của nhà mạng và nhận result code', 1, ['Activation code qua AIDL', 'Carrier UI từ LPA']],
+  ['LPA nhận activation code trực tiếp từ result intent', 1, ['Được phép', 'Không bao giờ được phép']]
+]);
+WIDGETS['time-priority'] = host => {
+  host.innerHTML = '<div class="row"><label>Android <select id="v"><option value="11">11 trở xuống</option><option value="12" selected>12+</option></select></label><label><input type="checkbox" id="n" checked> Có NTP hợp lệ</label><label><input type="checkbox" id="t" checked> Có NITZ hợp lệ</label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => {
+    const v = +host.querySelector('#v').value, n = host.querySelector('#n').checked, t = host.querySelector('#t').checked;
+    const order = v >= 12 ? ['NTP (network)', 'NITZ (telephony)'] : ['NITZ (telephony)', 'NTP (network)'];
+    const ok = { 'NTP (network)': n, 'NITZ (telephony)': t };
+    const pick = order.find(x => ok[x]);
+    o.innerHTML = `Thứ tự: ${order.join(' → ')}<br>Được chọn: <b>${pick || 'không có (uncertain, giữ nguyên đồng hồ)'}</b>`;
+  };
+  host.querySelectorAll('input,select').forEach(i => i.onchange = draw); draw();
+};
+WIDGETS['uwb-country'] = host => {
+  const srcs = ['Override bằng adb', 'Mã telephony hiện tại', 'Mã Wi-Fi (802.11ad)', 'Mã telephony biết gần nhất', 'Vị trí fused', 'Mặc định OEM'];
+  host.innerHTML = srcs.map((s, i) => `<label style="display:block"><input type="checkbox" data-i="${i}"> ${s}</label>`).join('') + '<div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const c = [...host.querySelectorAll('input')].map(x => x.checked), i = c.indexOf(true); o.innerHTML = i < 0 ? 'Không nguồn nào ⇒ gửi mã <b>00</b>, stack <b>DISABLED</b>.' : `Dùng nguồn: <b>${srcs[i]}</b> ⇒ stack READY (nếu quy định cho phép UWB).`; };
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};
+WIDGETS['wifi-hal-version'] = host => quizBtns(host, [
+  ['Vendor HAL trên Android 14+', 1, ['HIDL', 'AIDL']],
+  ['Vendor HAL trên Android 13 trở xuống', 0, ['HIDL', 'AIDL']],
+  ['Supplicant HAL từ Android 13', 1, ['HIDL', 'AIDL']],
+  ['Vendor HAL cho Wi-Fi Aware / RTT', 0, ['Bắt buộc', 'Tuỳ chọn']]
+]);
+WIDGETS['wifi-score'] = host => {
+  const nets = [['Saved, unmetered', 3], ['Suggested, unmetered', 2], ['Saved, metered', 1], ['Suggested, metered', 0]];
+  host.innerHTML = nets.map((n, i) => `<label style="display:block"><input type="checkbox" data-i="${i}" checked> ${n[0]} khả dụng</label>`).join('') + '<div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const av = nets.filter((_, i) => host.querySelector(`input[data-i="${i}"]`).checked).sort((a, b) => b[1] - a[1]); o.innerHTML = av.length ? `Theo thứ tự mặc định, mạng được chọn: <b>${av[0][0]}</b> (nếu tín hiệu tương đương; lựa chọn gần đây của người dùng có thể vượt).` : 'Không có mạng khả dụng.'; };
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};
+WIDGETS['companion-profile'] = host => quizBtns(host, [
+  ['Cấp phát eSIM', 0, ['Chỉ Watch', 'Chỉ Glasses', 'Cả hai']],
+  ['Quyền micro', 1, ['Chỉ Watch', 'Chỉ Glasses', 'Cả hai']],
+  ['Lịch (calendar)', 0, ['Chỉ Watch', 'Chỉ Glasses', 'Cả hai']],
+  ['Thông báo và danh bạ', 2, ['Chỉ Watch', 'Chỉ Glasses', 'Cả hai']]
+]);
+
+// ---- Android input & interaction widgets ----
+WIDGETS['input-pipeline'] = host => quizBtns(host, [
+  ['Đọc sự kiện thô từ evdev của từng thiết bị', 0, ['EventHub', 'InputReader', 'InputDispatcher']],
+  ['Giải mã sự kiện thô theo lớp thiết bị, áp key layout/character map', 1, ['EventHub', 'InputReader', 'InputDispatcher']],
+  ['Chuyển sự kiện tới cửa sổ phù hợp', 2, ['EventHub', 'InputReader', 'InputDispatcher']]
+]);
+WIDGETS['touch-classify'] = host => quizBtns(host, [
+  ['Báo trục X/Y multi-touch tuyệt đối, không có nút gamepad', 0, ['Multi-touch', 'Single-touch', 'Touch pad']],
+  ['Báo trục X/Y tuyệt đối chuẩn + touch key', 1, ['Multi-touch', 'Single-touch', 'Touch pad']],
+  ['Thiết bị cảm ứng có trục X/Y tương đối', 2, ['Multi-touch', 'Single-touch', 'Touch pad']]
+]);
+WIDGETS['haptic-primitive'] = host => quizBtns(host, [
+  ['Cảm giác nhấp ngắn ~12 ms gần tần số cộng hưởng', 0, ['CLICK', 'TICK', 'THUD', 'SPIN']],
+  ['Xung rất ngắn ~5 ms, nhẹ hơn click', 1, ['CLICK', 'TICK', 'THUD', 'SPIN']],
+  ['Cảm giác trầm nặng ~300 ms, tần số thấp', 2, ['CLICK', 'TICK', 'THUD', 'SPIN']],
+  ['Cảm giác xoay không đều, quét tần số rồi quay lại', 3, ['CLICK', 'TICK', 'THUD', 'SPIN']]
+]);
+WIDGETS['nn-device'] = host => quizBtns(host, [
+  ['Bộ xử lý thần kinh chuyên dụng (NPU)', 2, ['CPU', 'GPU', 'ACCELERATOR', 'OTHER']],
+  ['Driver dị thể quản lý nhiều thiết bị khác loại', 3, ['CPU', 'GPU', 'ACCELERATOR', 'OTHER']],
+  ['Chạy được model NNAPI và tăng tốc OpenGL ES/Vulkan', 1, ['CPU', 'GPU', 'ACCELERATOR', 'OTHER']]
+]);
+WIDGETS['nn-errors'] = host => quizBtns(host, [
+  ['Driver đang bận, thử lại sau có thể được', 0, ['TRANSIENT', 'PERSISTENT']],
+  ['Model quá lớn cho tài nguyên driver', 1, ['TRANSIENT', 'PERSISTENT']],
+  ['Không thể kịp deadline ngay cả trong điều kiện lý tưởng', 1, ['TRANSIENT', 'PERSISTENT']]
+]);
+WIDGETS['headset-behavior'] = host => quizBtns(host, [
+  ['Người dùng rút tai nghe khi đang phát nhạc', 0, ['App nên pause', 'Tự tăng volume']],
+  ['Cắm lại tai nghe sau khi pause', 1, ['Tự phát tiếp', 'Chờ người dùng nhấn play']],
+  ['Cuộc gọi đang diễn ra khi cắm headset', 0, ['Chuyển sang headset, micro không tắt', 'Bị ngắt']]
+]);
+WIDGETS['sensor-units'] = host => quizBtns(host, [
+  ['Tốc độ quay (rad/s)', 1, ['Accelerometer', 'Gyroscope', 'Magnetometer', 'Barometer']],
+  ['Từ trường (µT)', 2, ['Accelerometer', 'Gyroscope', 'Magnetometer', 'Barometer']],
+  ['Áp suất khí quyển (hPa)', 3, ['Accelerometer', 'Gyroscope', 'Magnetometer', 'Barometer']],
+  ['Gia tốc có cả trọng lực (m/s²)', 0, ['Accelerometer', 'Gyroscope', 'Magnetometer', 'Barometer']]
+]);
+WIDGETS['sensor-mode'] = host => quizBtns(host, [
+  ['Accelerometer', 0, ['Continuous', 'On-change', 'One-shot']],
+  ['Step counter', 1, ['Continuous', 'On-change', 'One-shot']],
+  ['Significant motion', 2, ['Continuous', 'On-change', 'One-shot']],
+  ['Proximity', 1, ['Continuous', 'On-change', 'One-shot']]
+]);
+WIDGETS['sensor-batch'] = host => {
+  host.innerHTML = '<div class="row"><label>Tần số (Hz) <input id="f" type="number" value="240" style="width:70px"></label><label>Số sự kiện mỗi lô <input id="n" type="number" value="10" style="width:60px"></label></div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const f = +host.querySelector('#f').value || 0, n = Math.max(1, +host.querySelector('#n').value || 1); o.innerHTML = `Không batching: <b>${f}</b> ngắt/giây. Batching ${n} sự kiện: <b>${(f / n).toFixed(1)}</b> ngắt/giây (giảm ${Math.round((1 - 1 / n) * 100)}%).`; };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['chre-event'] = host => quizBtns(host, [
+  ['Được gọi khi nanoapp bắt đầu', 0, ['nanoappStart()', 'nanoappHandleEvent()', 'nanoappEnd()']],
+  ['Nhận sự kiện (timer, cảm biến, thông điệp)', 1, ['nanoappStart()', 'nanoappHandleEvent()', 'nanoappEnd()']],
+  ['Được gọi khi nanoapp kết thúc', 2, ['nanoappStart()', 'nanoappHandleEvent()', 'nanoappEnd()']]
+]);

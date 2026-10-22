@@ -123,6 +123,34 @@ window.BOOKS = [
     ]
   },
   {
+    id: "angularguide",
+    title: "Angular 22 – giáo trình tiếng Việt dễ hiểu",
+    subtitle: "Components, Signals, Template, DI, Forms, Router, HTTP, SSR, Testing (angular.dev)",
+    author: "Biên soạn tiếng Việt từ tài liệu chính thức angular.dev",
+    cat: "Lập trình & AI",
+    tags: ["angular","angular 22","signals","standalone","zoneless","onpush","signal forms","router","httpresource","ssr","hydration","vitest","dependency injection"],
+    level: "Cơ bản → Nâng cao",
+    emoji: "🅰️",
+    color: "linear-gradient(135deg,#9f1239,#dd0031)",
+    desc: "14 chương theo tài liệu chính thức Angular 22: giới thiệu và CLI, component, input/output/model, signals và resource, template (control flow, @defer), directive/pipe, vòng đời và change detection (OnPush, zoneless), dependency injection, Signal Forms, Router, HTTP, SSR/hydration, testing với Vitest và bản đồ tra cứu.",
+    chapters: [
+      { n: 1, title: "Angular là gì, cài đặt và cấu trúc dự án", ready: true },
+      { n: 2, title: "Component: khối xây dựng ứng dụng", ready: true },
+      { n: 3, title: "Giao tiếp component: input, output, model, content projection, query", ready: true },
+      { n: 4, title: "Signals: signal, computed, effect, linkedSignal, resource", ready: true },
+      { n: 5, title: "Template: binding, control flow, @defer, @let và sự kiện", ready: true },
+      { n: 6, title: "Directive và Pipe", ready: true },
+      { n: 7, title: "Vòng đời component và change detection (OnPush, zoneless)", ready: true },
+      { n: 8, title: "Dependency Injection và service", ready: true },
+      { n: 9, title: "Forms: Signal Forms (stable v22), Reactive và Template-driven", ready: true },
+      { n: 10, title: "Routing: định tuyến, guard, resolver, lazy loading", ready: true },
+      { n: 11, title: "HTTP và dữ liệu: HttpClient, interceptor, httpResource, RxJS", ready: true },
+      { n: 12, title: "SSR, hydration, hiệu năng, bảo mật và a11y", ready: true },
+      { n: 13, title: "Kiểm thử (Vitest) và công cụ: CLI, DevTools, Language Service", ready: true },
+      { n: 14, title: "Bản đồ tra cứu: chọn đúng công cụ cho đúng việc", ready: true }
+    ]
+  },
+  {
     id: "vuebook",
     title: "Fullstack Vue (bản tiếng Việt dễ hiểu)",
     subtitle: "Vue.js, Vuex, Router, Form, Unit test – kèm chương bổ sung Vue 3",
@@ -1056,8 +1084,118 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "aospconn",
+  "title": "Android Connectivity (AOSP)",
+  "subtitle": "Bluetooth, NFC, Calling, Carrier, Time, UWB, Wi-Fi",
+  "author": "source.android.com/docs/core/connect",
+  "cat": "Bảo mật & CNTT",
+  "tags": [
+    "AOSP",
+    "Bluetooth",
+    "Wi-Fi",
+    "NFC",
+    "IMS",
+    "eSIM",
+    "UWB"
+  ],
+  "level": "Nâng cao",
+  "emoji": "📡",
+  "color": "#2563eb",
+  "desc": "7 chương theo menu Connectivity của AOSP: Bluetooth, NFC, calling & messaging, carrier/eSIM/vệ tinh, time & UWB, Wi-Fi và các mục kết nối khác.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Bluetooth: stack, BLE, ASHA và HCI",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "NFC: FeliCa, Secure NFC, Quick Access Wallet, NCI",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Calling and messaging: IMS, khẩn cấp, RTT, app gọi bên thứ ba",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Carrier: CarrierConfig, APN, eSIM, vệ tinh, UICC privileges",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Time (thời gian, múi giờ) và Ultra-wideband",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Wi-Fi: kiến trúc, HAL, MAC randomization, chọn mạng, WPA3",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Companion device, Connectivity Diagnostics, signal strength, chọn mạng",
+      "ready": true
+    }
+  ]
+},
+{
+  "id": "aospinput",
+  "title": "Android Interaction: Input, Haptics, Sensors (AOSP)",
+  "subtitle": "Input, Haptics, NNAPI, Peripherals, Sensors, CHRE",
+  "author": "source.android.com/docs/core/interaction",
+  "cat": "Bảo mật & CNTT",
+  "tags": [
+    "AOSP",
+    "Input",
+    "Haptics",
+    "Sensors",
+    "NNAPI",
+    "CHRE"
+  ],
+  "level": "Nâng cao",
+  "emoji": "🖐️",
+  "color": "#7c3aed",
+  "desc": "6 chương theo menu Interaction của AOSP: input pipeline và file keymap, haptics/PWLE, Neural Networks HAL, peripherals/AOA/stylus, sensors và CHRE.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Input: pipeline, key layout, key character map, IDC, touch và bàn phím",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Haptics (phản hồi xúc giác)",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Neural Networks (NNAPI): driver, burst, cache, QoS",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Peripherals: phụ kiện âm thanh, Android Open Accessory, stylus",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Sensors: stack, loại cảm biến, batching, reporting mode, HAL AIDL",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Context Hub Runtime Environment (CHRE)",
+      "ready": true
+    }
+  ]
 }
 ];
+
+
 
 
 
