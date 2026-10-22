@@ -1,0 +1,50 @@
+// Chương 1 – Dụng cụ cho ống (TT). Dịch từ "Good Practices in Refrigeration" (GIZ Proklima, 2010), tr. 5–17 (PDF 13–25). Đã lược tên hãng/model.
+window.RF_CH = window.RF_CH || {};
+RF_CH[1] = { n: 1, title: 'Dụng cụ cho ống (TT)', en: 'Tools for Tubing (TT)', part: 'I', dir: 'ch01', pdf: [13, 25],
+  intro: 'Giới thiệu các dụng cụ và thiết bị dùng khi làm việc với ống đồng: cắt, cạo ba via, làm sạch, bóp kẹp ống, đầu nối nhanh và bấm ép, gương soi, loe/uốn/nong ống, bộ hàn, que hàn, bình khí và bình chữa cháy. Số trong vòng tròn cam ❶❷❸ trên ảnh khớp với danh sách chú thích bên cạnh.',
+  terms: [['Wheel cutter', 'Dao cắt ống (cutter)'], ['Capillary tube cutter', 'Dụng cụ cắt ống mao'], ['Reamer / deburrer', 'Dao doa / dụng cụ cạo ba via'], ['Scouring pad', 'Miếng chà nhám'], ['Pinch-off plier', 'Kìm bóp (bịt) ống'], ['Access valve (Schrader)', 'Van nạp (van lõi Schrader)'], ['Quick coupler', 'Đầu nối nhanh'], ['Press system', 'Hệ nối bấm ép'], ['Inspection mirror', 'Gương soi kiểm tra'], ['Flaring tool', 'Bộ dụng cụ loe ống'], ['Tube bender', 'Dụng cụ uốn ống'], ['Tube expander', 'Dụng cụ nong ống'], ['Brazing rod', 'Que hàn'], ['Torch / burner', 'Mỏ hàn'], ['Igniter', 'Dụng cụ châm lửa (đánh lửa)'], ['Cylinder guard', 'Chụp bảo vệ van bình']],
+  sections: [
+    { title: 'Cắt ống', en: 'Tube cutters', pg: [13], blocks: [
+      { t: 'p', x: 'Chương này mô tả các <b>dụng cụ và thiết bị để xử lý ống</b>.' },
+      { t: 'step', figs: ['13_c1'], cap: 'Hình 1: Dao cắt ống (wheel cutter)', title: 'Dao cắt ống', en: 'Tube cutter (wheel cutter)', x: '<p>Cắt <b>ống đồng, đồng thau và nhôm</b>.</p><ol><li>Dao cắt cho ống <b>đường kính 6 đến 35 mm</b></li><li>Dao cắt cho ống <b>đường kính 3 đến 16 mm</b></li></ol>' },
+      { t: 'step', figs: ['13_c2'], cap: 'Hình 2: Dụng cụ cắt ống mao', title: 'Dụng cụ cắt ống mao', en: 'Capillary tube cutter', x: 'Cắt ống mao <b>mà không làm bẹp đường kính trong</b> của ống. Cắt được <b>mọi cỡ ống mao</b>.' }
+    ] },
+    { title: 'Cạo ba via và làm sạch', en: 'Reamers, scouring pad, brushes', pg: [14, 15], blocks: [
+      { t: 'step', figs: ['14_c1'], cap: 'Hình 3: Dao doa và dụng cụ cạo ba via', title: 'Cạo ba via', en: 'Reamer and deburrer', x: '<p>Cạo <b>ba via bên trong và bên ngoài</b> ống đồng.</p><ol><li>Dao doa trong–ngoài cho ống đồng</li><li>Dụng cụ cạo ba via cầm tay, lưỡi dao <b>xoay được</b></li></ol>' },
+      { t: 'step', figs: ['14_c2'], cap: 'Hình 4: Miếng chà nhám và chổi', title: 'Làm sạch trong/ngoài', en: 'Scouring pad and brush', x: 'Làm sạch và hoàn thiện bề mặt <b>trong và ngoài</b>:<ol><li>Miếng chà nhám nhựa</li><li>Chổi làm sạch phụ kiện</li></ol>' },
+      { t: 'step', figs: ['15_c1'], cap: 'Hình 5: Chổi sắt', title: 'Chổi sắt', en: 'Steel brush', x: 'Làm sạch <b>bên ngoài</b> ống đồng, thép, đồng thau, nhôm. Dây thép (steel wires).' },
+      { t: 'step', figs: ['15_c2'], cap: 'Hình 6: Kìm bóp ống', title: 'Kìm bóp (bịt) ống', en: 'Pinch-off plier', x: 'Bóp bịt ống đồng có <b>đường kính đến 12 mm</b>.' }
+    ] },
+    { title: 'Van nạp, đầu nối nhanh và hệ bấm ép', en: 'Access valve, quick couplers, press system', pg: [16, 17, 18], blocks: [
+      { t: 'step', figs: ['16_c1'], cap: 'Hình 7: Ống đồng nối dài có van nạp (Schrader)', title: 'Van nạp Schrader trên đoạn ống nối dài', en: 'Extended copper tube with access valve', x: '<p>Đoạn ống hàn thẳng có <b>van dịch vụ 1/4″ ren loe đực SAE</b>.</p><ol><li>Ống và van dịch vụ</li><li>Lõi van</li></ol>' },
+      { t: 'warn', x: '<b>Không khuyến cáo dùng cho ứng dụng hydrocacbon (HC)!</b> Nếu lắp sai cách, đây là <b>nguồn rò rỉ môi chất tiềm ẩn</b>.' },
+      { t: 'step', figs: ['17_c1'], cap: 'Hình 8: Đầu nối nhanh', title: 'Đầu nối nhanh', en: 'Quick couplers', x: '<ol><li>Lắp <b>đầu nối nhanh từ ống tới ống mềm môi chất</b></li><li>Kẹp trực tiếp lên <b>ống thẳng đường kính 2 đến 10 mm</b></li><li>Giống loại ❷ nhưng <b>kiểu vặn ren</b></li></ol><p>Áp suất làm việc <b>từ 13 mbar đến 45 bar</b>.</p>' },
+      { t: 'step', figs: ['18_c1'], cap: 'Hình 9: Các bộ phận của hệ nối bấm ép', title: 'Bộ phận hệ nối bấm ép', en: 'Press system components for tubing', x: '<ol><li>Bộ dụng cụ cùng phụ kiện, đầu nối và adapter</li><li>Đầu nối bấm ép ống đồng thẳng</li><li>Đầu nối bấm ép góc (cút)</li><li>Đầu nối bấm ép cho ống hút có ống mao (gia dụng)</li></ol><p>Xem chương 11 (Bấm ép ống).</p>' },
+      { t: 'step', figs: ['18_c2'], cap: 'Hình 10: Gương soi kiểm tra dạng telescope', title: 'Gương soi kiểm tra', en: 'Telescope inspection mirror', x: 'Kiểm tra mối hàn bằng <b>mắt</b> (nhìn các chỗ khuất).' }
+    ] },
+    { title: 'Loe, uốn và nong ống', en: 'Flaring, bending, expanding', pg: [19, 20], blocks: [
+      { t: 'step', figs: ['19_c1'], cap: 'Hình 11: Bộ dụng cụ loe ống', title: 'Bộ dụng cụ loe ống', en: 'Flaring tool', x: '<ol><li>Thanh giữ ống nhiều mặt (<b>6–8–10–12–15 và 16 mm</b> hoặc cỡ inch) có mũi loe</li><li>Thanh giữ ống kiểu <b>màng mống mắt</b> (5 đến 16 mm) có mũi loe</li><li>Cơ cấu kẹp có mũi loe</li><li>Các thanh loe nhận ống nhiều đường kính khác nhau</li></ol><p>Xem chương 8 (Loe ống).</p>' },
+      { t: 'step', figs: ['19_c2'], cap: 'Hình 12: Dụng cụ uốn ống', title: 'Dụng cụ uốn ống', en: 'Tube bender', x: '<ol><li>Dụng cụ uốn <b>tay cầm xoay</b> cho một cỡ ống cụ thể (có từ 6 đến 18 mm hoặc cỡ inch)</li><li>Dụng cụ uốn <b>ba đầu</b> cho ống 6, 8 và 10 mm (hoặc cỡ inch)</li><li>Bộ uốn cơ khí với má và khuôn đối (nhiều cỡ)</li></ol><p>Xem chương 6 (Uốn ống).</p>' },
+      { t: 'step', figs: ['20_c1'], cap: 'Hình 13: Dụng cụ nong ống', title: 'Dụng cụ nong ống', en: 'Tube expander', x: '<ol><li>Dụng cụ nong cho <b>đồng ủ (mềm)</b> có <b>đầu nong thay được</b> (10 đến 42 mm hoặc cỡ inch)</li><li>Ví dụ ống đồng đã nong</li><li>Dụng cụ nong và bộ đầu nong</li></ol>' }
+    ] },
+    { title: 'Thiết bị hàn, que hàn và khí', en: 'Brazing equipment, rods, gases', pg: [21, 22, 23, 24, 25], blocks: [
+      { t: 'step', figs: ['21_c1'], cap: 'Hình 14: Thiết bị hàn', title: 'Bộ hàn (brazing)', en: 'Brazing equipment', x: '<ol><li>Bộ hàn <b>propan/oxy</b></li><li>Bộ giảm áp oxy kèm ống mềm</li><li>Bộ hàn <b>chỉ dùng propan</b></li><li>Bộ hàn <b>chỉ dùng axetylen</b></li><li>Bộ giảm áp axetylen kèm ống mềm</li><li>Mỏ hàn (burner/torch)</li></ol>' },
+      { t: 'step', figs: ['21_c2'], cap: 'Hình 15: Mỏ hàn và đầu mỏ cho propan–oxy', title: 'Mỏ hàn và đầu mỏ', en: 'Torch (burner) and tips', x: '<p>Hàn đồng, đồng thau và nhôm.</p><ol><li>Tay cầm mỏ hàn có bộ điều chỉnh khí</li><li>Mỏ hàn <b>hai ngọn lửa hình chạc</b></li><li>Các đầu mỏ thay được nhiều cỡ, đầu làm bằng đồng cứng</li></ol>' },
+      { t: 'step', figs: ['22_c1'], cap: 'Hình 16: Dụng cụ châm lửa', title: 'Dụng cụ châm lửa', en: 'Lighters', x: '<ol><li>Dụng cụ đánh lửa dùng đá lửa (dạng kẹp)</li><li>Dụng cụ đánh lửa dùng đá lửa có <b>kim thông đầu mỏ</b> (dạng kẹp)</li><li>Dụng cụ đánh lửa dùng đá lửa (dạng súng)</li></ol>' },
+      { t: 'warn', x: 'Bật lửa kiểu <b>“thuốc lá”</b> <b>nguy hiểm</b> khi dùng với thiết bị hàn!' },
+      { t: 'step', figs: ['22_c2'], cap: 'Hình 17: Ví dụ phụ kiện nối', title: 'Phụ kiện nối ống', en: 'Example of fittings', x: 'Nhiều kiểu thiết kế và đường kính; vật liệu <b>đồng thau hoặc đồng</b>.' },
+      { t: 'step', figs: ['23_c1'], cap: 'Hình 18: Ví dụ que hàn', title: 'Que hàn', en: 'Brazing rods examples', x: '<table class="rf-tbl"><thead><tr><th>Que</th><th>Cu</th><th>Ag</th><th>Zn</th><th>Sn</th><th>P</th><th>Khoảng nóng chảy °C</th></tr></thead><tbody><tr><td>CP 203</td><td>Còn lại</td><td>–</td><td>–</td><td>–</td><td>5,9–6,5</td><td>710–890</td></tr><tr><td>CP 105</td><td>Còn lại</td><td>1,5–2,5</td><td>–</td><td>–</td><td>5,9–6,7</td><td>645–825</td></tr><tr><td>AO 106</td><td>35–37</td><td>33–35</td><td>Còn lại</td><td>2,5–3,5</td><td>–</td><td>630–730</td></tr><tr><td>AO 104</td><td>26–28</td><td>44–46</td><td>Còn lại</td><td>2,5–3,5</td><td>–</td><td>640–680</td></tr><tr><td>AO 203</td><td>29–31</td><td>43–45</td><td>Còn lại</td><td>–</td><td>–</td><td>675–735</td></tr></tbody></table><p>❶ Que hàn <b>khuyến nghị cho hàn đồng/đồng</b> (nhóm CP).  ❷ Que hàn <b>khuyến nghị cho hàn đồng/đồng thau</b> (nhóm AO, có bạc).</p>' },
+      { t: 'step', figs: ['23_c2'], cap: 'Hình 19: Bình nitơ', title: 'Bình nitơ', en: 'Nitrogen cylinder', x: '<ol><li>Bình nitơ</li><li>Bộ giảm áp nitơ</li><li>Ống chuyển nitơ có đầu <b>1/4″ ren loe cái SAE</b></li></ol>' },
+      { t: 'step', figs: ['24_c1'], cap: 'Hình 20: Bình và phụ kiện cho khí kỹ thuật', title: 'Bình khí và phụ kiện', en: 'Cylinder and accessories for technical gases', x: '<ol><li>Bình khí nhiều cỡ</li><li>Van bình có van an toàn</li><li>Chụp bảo vệ tiêu chuẩn (dạng hoa tulip)</li><li>Chụp bảo vệ tiêu chuẩn (dạng đóng–mở)</li></ol>' },
+      { t: 'step', figs: ['25_c1'], cap: 'Hình 21: Bình chữa cháy', title: 'Bình chữa cháy', en: 'Fire extinguisher', x: 'Bình chữa cháy <b>bột 2 kg</b>. (💡 Ngoài sách: nên luôn để sẵn bình chữa cháy ở khu vực hàn.)' }
+    ] },
+    { title: 'Kiểm tra nhanh', pg: [], blocks: [
+      { t: 'quiz', items: [
+        { q: 'Vì sao nên cắt ống đồng bằng dao cắt ống (wheel cutter)?', o: ['Rẻ', 'Không làm phoi lọt vào ống và cắt phẳng', 'Cắt thép được', 'Không cần kẹp'], a: 1, e: 'Cưa sắt dễ để phoi trong ống.' },
+        { q: 'Kìm bóp ống dùng để bịt ống đồng đường kính tới bao nhiêu?', o: ['12 mm', '50 mm', '100 mm', '2 mm'], a: 0, e: 'Theo sách: ống đồng đến 12 mm.' },
+        { q: 'Van nạp Schrader trên ống nối dài không khuyến cáo cho môi chất nào?', o: ['HFC-R134a', 'Hydrocacbon (HC)', 'CFC', 'Nitơ'], a: 1, e: 'Nếu lắp sai là nguồn rò rỉ tiềm ẩn.' },
+        { q: 'Bật lửa kiểu “thuốc lá” khi hàn:', o: ['An toàn', 'Nguy hiểm, không nên dùng', 'Bắt buộc', 'Không có tác động'], a: 1, e: 'Dùng dụng cụ đánh lửa chuyên dụng.' },
+        { q: 'Que hàn nào khuyến nghị cho hàn đồng–đồng?', o: ['Nhóm CP (đồng–phốt pho)', 'Nhóm AO (có kẽm, thiếc)', 'Que sắt', 'Không cần que'], a: 0, e: 'Nhóm AO dùng cho đồng–đồng thau (nhiều bạc).' }
+      ] }
+    ] }
+  ] };

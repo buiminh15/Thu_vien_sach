@@ -33,6 +33,8 @@
     switch (b.t) {
       case 'h': return `<h3 style="margin:14px 0 4px">${b.x}${en(b.en)}</h3>`;
       case 'p': return `<p>${b.x}</p>`;
+      case 'steps': return `<ol class="rf-ol">${b.items.map(i => `<li>${i}</li>`).join('')}</ol>`;
+      case 'flow': return `<div class="rf-flow"><b>${b.title}</b>${en(b.en)}${b.items.map((i, k) => `<div class="rf-fb">${i}</div>${k < b.items.length - 1 ? '<div class="rf-fa">↓</div>' : ''}`).join('')}<div class="rf-fa">↓</div><div class="rf-br">${b.branch.map(x => `<div class="rf-fb alt">${x}</div>`).join('')}</div></div>`;
       case 'list': return `<ul>${b.items.map(i => `<li>${i}</li>`).join('')}</ul>`;
       case 'warn': case 'tip': case 'key': return `<div class="rf-box ${b.t}">${b.x}</div>`;
       case 'table': return `<table class="rf-tbl"><thead><tr>${b.head.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${b.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
