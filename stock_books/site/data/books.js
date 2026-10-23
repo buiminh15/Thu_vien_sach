@@ -1606,5 +1606,85 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "fearch",
+  "title": "Frontend Architecture for Design Systems",
+  "subtitle": "Bốn trụ cột: Code – Process – Testing – Documentation",
+  "author": "Micah Godbolt – O'Reilly, 2016 (soạn từ bản tóm tắt)",
+  "cat": "Lập trình & AI",
+  "tags": [
+    "Kiến trúc frontend",
+    "Design system",
+    "CSS",
+    "Testing",
+    "Pattern Library"
+  ],
+  "level": "Trung cấp",
+  "emoji": "🧱",
+  "color": "#7c3aed",
+  "desc": "12 chương theo 4 trụ cột của kiến trúc sư frontend: code (HTML/CSS/JS), quy trình (workflow, task runner), kiểm thử (unit, hiệu năng, visual regression) và tài liệu (style guide, Pattern Lab). Soạn từ bản tóm tắt Bookey nên không đầy đủ như sách gốc.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Nguồn gốc: vì sao cần kiến trúc frontend",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Kỷ luật kiến trúc frontend và dự án Alpha",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Trụ cột Code (1): HTML và phương pháp CSS",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Trụ cột Code (2): CSS và JavaScript",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Red Hat Code: tái cấu trúc thành hệ thống module",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Trụ cột Process: quy trình làm việc (workflow)",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Task runner: Sass, Compass, Grunt và Gulp",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Trụ cột Testing (1): vì sao test và unit testing",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Trụ cột Testing (2): kiểm thử hiệu năng",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Trụ cột Testing (3): visual regression testing",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Trụ cột Documentation: style guide và pattern library",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Red Hat Documentation và lời kết",
+      "ready": true
+    }
+  ]
 }
 ];

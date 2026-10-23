@@ -1,0 +1,48 @@
+window.BOOK_DATA = window.BOOK_DATA || {};
+BOOK_DATA.crashp = BOOK_DATA.crashp || { chapters: [] };
+BOOK_DATA.crashp.chapters.push({
+  n: 17,
+  title: 'Lời kêu gọi hành động',
+  intro: 'Linda chuyển từ phòng thủ sang tấn công, cố vấn dạy cô quy trình mua/bán quỹ đảo ngược theo tín hiệu thay vì mua-và-giữ. Johnston gặp cố vấn, viết lại bài phát biểu cho nhà đầu tư và đưa ra sáu hành động cùng một bản kiến nghị đòi minh bạch.',
+  sections: [
+    { icon: '🧠', title: 'Phòng thủ xong, tính chuyện kiếm lời', blocks: [
+      { t: 'p', x: 'Linda thuyết phục các anh trai bán nốt danh mục cổ phiếu của gia đình: Nasdaq đã mất 80% từ đỉnh trong khi cổ phiếu họ chỉ giảm 30–40%, và "không ai biết Nasdaq có đang kéo cả thị trường xuống như một lực hấp dẫn". Quỹ đảo ngược ban đầu chỉ là biện pháp chuyển tiếp để giữ cân bằng; mục tiêu cao hơn là tăng trưởng.' },
+      { t: 'key', x: 'Điểm đổi chiến lược: khi quỹ đảo ngược dùng để <b>phòng ngừa</b> thì mua-và-giữ chấp nhận được; khi dùng để <b>kiếm lời</b> thì mua-và-giữ nguy hiểm. Lý do: (1) không ai biết chắc khi nào thị trường gấu kết thúc (thường chỉ biết sau khi đã qua lâu); (2) các đợt hồi phục thị trường gấu có thể rất mạnh và dài, làm bạn lỗ nhiều hơn mức chịu được. Cần một chiến lược thoát ra khi thị trường quay đầu, rồi quay lại khi xu hướng giảm tiếp tục.' }
+    ] },
+    { icon: '📐', title: '"Innumeracy": đòi hỏi sự chính xác', blocks: [
+      { t: 'p', x: 'Cố vấn chỉ vào cuốn "Innumeracy" của John Allen Paulos: xã hội biết chữ nhưng mù về con số, nên dễ bị những "số liệu chọn lọc" và "kết luận ngọt ngào" của các nhà phân tích đánh lừa, và dễ sùng bái các "đại sư" thị trường như bán thần.' },
+      { t: 'tip', x: 'Ví dụ điển hình: một guru dự đoán "thị trường sẽ giảm sau đợt hồi". Thị trường vốn luôn lên xuống nên họ luôn có thể nói đã đúng, vì không nói <i>giảm bao nhiêu, khi nào</i>. Cố vấn tự nhận mình đôi lúc cũng dự báo mơ hồ; Linda đã bắt ông phải định nghĩa "bounce ngắn hạn" cụ thể. <b>Hãy đòi sự chính xác, rồi chấp nhận sai sót là tất yếu.</b>' },
+      { t: 'p', x: 'Cách bảo vệ trước sai sót: dùng một "thiết bị cơ học" (fail-safe) tự động đưa bạn ra khỏi vị thế khi sai và đưa vào lại khi xu hướng có lợi tiếp tục.' }
+    ] },
+    { icon: '🛠️', title: 'Quy trình tín hiệu cho quỹ đảo ngược', blocks: [
+      { t: 'steps', items: ['Tìm hiểu quỹ đảo ngược S&P 500 (ví dụ Rydex Ursa, mã RYURX).', 'Mở biểu đồ giá của quỹ, khung 6 tháng, dữ liệu ngày, thêm đường trung bình động giản đơn 20 ngày (SMA 20) và chỉ báo MACD (12, 26) cùng đường tín hiệu EMA 9.', 'Mỗi tuần (tốt nhất cuối tuần) hỏi hai câu: (a) giá quỹ có nằm trên SMA 20? (b) đường MACD có nằm trên đường tín hiệu?', 'Cả hai "có" và bạn có tiền chấp nhận rủi ro → mua quỹ; ngược lại thì không mua.', 'Cả hai "không" và đang giữ quỹ → bán hết.', 'Một "có", một "không" → không làm gì (đang giữ thì giữ, đang đứng ngoài thì đứng ngoài).'] },
+      { t: 'widget', name: 'cp-signal', title: 'Bộ lọc hai tín hiệu: mua, bán hay đứng yên?' },
+      { t: 'warn', x: 'Quy trình này không hoàn hảo, có thể gây lỗ khi thị trường đi ngang (bị "cưa"); các quỹ đảo ngược và công cụ biểu đồ nêu trong sách là của năm 2002 và cần được thay thế bằng thông tin hiện hành. Đây là ví dụ về quy tắc cơ học, không phải khuyến nghị đầu tư.' }
+    ] },
+    { icon: '🎤', title: 'Bài phát biểu của Johnston', blocks: [
+      { t: 'p', x: 'Johnston, ngày trước ở phía bên kia, thấy mỉa mai khi biết quyền chọn mua từng được CEO dùng để "vắt" nhà đầu tư nay lại có quyền chọn bán được nhà đầu tư dùng để phòng ngừa hoặc đầu cơ. Ông mời cố vấn làm đồng chủ tịch ủy ban nhưng cố vấn từ chối, muốn giữ ẩn danh. Vì kiến nghị cải cách gửi cho SEC, NASD, NYSE và các bang bị trả lời kiểu "chúng tôi đang làm rồi" hoặc "đang trong bản vẽ", Johnston chọn kêu gọi trực tiếp nhà đầu tư trong buổi hội thảo ở Manhattan có C-SPAN, CNN, CNBC.' },
+      { t: 'list', items: ['Bốn thay đổi nghiêm trọng: chi phí bị giấu và lợi nhuận phóng đại; nợ chồng chất; Phố Wall trao khuyến nghị mua cho nhiều công ty đáng ngờ; và gần như mọi hãng môi giới đều thu phí bảo lãnh/tư vấn hoặc cho vay các công ty họ quảng bá.', 'Theo ông, đây là "vi phạm niềm tin lớn nhất thời hiện đại"; hàng nghìn tỷ USD tiết kiệm và hưu trí bị hủy hoại.', 'Chính trị gia ngại mất tiền tài trợ, Phố Wall vận động hành lang chống luật, nhiều cơ quan quản lý biết xung đột lợi ích hàng chục năm mà ít làm gì, và chưa hãng nào "thú nhận".', 'Người duy nhất họ sợ là nhà đầu tư, vì có thể chuyển tiền chỉ bằng một cú gọi.'] },
+      { t: 'h3', x: 'Sáu hành động' },
+      { t: 'steps', items: ['<b>Bán</b> các cổ phiếu dễ tổn thương nhất, bán có tính toán.', '<b>Đưa tiền về nơi an toàn.</b>', '<b>Chuyển tài khoản</b> khỏi các công ty có hồ sơ xấu sang công ty tốt: vừa tránh rủi ro, vừa gửi thông điệp "dọn dẹp lại hoặc mất khách".', '<b>Bảo vệ tài sản</b> bằng các khoản đầu tư phòng thủ.', '<b>Kiếm lời</b> từ đợt giảm tiếp theo bằng số tiền chấp nhận mất và kỷ luật; khi chạm đáy có tiền mua cổ phiếu tốt giá rẻ.', '<b>Tham gia</b> chiến dịch "Protect Investors and Restore Confidence" (bảo vệ nhà đầu tư, khôi phục niềm tin).'] },
+      { t: 'warn', x: 'Các danh sách hãng "xấu" và "tốt" trong sách dựa trên số liệu 1997–2001 và đánh giá của tác giả; đó không phải kết luận pháp lý và không phản ánh các công ty hiện nay.' }
+    ] },
+    { icon: '📣', title: 'Những yêu cầu cải cách', blocks: [
+      { t: 'list', items: ['Hội đồng chuẩn mực kế toán (FASB) ngừng nhượng bộ ngành công nghiệp.', 'Tách hẳn kiểm toán khỏi tư vấn; tách hẳn ngân hàng đầu tư khỏi nghiên cứu.', 'Công khai chi tiết xung đột lợi ích, các khoản nợ, các hợp đồng phái sinh (cái nào để bảo vệ, cái nào để đầu cơ).', 'Chính phủ chỉ cần đặt luật chơi công bằng và bảo đảm thông tin, rồi để thị trường vận hành.'] },
+      { t: 'p', x: 'Ba hạn chế của cải cách chính thức: <b>sau sự việc</b> (nhà đầu tư đã mất hơn 10 nghìn tỷ USD), <b>chọn việc dễ</b> (thay đổi mang tính hình thức), và <b>ngành kháng cự</b> (luật bị làm nhẹ). Bằng chứng: trong 4 năm đến 2001 có 4.822 hành động pháp lý chống 612 công ty môi giới lớn nhưng số khiếu nại trọng tài vẫn tăng.' },
+      { t: 'h3', x: '"Sự thật trong môi giới": ba loại công bố cần có' },
+      { t: 'table', head: ['Nhóm thông tin', 'Nhà đầu tư thường nhận được gì'], rows: [['Lịch sử pháp lý của môi giới và công ty (tỷ lệ theo số tài khoản, so với trung bình ngành)', 'Rất ít hoặc không có'], ['Cách tạo xếp hạng cổ phiếu, thành tích nhà phân tích, các khoản vay và quan hệ ngân hàng đầu tư', 'Không đủ để ra quyết định'], ['Sức khỏe tài chính của công ty môi giới', 'Công ty tư nhân không công bố; công ty niêm yết không tách riêng; muốn xem phải lên SEC (tối đa 10 công ty mỗi yêu cầu)']] },
+      { t: 'steps', items: ['Thông tin đầy đủ và có so sánh: số vụ trên mỗi tài khoản, tổng giá trị phạt/bồi thường so với tài sản khách giữ, tỷ lệ khiếu nại được giải quyết.', 'Dễ hiểu và đưa ra ngay lúc bán, cập nhật ít nhất mỗi năm.', 'Giáo dục người dùng về rủi ro: cổ phiếu quen thuộc vẫn có thể rơi nhanh khi lộ gian lận, thao túng thu nhập, xếp hạng thổi phồng, phá sản.', 'Bảng câu hỏi chuẩn dùng toàn ngành.', 'Tiếp cận mọi thông tin cơ quan quản lý nắm giữ (tiền thuế của dân).', 'Thực thi và có chế tài; sửa hệ thống trọng tài vì ngay cả khi thắng kiện, <b>chưa đến một phần tư số tiền phán quyết thực sự được trả</b>.'] },
+      { t: 'widget', name: 'cp-arbitration', title: 'Phán quyết trọng tài và tiền thực nhận' }
+    ] }
+  ],
+  summary: ['Quỹ đảo ngược để phòng ngừa thì có thể giữ lâu; để kiếm lời thì cần quy tắc vào/ra.', 'Hãy đòi hỏi sự chính xác của mọi lời dự báo và chấp nhận sai sót tất yếu.', 'Quy trình hai tín hiệu (SMA 20 + MACD): cả hai "có" mua, cả hai "không" bán, lệch thì đứng yên.', 'Sáu hành động của nhà đầu tư: bán, an toàn, chuyển tài khoản, bảo vệ, kiếm lời, ủng hộ cải cách.', 'Cải cách cần minh bạch về lịch sử pháp lý, quy trình xếp hạng, độ an toàn tài chính; trọng tài chỉ trả chưa đến 1/4 phán quyết.'],
+  cards: [['Mua-và-giữ quỹ đảo ngược phù hợp khi nào?', 'Khi dùng để phòng ngừa danh mục'], ['Vì sao không dùng mua-và-giữ để kiếm lời?', 'Không biết khi nào gấu kết thúc; hồi phục mạnh gây lỗ'], ['SMA 20 là gì?', 'Trung bình động giản đơn của giá 20 ngày'], ['MACD (12,26) là gì?', 'Chỉ báo động lượng dựa trên hai đường trung bình'], ['Quy tắc một "có", một "không"?', 'Không làm gì'], ['Innumeracy?', 'Sự mù tịt về số/xác suất (sách của Paulos)'], ['Truth in Brokerage?', 'Công bố trung thực tương tự Truth in Lending'], ['Tỷ lệ phán quyết trọng tài được trả?', 'Chưa đến 1/4'], ['Sáu hành động của Johnston?', 'Bán, an toàn, chuyển TK, bảo vệ, kiếm lời, ủng hộ cải cách']],
+  quiz: [
+    { q: 'Quỹ nằm trên SMA 20 và MACD nằm trên tín hiệu → theo quy trình:', o: ['Mua (nếu có tiền chịu rủi ro)', 'Bán', 'Đứng yên', 'Mua gấp đôi'], a: 0, e: 'Cả hai "có".' },
+    { q: 'Một "có", một "không" khi đang giữ quỹ:', o: ['Bán hết', 'Mua thêm', 'Giữ nguyên', 'Chuyển sang cổ phiếu'], a: 2, e: 'Không làm gì.' },
+    { q: 'Hạn chế của dự báo "thị trường sẽ giảm sau đợt hồi":', o: ['Quá chi tiết', 'Không nêu mức và thời điểm nên khó bị bác bỏ', 'Luôn sai', 'Luôn đúng'], a: 1, e: 'Thiếu độ chính xác.' },
+    { q: 'Số tiền thực sự được trả từ phán quyết trọng tài:', o: ['Trên 90%', 'Khoảng một nửa', 'Chưa đến 1/4', 'Toàn bộ'], a: 2, e: 'Theo sách.' },
+    { q: 'Khoản mất của nhà đầu tư mà ủy ban nhắc đến (lúc đó):', o: ['1 tỷ', '100 tỷ', 'Hơn 10 nghìn tỷ USD', 'Không có'], a: 2, e: '$10 trillion.' }
+  ],
+  match: [['SMA 20', 'Xu hướng gần'], ['MACD', 'Động lượng'], ['Fail-safe', 'Thiết bị cơ học thoát vị thế'], ['FASB', 'Cơ quan chuẩn mực kế toán'], ['Trọng tài', 'Cơ chế giải quyết tranh chấp môi giới']]
+});

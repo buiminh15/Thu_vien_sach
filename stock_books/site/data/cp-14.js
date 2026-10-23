@@ -1,0 +1,74 @@
+window.BOOK_DATA = window.BOOK_DATA || {};
+BOOK_DATA.crashp = BOOK_DATA.crashp || { chapters: [] };
+BOOK_DATA.crashp.chapters.push({
+  n: 14,
+  title: 'Giảm phát!',
+  intro: 'Tamara trình bày với Dulles hai kịch bản xấu nhất, các tiền lệ lịch sử, ví dụ Nhật Bản và cơ chế của giảm phát: giá giảm, lợi nhuận bị bóp nghẹt nhiều hơn chi phí giảm, và phá sản kéo theo bán tháo.',
+  sections: [
+    { icon: '📜', title: 'Vì sao nhìn lại lịch sử', blocks: [
+      { t: 'p', x: 'Dulles nghi ngờ Dow 1.000 là "thảm họa tối đa chứ không hợp lý". Tamara dùng bốn nghiên cứu điển hình đầu thế kỷ 20 và nhấn mạnh ba điểm chung:' },
+      { t: 'table', head: ['Sự kiện', 'Điểm tương tự với thời đó (theo Tamara)'], rows: [
+        ['Hoảng loạn 1901', 'Dùng nợ khổng lồ để mua lại công ty qua sáp nhập (như thời bong bóng 1990)'],
+        ['Sụp đổ 1907 ("hoảng loạn của người giàu")', 'Đầu cơ hàng hóa (đồng, cà phê); nay là đầu cơ chỉ số, tiền tệ, trái phiếu'],
+        ['Sụp đổ 1920–21', 'Tồn kho dư thừa sau chiến tranh; nay là PC, router, vi mạch, linh kiện không dây; thừa công suất và hàng bán phá giá'],
+        ['Sụp đổ 1929', 'Một thập kỷ bùng nổ kỷ lục, nợ khổng lồ, gian lận và phá sản doanh nghiệp']
+      ] },
+      { t: 'key', x: 'Ba điểm chung: (1) chính phủ không thể hoặc không muốn ngăn các cuộc hoảng loạn; (2) sau đó vẫn có phục hồi lành mạnh; (3) khu vực tư nhân (cá nhân giàu, tổ chức nhiều tiền mặt như J.P. Morgan 1907, Du Pont và ngân hàng lớn 1920–21, GM tích lũy tiền mặt sau 1920) đóng vai trò then chốt khi mua tài sản giá rẻ. Hoảng loạn dù nặng nề không phải án tử.' },
+      { t: 'p', x: 'Hai vòng luẩn quẩn của kịch bản A: (1) chứng khoán giảm → người tiêu dùng chi ít hơn → lợi nhuận giảm → chứng khoán giảm thêm; (2) giảm phát ↔ phá sản: doanh nghiệp giảm giá để bán → doanh thu giảm → không trả được nợ → phá sản → bán tháo tài sản → giá giảm thêm.' }
+    ] },
+    { icon: '🇯🇵', title: 'Kịch bản B và bài học Nhật Bản', blocks: [
+      { t: 'p', x: 'Theo Tamara, Nhật là thảm họa kinh tế lớn nhất từ thập niên 1930: nợ khoảng 1,4 lần GDP, ít nhất bốn cuộc suy thoái từ 1990, thất nghiệp cao nhất từ sau thế chiến, chứng khoán giảm gần 78% từ đỉnh, các ngân hàng và công ty bảo hiểm lớn bị chính phủ yếu "treo" bằng sợi chỉ. Nguyên nhân (theo cô): chính phủ chống cải cách thị trường, cố đỡ ngân hàng yếu và chứng khoán — thay vì "xé băng một lần" thì "gỡ từng sợi lông".' },
+      { t: 'tip', x: '"Ít đau hơn nhưng khổ hơn": Nhật không có hàng người xếp bánh mì hay bụi bặm; bề ngoài trông thịnh vượng. Mickey Kantor mô tả: ngân hàng vật lộn, chi tiêu giảm, giảm phát, bế tắc chính trị, cải cách chưa làm — "mọi thứ hoàn hảo". Tamara ví như "thắng ván bài trên tàu Titanic".' },
+      { t: 'warn', x: 'So sánh Mỹ với Nhật là lập luận của nhân vật; chính Dulles phản biện về khác biệt cấu trúc. Thập kỷ sau đó cho thấy cả hai nước phản ứng chính sách rất mạnh nhưng với kết quả khác nhau.' }
+    ] },
+    { icon: '🎚️', title: 'Dow 1.000? Giá trị và tâm lý', blocks: [
+      { t: 'p', x: 'Tamara lập luận: thời kỳ duy nhất trong 100 năm giống bây giờ — thị trường tăng kỷ lục rồi sụp, gian lận doanh nghiệp, phá sản hàng loạt, lãi suất bị Fed giảm liên tục mà vô hiệu — là 1929–32, Dow giảm 89%. Với Dow ~8.000 điều đó đưa về khoảng 1.000–1.500. Cách tính thứ hai: nếu Dow giảm như Nasdaq 2000–2002 thì xuống 2.500–3.000.' },
+      { t: 'list', items: ['Dow lúc đó giao dịch ở P/E 20; trong thị trường gấu lớn có thể xuống 6–7 lần lợi nhuận. Nếu lợi nhuận giữ nguyên thì ngụ ý Dow quanh 2.500.', 'Lợi nhuận không có "đáy chắc chắn": toàn bộ lợi nhuận tích lũy gần bảy năm (4/1994–6/2000) của các công ty Nasdaq — 159,8 tỷ USD — bị xóa sạch bởi khoản lỗ 161 tỷ USD chỉ trong 15 tháng (7/2000–9/2001).', 'Moody\'s: chất lượng tín dụng doanh nghiệp Mỹ giảm 18 quý liên tiếp; quý gần nhất hạ bậc 124 công ty, nâng bậc 35. Nợ doanh nghiệp 4,9 nghìn tỷ USD = 57,1% giá trị ròng.', 'Nợ tư nhân trên GDP: dưới 1 USD (1974) so với gần 2 USD (lúc viết).'] },
+      { t: 'widget', name: 'cp-pe-floor', title: 'P/E co lại và lợi nhuận giảm: chỉ số có thể về đâu?' },
+      { t: 'p', x: 'Tamara nhắc: Dulles hỏi <i>kịch bản xấu nhất hợp lý</i>, không phải dự báo. Bản thân ở đỉnh Nasdaq mọi nhà phân tích cũng nói "không thể giảm 80%"; Phố Wall chỉ gọi đó là bong bóng sau khi nó đã vỡ.' }
+    ] },
+    { icon: '💲', title: 'Giảm phát: lúc giá cùng rơi', blocks: [
+      { t: 'p', x: 'Nửa sau thế kỷ 20, lạm phát có ở khắp nơi. Đầu những năm 2000, lần đầu sau hơn 60 năm, giảm phát xuất hiện ở một số vùng: Brazil (xe VW Passat từ 15.000 xuống dưới 7.000 USD), Nhật (hamburger rẻ một nửa, áo thun cotton rẻ 60%, nhà đất giảm 50–80%), và ở Bắc Mỹ rải rác (tên miền 70 → 7 USD; chip DRAM 128 MB từ 14 xuống 2 USD trong 10 tháng; máy chủ gần mới giá 30%).' },
+      { t: 'key', x: 'Giảm phát là <b>giá giảm</b>, không đồng nghĩa với suy thoái nhưng có thể cùng lúc. Dài hạn nó khôi phục sức mua đồng tiền, người tiết kiệm được lợi; nhưng chính quyền và doanh nghiệp coi đó là thứ đáng sợ nhất vì họ nhiều nợ và nhiều thứ để mất. Tamara cho rằng lạm phát phi mã còn tệ hơn, và trong kịch bản B nó quay lại như "kẻ giết người".' },
+      { t: 'steps', items: ['Doanh số giảm 30%: từ 1.000 xuống 700 máy mỗi tháng.', 'Giá giảm 50%: từ 4.000 xuống 2.000 USD/máy.', 'Doanh thu rơi từ 4 triệu xuống 1,4 triệu USD mỗi tháng.', 'Chi phí linh kiện giảm nhưng marketing và chi phí chung gần như không đổi: lợi nhuận mỗi máy từ +500 USD thành −1.000 USD.'] },
+      { t: 'widget', name: 'cp-deflation', title: 'Giá bán giảm 50%, chi phí giảm 15%: lợi nhuận đổi thế nào?' },
+      { t: 'tip', x: 'Công thức nhớ: với mỗi 1 USD chi phí giảm, doanh nghiệp điển hình có thể mất 2–4 USD lợi nhuận vì giá bán giảm nhiều hơn. Đây là lý do tác giả coi giảm phát "ngắn hạn tiêu cực, dài hạn tích cực". Một từ tóm tắt kịch bản A: <b>GIẢM PHÁT</b>.' },
+      { t: 'p', x: 'Bằng chứng phá sản: tháng 11/2001 nhiều công ty chọn thanh lý bán rẻ hàng tồn, khoản phải thu, bất động sản, thiết bị, danh sách khách hàng... thay vì tái cơ cấu. Bán tháo như thế lan thành giảm phát ở mọi thứ (cả viện phí, học phí, vé tàu điện) nhưng nhanh chóng qua, không để lại "mìn" chôn.' }
+    ] },
+    { icon: '🏦', title: 'Tín dụng cạn dần và tài sản sưu tầm', blocks: [
+      { t: 'p', x: 'Dulles nối tiếp các manh mối: nhiều công ty trái phiếu hạng đầu tư bị hạ xuống "rác" (American Greetings, Lucent, AMR, Delta...), nhiều công ty phát hành trái phiếu rác vỡ nợ (Bethlehem Steel 179 triệu USD, Swiss Air 1,5 tỷ, Chiquita 700 triệu, Metricom 300 triệu trái phiếu lãi 13%). Lãi 13% nghe hấp dẫn, nhưng "không được trả" thì chẳng có ích gì.' },
+      { t: 'list', items: ['Vốn mạo hiểm: đầu tư mới của quỹ VC giảm 62% năm 2001 và thêm 92% năm 2002; Safeguard Scientifics rơi từ 99 USD xuống 1,03 USD.', 'Ngân hàng siết tín dụng: Wachovia siết cho vay hàng không, khách sạn...; Bank of America đóng cửa một cửa tín dụng cho nhà thầu thương mại.', 'Công ty nghiện tín dụng mà bị cắt đột ngột sẽ sập nhanh nhất ("cold turkey"). Lúc đó chủ yếu doanh nghiệp vừa và nhỏ chịu, còn blue-chip vẫn vay được.'] },
+      { t: 'p', x: 'Tác động lan sang <b>nghệ thuật, đồ cổ, sưu tầm</b>: những năm 1930 gia đình giàu bán đấu giá với giá cực thấp; sau sụp đổ 1987 giá giảm 30–50% (dù không kéo dài). Giảm phát giống quả cầu tuyết: giá giảm vì người bán, người bán thêm vì giá giảm.' }
+    ] },
+    { icon: '🧾', title: 'Linda và trái phiếu doanh nghiệp', blocks: [
+      { t: 'p', x: 'Lãi tín phiếu kho bạc quá thấp, Linda muốn mua trái phiếu doanh nghiệp BBB và bán khi bị hạ dưới BBB. Cố vấn nhắc giảm phát làm tiền mặt tăng giá trị thực, rồi chỉ ra hai cạm bẫy: phá sản lan rộng và <b>xếp hạng tín nhiệm đến muộn</b>.' },
+      { t: 'key', x: 'Ví dụ Enron: trái phiếu đã giao dịch ở mức "rác" mà các hãng xếp hạng vẫn giữ hạng đầu tư. Rồi trong 24 giờ, Moody\'s hạ 5 bậc, S&P 6 bậc, Fitch 10 bậc; trái phiếu rơi từ trên 100 xuống 22 xu (mất 78%) chỉ trong 4 tháng. Chờ cảnh báo hạng thì "quá ít, quá muộn".' },
+      { t: 'steps', items: ['<b>Cấp bách nhất:</b> bán mọi trái phiếu rác (BB trở xuống).', '<b>Cấp bách:</b> bán trái phiếu doanh nghiệp dưới hạng A, kể cả BBB (chỉ cách rác một bậc).', '<b>Ít cấp bách:</b> bán trái phiếu doanh nghiệp còn từ 5 năm trở lên (kỳ hạn dài dễ bị giá giảm khi lãi suất tăng hay bên nắm giữ lớn bán tháo).', 'Chọn chất lượng cao nhất (Kho bạc Mỹ) và kỳ hạn ngắn.'] },
+      { t: 'widget', name: 'cp-bond-ladder', title: 'Xếp hạng trái phiếu và kỳ hạn: chỗ nào rủi ro nhất?' },
+      { t: 'h3', x: 'Quản lý 401(k) khi thị trường đi xuống' },
+      { t: 'list', items: ['Đừng rút tiền ra khỏi "chiếc ô" 401(k) (mất ưu đãi thuế); nếu muốn, đổi nhà quản lý chứ không phá kế hoạch.', 'Trong 401(k), ưu tiên an toàn hơn hiệu suất: quỹ thị trường tiền tệ chỉ đầu tư chứng khoán chính phủ ngắn hạn (an toàn nhất) → quỹ tiền tệ bất kỳ → quỹ trái phiếu chất lượng cao ngắn hạn → quỹ thu nhập hỗn hợp (chỉ là lựa chọn cuối).', 'Nếu kế hoạch không có lựa chọn an toàn, hãy kiến nghị phía quản lý, nêu nghĩa vụ ủy thác và quy định ERISA 404(c) về ít nhất ba lựa chọn đa dạng.', 'Quỹ tương hỗ: cổ phiếu thì làm như cổ phiếu, trái phiếu thì làm như trái phiếu.'] },
+      { t: 'warn', x: 'Đây là lời khuyên theo bối cảnh 2002 (thị trường gấu, nhiều vỡ nợ). Không thể áp dụng máy móc cho mọi giai đoạn; thị trường sau đó cho thấy trái phiếu rác và cổ phiếu phục hồi mạnh.' }
+    ] },
+    { icon: '🎟️', title: 'Quyền chọn bán (put option) cho người mới', blocks: [
+      { t: 'p', x: 'Linda mua vài quyền chọn bán rẻ mạt trên CNBC rồi mất sạch ~2.000 USD khi thị trường đi ngang. Cố vấn dạy lại qua ví dụ đời thường: <b>thuê nhà có quyền mua</b> (call: quyền mua) và <b>chốt giá bán nhà</b> (put: quyền bán, trả phí 2.000 USD để đảm bảo giá bán tối thiểu 190.000 USD).' },
+      { t: 'table', head: ['Thuật ngữ', 'Nghĩa'], rows: [['Strike price (giá thực hiện)', 'Giá mà bạn có quyền mua/bán'], ['Expiration (ngày đáo hạn)', 'Hết hạn thì quyền chọn vô giá trị'], ['In the money / At the money', 'Đã có lợi / giá thị trường bằng giá thực hiện'], ['Intrinsic value', 'Phần có lợi thực tế nếu thực hiện ngay'], ['Time value', 'Giá trị của thời gian còn lại'], ['Volatility value', 'Giá trị thêm khi thị trường biến động mạnh']] },
+      { t: 'p', x: 'Ba quy tắc nền: giá thực hiện càng gần giá cổ phiếu thì quyền chọn càng đáng giá; thời gian càng dài càng đáng giá; lợi nhuận có thể lớn nhưng <b>rủi ro bị giới hạn</b> ở số tiền đã bỏ ra.' },
+      { t: 'steps', items: ['Hợp đồng ví dụ: 100 cổ phiếu ABC, đáo hạn 3 tháng, giá thực hiện 90; giá 4,75 USD/cp → mua hết 475 USD (xấp xỉ 500 USD cả phí).', '<b>Oops:</b> giá lên 130 → quyền chọn vô giá trị, mất 100% vốn.', '<b>Đi ngang / sai thời điểm:</b> đúng hướng nhưng quá muộn, hết hạn trước → vẫn mất hết (thời gian bào mòn như đồng hồ cát).', '<b>Hòa vốn:</b> giá về 85 (90 − 5 chi phí) → thu về 500 USD.', '<b>Gấp đôi:</b> giá về 80 → quyền chọn đáng 1.000 USD.', '<b>Home run:</b> giá về 65 → giá trị nội tại 2.500 USD + giá trị thời gian ~1.000 USD ≈ 3.500 USD (lãi ~3.000 USD, 6 lần).', '<b>Grand slam:</b> mua khi thị trường "chết" với giá 200 USD; sau tin xấu và biến động mạnh, giá trị nội tại 2.500 + thời gian + biến động → 4.000 USD (gấp 20 lần).'] },
+      { t: 'widget', name: 'cp-put-payoff', title: 'Lãi/lỗ khi mua quyền chọn bán ABC: kéo giá lúc đáo hạn' },
+      { t: 'tip', x: 'Cố vấn dùng hình ảnh "súng cao su": không bao giờ nổ ngược vào bạn nhưng cho đòn bẩy lớn; trượt vài viên thì thử thêm. Ba kỹ năng: chọn đá (quyền chọn thường, giá vừa phải), kỷ luật (kiểm soát lòng tham) và <b>thời điểm</b> (khó nhất).' },
+      { t: 'h3', x: '15 quy tắc (rút gọn) khi dùng put option' },
+      { t: 'list', items: ['Chỉ dùng số tiền chấp nhận mất: giữ ít nhất 95% ở nơi an toàn, quyền chọn không quá 5%.', 'Trải đều theo thời gian (ví dụ 10.000 USD chia mỗi quý 2.500).', 'Tránh quyền chọn rẻ dưới ~50 USD/hợp đồng (xác suất thấp, phí lấn át) và đắt trên ~500 USD.', 'Chấp nhận nhiều khoản lỗ nhỏ, vài khoản thắng lớn; cố bán trước hai tuần cuối.', 'Mua put khi thị trường đang hồi, bán khi còn đang giảm ngắn hạn.', 'Mua số hợp đồng chẵn; luôn đặt giá giới hạn (không mua/bán "at the market"); đừng đuổi theo giá.', 'Đừng thêm vào vị thế đang thắng; đừng vội cắt vị thế đang thua; thường không dùng lệnh dừng lỗ.', 'Mẹo: mua ít nhất 2 hợp đồng, khi giá gấp đôi thì bán một nửa để thu hồi vốn rồi để phần còn lại chạy.'] },
+      { t: 'warn', x: 'Không bán khống (viết) quyền chọn vì rủi ro không giới hạn. Quyền chọn là tài sản hao mòn theo thời gian. Cố vấn nhắc: bạn có thể hưởng lợi từ sụp đổ chỉ bằng cách giữ tín phiếu kho bạc; quyền chọn là tùy chọn, không phải bắt buộc. Quyền chọn có rủi ro cao và phù hợp rất ít người.' }
+    ] }
+  ],
+  summary: ['Lịch sử đầu thế kỷ 20 cho thấy hoảng loạn nặng nề vẫn đi kèm phục hồi nhờ khu vực tư nhân.', 'Hai vòng luẩn quẩn: chứng khoán–chi tiêu, và giảm phát–phá sản.', 'Nhật Bản: nhà nước đỡ ngân hàng/thị trường kéo dài suy thoái nhiều năm.', 'Không có đáy chắc chắn cho lợi nhuận hay chỉ số; P/E có thể co lại.', 'Giảm phát làm giá bán giảm nhiều hơn chi phí nên bóp nghẹt lợi nhuận.'],
+  cards: [['Hai vòng luẩn quẩn của kịch bản A?', 'Chứng khoán↔chi tiêu; giảm phát↔phá sản'], ['Giảm phát là gì?', 'Giá nói chung giảm'], ['Giảm phát và suy thoái có phải một?', 'Không, có thể xảy ra cùng lúc'], ['Mức giảm Dow 1929–32?', '89%'], ['Vì sao giảm phát bóp lợi nhuận?', 'Giá bán giảm nhiều hơn chi phí; chi phí chung ít đổi'], ['Ví dụ máy chủ?', 'Từ lãi 500 USD/máy thành lỗ 1.000 USD/máy'], ['Nasdaq mất bao nhiêu lợi nhuận tích lũy?', '159,8 tỷ USD bị xóa bằng khoản lỗ 161 tỷ USD trong 15 tháng'], ['Nợ doanh nghiệp so với vốn chủ lúc đó?', '57,1% (4,9 nghìn tỷ USD)'], ['Nhật Bản điển hình cho kịch bản?', 'B: dài và chập chờn']],
+  quiz: [
+    { q: 'Máy chủ bán 4.000 USD, chi phí 3.500; sau giảm phát bán 2.000, chi phí 3.000. Lợi nhuận mỗi máy:', o: ['+500', '0', '−1.000', '−3.000'], a: 2, e: '2.000 − 3.000.' },
+    { q: 'Doanh thu từ 1.000 máy × 4.000 USD xuống 700 máy × 2.000 USD:', o: ['1,4 triệu', '2,8 triệu', '4 triệu', '0,7 triệu'], a: 0, e: '700 × 2.000.' },
+    { q: 'Nhà đầu tư tư nhân thường đóng vai trò gì sau các cuộc hoảng loạn?', o: ['Chạy trốn mãi mãi', 'Mua tài sản giá rẻ và làm hồi phục kinh tế', 'Không tham gia', 'Chỉ bán'], a: 1, e: 'J.P. Morgan 1907...' },
+    { q: 'P/E co từ 20 xuống 7 trong khi lợi nhuận giữ nguyên, chỉ số còn khoảng:', o: ['100%', '65%', '35%', '10%'], a: 2, e: '7/20 = 35%.' },
+    { q: 'Điểm sai về giảm phát là:', o: ['Giá giảm', 'Chắc chắn mang lại lợi ích mọi người', 'Có thể tốt cho người tiết kiệm dài hạn', 'Có thể gây phá sản'], a: 1, e: 'Mang lại cả lợi lẫn hại.' }
+  ],
+  match: [['Giảm phát', 'Giá giảm chung'], ['Kịch bản B', 'Dài và chập chờn'], ['Nhật Bản', 'Đỡ ngân hàng kéo dài'], ['P/E co lại', 'Chỉ số giảm dù lợi nhuận đứng yên'], ['Bán tháo', 'Khiến giá giảm thêm']]
+});
