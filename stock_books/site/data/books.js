@@ -1344,8 +1344,105 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "dlanh",
+  "title": "Dạy nghề sửa chữa tủ lạnh và máy điều hòa dân dụng",
+  "subtitle": "Kiến thức cơ sở – cấu tạo – điện tự động – lắp đặt – gia công – sửa chữa",
+  "author": "Nguyễn Đức Lợi – NXB Giáo dục, 2007",
+  "cat": "Kỹ thuật",
+  "tags": [
+    "Tủ lạnh",
+    "Điều hòa",
+    "Chu trình lạnh",
+    "Mạch điện",
+    "Ga lạnh",
+    "Sửa chữa"
+  ],
+  "level": "Cơ bản → Trung cấp",
+  "emoji": "❄️",
+  "color": "#2563eb",
+  "desc": "15 chương theo giáo trình dạy nghề: nhiệt lạnh cơ sở, ga lạnh và đồ thị Mollier, cấu tạo và mạch điện tủ lạnh, máy điều hòa 1–2 chiều, kỹ thuật ống, thao tác nạp ga – thử kín và sửa chữa. Có chu trình lạnh hoạt hình, sơ đồ điện tương tác và máy tính nhanh.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Nhập môn kỹ thuật lạnh",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Những kiến thức nhiệt lạnh cơ sở",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Ga lạnh (môi chất lạnh)",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Cấu tạo của tủ lạnh",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Động cơ, thiết bị điện và tự động của tủ lạnh",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Đặc tính vận hành của tủ lạnh",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Sử dụng và bảo quản tủ lạnh",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Hư hỏng và sửa chữa tủ lạnh",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Cấu tạo máy điều hòa phòng",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Động cơ, thiết bị điện và tự động của máy điều hòa",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Đặc tính vận hành, tính toán, lựa chọn máy",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Lắp đặt, sử dụng, bảo dưỡng và sửa chữa máy điều hòa",
+      "ready": true
+    },
+    {
+      "n": 13,
+      "title": "Đường ống và kỹ thuật gia công đường ống",
+      "ready": true
+    },
+    {
+      "n": 14,
+      "title": "Các thao tác cơ bản của thợ lạnh",
+      "ready": true
+    },
+    {
+      "n": 15,
+      "title": "Một số công việc sửa chữa",
+      "ready": true
+    }
+  ]
 }
 ];
+
 
 
 

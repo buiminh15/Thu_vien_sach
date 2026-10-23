@@ -1852,3 +1852,826 @@ WIDGETS['rf-pressure-conv'] = host => {
   const draw = () => { const b = +host.querySelector('#b').value || 0; o.innerHTML = `${b} bar ≈ <b>${(b * 14.5).toFixed(1)} PSI</b> ≈ <b>${(b * 1.0197).toFixed(2)} kg/cm²</b>` + (b < 0 ? ` ≈ <b>${(-b * 29.53).toFixed(1)} inch Hg chân không</b>` : '') + (b >= 1.3 && b <= 1.7 ? '<br>≈ vùng “áp thấp bình thường” 1,5 bar trong bảng của sổ tay.' : ''); };
   host.querySelector('#b').oninput = draw; draw();
 };
+
+// ===== Dạy nghề sửa chữa tủ lạnh & điều hòa dân dụng (dl-*) =====
+// ---- trợ giúp chung ----
+function dlSvg(host, vb, label) {
+  const s = document.createElementNS(RF_NS, 'svg');
+  s.setAttribute('viewBox', '0 0 ' + vb[0] + ' ' + vb[1]);
+  s.setAttribute('role', 'img'); s.setAttribute('aria-label', label || 'Sơ đồ');
+  s.style.cssText = 'width:100%;max-width:' + (vb[0] + 40) + 'px;height:auto;display:block';
+  host.appendChild(s); return s;
+}
+function dlTxt(p, x, y, t, o) { o = o || {}; return rfEl('text', { x, y, 'text-anchor': o.a || 'middle', fill: o.c || 'currentColor', 'font-size': o.s || 11, 'font-weight': o.w || 400 }, p, t); }
+function dlBox(p, x, y, w, h, fill, label, o) {
+  o = o || {};
+  const g = rfEl('g', {}, p);
+  rfEl('rect', { x, y, width: w, height: h, rx: o.r === undefined ? 6 : o.r, fill: fill || 'none', stroke: o.stroke || 'none', 'stroke-width': o.sw || 1.5, opacity: o.op || 1, 'stroke-dasharray': o.dash || '' }, g);
+  if (label) dlTxt(g, x + w / 2, y + h / 2 + 4, label, { c: o.tc || '#fff', s: o.s || 11, w: o.w });
+  return g;
+}
+function dlLn(p, pts, c, w, o) { o = o || {}; return rfEl('path', { d: 'M' + pts.map(q => q.join(' ')).join(' L'), fill: 'none', stroke: c || 'currentColor', 'stroke-width': w || 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', 'stroke-dasharray': o.dash || '', opacity: o.op || 1 }, p); }
+// bảng thông tin "bấm bộ phận để xem"
+function dlHot(host, o) {
+  host.innerHTML = '<div class="info" id="hi" style="min-height:64px">' + (o.intro || 'Bấm vào một bộ phận để xem nhiệm vụ.') + '</div>';
+  const svg = dlSvg(host, o.vb, o.label); host.insertBefore(svg, host.firstChild);
+  const hi = host.querySelector('#hi'); const els = {};
+  if (o.bg) o.bg(svg);
+  o.parts.forEach(pt => {
+    const g = rfEl('g', { style: 'cursor:pointer', tabindex: 0, role: 'button', 'aria-label': pt.n }, svg);
+    if (pt.draw) pt.draw(g); else { rfEl('rect', { x: pt.x, y: pt.y, width: pt.w, height: pt.h, rx: pt.r === undefined ? 8 : pt.r, fill: pt.c || '#64748b', opacity: .92 }, g); dlTxt(g, pt.x + pt.w / 2, pt.y + pt.h / 2 + 4, pt.n, { c: '#fff', s: pt.s || 11, w: 600 }); }
+    const hl = rfEl('rect', { x: pt.x - 3, y: pt.y - 3, width: pt.w + 6, height: pt.h + 6, rx: 10, fill: 'none', stroke: '#facc15', 'stroke-width': 3, style: 'display:none', 'pointer-events': 'none' }, g);
+    const act = () => { Object.keys(els).forEach(k => els[k].style.display = 'none'); hl.style.display = ''; els[pt.n] = hl; hi.innerHTML = '<b>' + pt.n + '</b><br>' + pt.t; if (o.onPick) o.onPick(pt); };
+    g.onclick = act; g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } };
+    els[pt.n] = hl;
+  });
+  return { svg, info: hi };
+}
+// máy tính: fields [{id,label,v,min,max,step,opts:[[val,text]]}]
+function dlCalc(host, fields, fn) {
+  host.innerHTML = '<div class="row">' + fields.map(f => f.opts
+    ? '<label>' + f.label + ' <select id="' + f.id + '">' + f.opts.map(o => '<option value="' + o[0] + '"' + (String(o[0]) === String(f.v) ? ' selected' : '') + '>' + o[1] + '</option>').join('') + '</select></label>'
+    : '<label>' + f.label + ' <input id="' + f.id + '" type="number" value="' + f.v + '"' + (f.min !== undefined ? ' min="' + f.min + '"' : '') + (f.max !== undefined ? ' max="' + f.max + '"' : '') + ' step="' + (f.step || 'any') + '" style="width:90px"></label>').join('') + '</div><div class="calc" id="o"></div>';
+  const o = host.querySelector('#o');
+  const draw = () => { const v = {}; fields.forEach(f => { const e = host.querySelector('#' + f.id); v[f.id] = f.opts ? e.value : (parseFloat(e.value) || 0); }); o.innerHTML = fn(v); };
+  host.querySelectorAll('input,select').forEach(i => { i.oninput = draw; i.onchange = draw; }); draw();
+}
+// chọn triệu chứng -> nguyên nhân / cách xử lý
+function dlDiag(host, items, ttl) {
+  host.innerHTML = '<div class="row"><label>' + (ttl || 'Triệu chứng') + ' <select id="s">' + items.map((x, i) => '<option value="' + i + '">' + x[0] + '</option>').join('') + '</select></label></div><div class="calc" id="o"></div>';
+  const draw = () => { const it = items[+host.querySelector('#s').value]; host.querySelector('#o').innerHTML = '<b>Nguyên nhân thường gặp:</b><ul style="margin:4px 0 8px 18px">' + it[1].map(c => '<li>' + c + '</li>').join('') + '</ul><b>Cách kiểm tra / sửa:</b> ' + it[2]; };
+  host.querySelector('#s').onchange = draw; draw();
+}
+// danh sách bước có đánh dấu tick
+function dlCheck(host, steps, doneMsg) {
+  host.innerHTML = '<div class="calc" id="l"></div><div class="info" id="m" style="margin-top:8px"></div>';
+  const l = host.querySelector('#l'), m = host.querySelector('#m');
+  l.innerHTML = steps.map((s, i) => '<label style="display:block;margin:4px 0"><input type="checkbox" data-i="' + i + '"> <b>' + (i + 1) + '.</b> ' + s[0] + '</label>').join('');
+  const draw = () => { const cs = [...l.querySelectorAll('input')]; const n = cs.filter(c => c.checked).length; const first = cs.findIndex(c => !c.checked); m.innerHTML = n === cs.length ? (doneMsg || '✅ Hoàn tất!') : ('Đã xong ' + n + '/' + cs.length + '. <b>Việc kế tiếp:</b> ' + steps[first][0] + '<br><i>Lưu ý:</i> ' + (steps[first][1] || '')); };
+  l.onchange = draw; draw();
+}
+function dlSatP(g, t) { // áp suất bão hòa tuyệt đối (bar) – xấp xỉ theo bảng 3.2
+  const k = { R12: [1.510, 2445], R22: [2.455, 2410], R134a: [1.327, 2684], R410A: [4.007, 2376], NH3: [1.901, 2769] }[g];
+  return k[0] * Math.exp(k[1] * (1 / 253.15 - 1 / (t + 273.15)));
+}
+
+// ================= Chương 1 =================
+WIDGETS['dl-boil'] = host => {
+  dlCalc(host, [{ id: 'p', label: 'Áp suất tuyệt đối (bar)', v: 1.013, min: 0.01, max: 20, step: 0.01 }], v => {
+    const p = Math.max(v.p, 0.006), mm = p * 750.06;
+    const tw = 1730.63 / (8.07131 - Math.log10(mm)) - 233.426; // Antoine, nước 1–100 °C (ngoại suy gần đúng)
+    const twc = p > 1.9 ? 1730.63 / (8.14019 - Math.log10(mm)) - 233.426 : tw; // vùng ~100–200 °C hệ số khác
+    const t12 = 1 / (1 / 253.15 - Math.log(p / 1.510) / 2445) - 273.15;
+    return 'Nước sôi ở ≈ <b>' + (p > 1.9 ? twc : tw).toFixed(0) + ' °C</b> &nbsp;|&nbsp; R12 sôi ở ≈ <b>' + t12.toFixed(0) + ' °C</b> (theo bảng: 1,013 bar → −29,8 °C; 3,1 bar → 0 °C; 12,2 bar → 50 °C).<br>' +
+      (p < 0.9 ? 'Áp suất thấp hơn khí quyển → môi chất sôi ở nhiệt độ thấp hơn: đó là nguyên lý làm lạnh ở dàn bay hơi.' : p > 5 ? 'Áp suất cao → phải làm mát ít cũng ngưng tụ: đó là nguyên lý dàn ngưng.' : 'Điểm sôi tăng khi áp suất tăng, giảm khi áp suất giảm.');
+  });
+};
+WIDGETS['dl-cycle1'] = host => {
+  const P = [
+    { n: 'Máy nén', x: 40, y: 175, w: 100, h: 50, c: '#64748b', t: 'Hút <b>hơi áp thấp, lạnh</b> từ dàn bay hơi, nén lên <b>áp cao, nóng</b> rồi đẩy ra dàn ngưng. Là "trái tim" của hệ thống.' },
+    { n: 'Dàn ngưng', x: 230, y: 30, w: 190, h: 44, c: '#f97316', t: 'Hơi áp cao nóng <b>tỏa nhiệt</b> ra không khí và <b>ngưng tụ thành lỏng</b> áp cao.' },
+    { n: 'Ống mao / van tiết lưu', x: 520, y: 100, w: 120, h: 44, c: '#a855f7', t: 'Giảm áp đột ngột cho lỏng: áp suất và nhiệt độ hạ xuống, một phần lỏng hóa hơi; duy trì chênh áp giữa hai dàn.' },
+    { n: 'Dàn bay hơi', x: 230, y: 300, w: 190, h: 44, c: '#0ea5e9', t: 'Lỏng áp thấp <b>sôi</b>, thu nhiệt của buồng lạnh (làm lạnh); ra khỏi dàn là hơi áp thấp.' }
+  ];
+  dlHot(host, {
+    vb: [680, 380], label: 'Vòng tuần hoàn kín của ga lạnh', intro: 'Bấm một trong 4 thiết bị chính. Mũi tên/chấm cho biết chiều ga đi.', parts: P,
+    bg: svg => {
+      dlLn(svg, [[140, 200], [190, 200], [190, 52], [230, 52]], '#ef4444', 4);
+      dlLn(svg, [[420, 52], [580, 52], [580, 100]], '#f97316', 4);
+      dlLn(svg, [[580, 144], [580, 322], [420, 322]], '#38bdf8', 4);
+      dlLn(svg, [[230, 322], [90, 322], [90, 225]], '#0ea5e9', 4);
+      dlTxt(svg, 160, 118, 'đẩy: hơi cao áp', { c: '#ef4444', a: 'end' }); dlTxt(svg, 600, 80, 'lỏng cao áp', { c: '#f97316', a: 'start' }); dlTxt(svg, 600, 240, 'hỗn hợp lỏng–hơi thấp áp', { c: '#38bdf8', a: 'start' }); dlTxt(svg, 160, 340, 'hút: hơi thấp áp', { c: '#0ea5e9', a: 'end' });
+      dlTxt(svg, 325, 360, 'Buồng lạnh (thu nhiệt Q₀)', { s: 12 }); dlTxt(svg, 325, 18, 'Môi trường (thải nhiệt Q_k = Q₀ + N)', { s: 12 });
+    }
+  });
+};
+
+// ================= Chương 2 =================
+WIDGETS['dl-press'] = host => dlCalc(host, [
+  { id: 'v', label: 'Giá trị', v: 1, step: 'any' },
+  { id: 'u', label: 'Đơn vị', v: 'bar', opts: [['bar', 'bar'], ['at', 'at (kG/cm²)'], ['atm', 'atm'], ['mmHg', 'mmHg'], ['psi', 'psi'], ['kPa', 'kPa'], ['MPa', 'MPa']] },
+  { id: 'k', label: 'Là', v: 'abs', opts: [['abs', 'áp suất tuyệt đối'], ['gauge', 'áp suất dư (áp kế)'], ['vac', 'chân không (chân không kế)']] }
+], v => {
+  const f = { bar: 1, at: 0.980665, atm: 1.01325, mmHg: 0.00133322, psi: 0.0689476, kPa: 0.01, MPa: 10 }[v.u];
+  let bar = v.v * f; const pk = 1.01325;
+  const pa = v.k === 'abs' ? bar : v.k === 'gauge' ? bar + pk : pk - bar;
+  const row = Object.entries({ 'bar': 1, 'at': 0.980665, 'atm': 1.01325, 'mmHg': 0.00133322, 'psi': 0.0689476, 'kPa': 0.01, 'MPa': 10 }).map(([n, c]) => n + ' = <b>' + (pa / c).toFixed(n === 'mmHg' ? 0 : 3) + '</b>').join(' · ');
+  return 'Áp suất tuyệt đối: ' + row + (pa < 0 ? '<br>⛔ Âm: giá trị không hợp lệ (chân không không thể vượt khí quyển).' : '') + '<br><i>p = p<sub>k</sub> + p<sub>d</sub> (trên khí quyển); p = p<sub>k</sub> − p<sub>ck</sub> (dưới khí quyển), p<sub>k</sub> = 1,013 bar.</i>';
+});
+WIDGETS['dl-heat'] = host => {
+  dlCalc(host, [{ id: 'm', label: 'Khối lượng (kg)', v: 1, min: 0.1, step: 0.1 }, { id: 't1', label: 'Nhiệt độ đầu (°C)', v: -50, step: 1 }, { id: 't2', label: 'Nhiệt độ cuối (°C)', v: 150, step: 1 }], v => {
+    const cd = 2.12, cn = 4.186, ch = 1.86, rt = 333, rh = 2256, m = v.m; let t = v.t1, tot = 0; const parts = [];
+    const add = (name, q) => { if (q > 0) { parts.push([name, q]); tot += q; } };
+    if (v.t2 < v.t1) return 'Nhiệt độ cuối phải ≥ nhiệt độ đầu.';
+    if (t < 0) { const e = Math.min(v.t2, 0); add('Nhiệt hiện đá ' + t + '→' + e + ' °C', m * cd * (e - t)); t = e; }
+    if (v.t1 <= 0 && v.t2 > 0) { add('Nhiệt ẩn tan đá (0 °C)', m * rt); t = 0; }
+    if (v.t2 > 0 && t < 100) { const s = Math.max(t, 0), e = Math.min(v.t2, 100); add('Nhiệt hiện nước ' + s + '→' + e + ' °C', m * cn * (e - s)); t = e; }
+    if (v.t2 > 100 && v.t1 <= 100) { add('Nhiệt ẩn hóa hơi (100 °C)', m * rh); t = 100; }
+    if (v.t2 > 100) { const s = Math.max(t, 100); add('Nhiệt hiện hơi ' + s + '→' + v.t2 + ' °C', m * ch * (v.t2 - s)); }
+    const bar = parts.map(p => '<div style="display:flex;align-items:center;gap:8px;margin:2px 0"><span style="flex:0 0 250px">' + p[0] + '</span><span style="height:10px;border-radius:5px;background:' + (p[0].indexOf('ẩn') >= 0 ? '#ef4444' : '#38bdf8') + ';width:' + Math.max(2, p[1] / tot * 100) + '%"></span><b>' + p[1].toFixed(0) + ' kJ</b></div>').join('');
+    return bar + '<b>Tổng: ' + tot.toFixed(0) + ' kJ</b> (với 1 kg, −50 → 150 °C: 3206 kJ). Đỏ = nhiệt ẩn, xanh = nhiệt hiện.';
+  });
+};
+WIDGETS['dl-capacity'] = host => dlCalc(host, [
+  { id: 'q', label: 'Năng suất lạnh', v: 12000, step: 'any' },
+  { id: 'u', label: 'Đơn vị', v: 'btu', opts: [['btu', 'Btu/h'], ['kw', 'kW'], ['kcal', 'kcal/h'], ['tr', 'tấn lạnh (TR)'], ['w', 'W']] },
+  { id: 'l', label: 'Lưu lượng nước (l/s)', v: 26, step: 'any' }, { id: 'd', label: 'Δt nước (K)', v: 5, step: 'any' }
+], v => {
+  const kw = v.q * { btu: 0.00029307, kw: 1, kcal: 0.0011628, tr: 3.516, w: 0.001 }[v.u];
+  return '= <b>' + kw.toFixed(2) + ' kW</b> = ' + (kw / 0.00029307).toFixed(0) + ' Btu/h = ' + (kw / 0.0011628).toFixed(0) + ' kcal/h = ' + (kw / 3.516).toFixed(2) + ' TR ≈ ' + (kw / 2.64).toFixed(1) + ' HP lạnh<br>Q₀ = m·C·Δt = ' + v.l + ' × 4,186 × ' + v.d + ' = <b>' + (v.l * 4.186 * v.d).toFixed(1) + ' kW</b>';
+});
+
+// ================= Chương 3 =================
+WIDGETS['dl-sat'] = host => {
+  const gs = ['R12', 'R22', 'R134a', 'R410A', 'NH3'];
+  dlCalc(host, [{ id: 'g', label: 'Ga', v: 'R22', opts: gs.map(g => [g, g]) }, { id: 't', label: 't (°C)', v: 30, step: 1 }, { id: 'p', label: 'Áp kế (bar dư) – để nhận biết ga', v: 10.9, step: 0.1 }], v => {
+    const pa = dlSatP(v.g, v.t), pab = v.p + 1.013;
+    const m = gs.map(g => [g, Math.abs(dlSatP(g, v.t) - pab) / pab]).sort((a, b) => a[1] - b[1]);
+    return v.g + ' ở ' + v.t + ' °C: p bão hòa ≈ <b>' + pa.toFixed(2) + ' bar tuyệt đối</b> (áp kế ≈ ' + (pa - 1.013).toFixed(2) + ' bar).<br>Nhận biết ga: áp kế ' + v.p + ' bar → p tuyệt đối ' + pab.toFixed(2) + ' bar ở ' + v.t + ' °C ⇒ giống nhất <b>' + m[0][0] + '</b> (lệch ' + (m[0][1] * 100).toFixed(0) + '%)' + (m[0][1] > 0.12 ? ' — khá lệch: có thể có khí lạ hoặc bình chưa đủ cả lỏng và hơi.' : '.') + '<br><i>Chỉ đúng khi trong bình có đủ lỏng + hơi. Giá trị xấp xỉ theo bảng 3.2.</i>';
+  });
+};
+WIDGETS['dl-mollier'] = host => {
+  host.innerHTML = '<div class="row"><label>t bay hơi <input id="te" type="range" min="-40" max="10" value="-10"> <b id="tev"></b></label><label>t ngưng <input id="tk" type="range" min="25" max="65" value="40"> <b id="tkv"></b></label><label>quá lạnh <input id="sc" type="range" min="0" max="15" value="3"> <b id="scv"></b></label></div><svg viewBox="0 0 640 380" id="sv" style="width:100%;max-width:680px;height:auto;display:block"></svg><div class="calc" id="o"></div>';
+  const svg = host.querySelector('#sv'), o = host.querySelector('#o');
+  const P = t => dlSatP('R22', t), hf = t => 200 + 1.17 * t + 0.0027 * t * t, hg = t => 405.4 + 0.28 * t - 0.0013 * t * t;
+  const X = h => 60 + (h - 150) / (500 - 150) * 540, Y = p => 330 - (Math.log(p) - Math.log(0.5)) / (Math.log(40) - Math.log(0.5)) * 290;
+  rfEl('rect', { x: 60, y: 40, width: 540, height: 290, fill: 'none', stroke: 'currentColor', opacity: .3 }, svg);
+  [0.5, 1, 2, 5, 10, 20, 40].forEach(p => { rfEl('line', { x1: 60, x2: 600, y1: Y(p), y2: Y(p), stroke: 'currentColor', opacity: .12 }, svg); dlTxt(svg, 54, Y(p) + 4, p, { a: 'end', s: 10 }); });
+  [150, 200, 250, 300, 350, 400, 450, 500].forEach(h => dlTxt(svg, X(h), 346, h, { s: 10 }));
+  dlTxt(svg, 330, 366, 'h, kJ/kg (R22 – hình minh họa gần đúng)', { s: 11 }); dlTxt(svg, 14, 185, 'p, bar', { s: 11 });
+  let dome = []; for (let t = -50; t <= 90; t += 5) dome.push([X(hf(t)), Y(P(t))]); for (let t = 90; t >= -50; t -= 5) dome.push([X(hg(t)), Y(P(t))]);
+  rfEl('path', { d: 'M' + dome.map(q => q.join(' ')).join(' L') + 'Z', fill: '#38bdf8', 'fill-opacity': .12, stroke: '#0ea5e9', 'stroke-width': 1.5 }, svg);
+  dlTxt(svg, 250, 300, 'vùng hơi ẩm', { c: '#0ea5e9' }); dlTxt(svg, 100, 120, 'lỏng quá lạnh', { s: 10 }); dlTxt(svg, 540, 100, 'hơi quá nhiệt', { s: 10 });
+  const cyc = rfEl('path', { fill: 'rgba(239,68,68,.10)', stroke: '#ef4444', 'stroke-width': 2.5, 'stroke-linejoin': 'round' }, svg);
+  const lab = []; ['1', '2', '3', '4'].forEach(n => lab.push(dlTxt(svg, 0, 0, n, { w: 700, s: 14, c: '#ef4444' })));
+  const draw = () => {
+    const te = +host.querySelector('#te').value, tk = +host.querySelector('#tk').value, sc = +host.querySelector('#sc').value;
+    host.querySelector('#tev').textContent = te + ' °C'; host.querySelector('#tkv').textContent = tk + ' °C'; host.querySelector('#scv').textContent = sc + ' K';
+    if (tk <= te + 10) { o.innerHTML = 'Nhiệt độ ngưng phải cao hơn nhiệt độ bay hơi ít nhất 10 K.'; return; }
+    const pe = P(te), pk = P(tk), h1 = hg(te) + 0.7 * 5, T1 = te + 5 + 273.15, ds = 0.7 * T1 * (Math.pow(pk / pe, 0.1525) - 1), h2 = h1 + ds / 0.8, h3 = hf(tk - sc), h4 = h3;
+    const pts = [[X(h1), Y(pe)], [X(h2), Y(pk)], [X(hg(tk)), Y(pk)], [X(hf(tk)), Y(pk)], [X(h3), Y(pk)], [X(h4), Y(pe)]];
+    cyc.setAttribute('d', 'M' + pts.map(q => q.join(' ')).join(' L') + 'Z');
+    [[pts[0], -10, 14], [pts[1], 8, -8], [pts[4], -10, -8], [pts[5], -10, 16]].forEach((a, i) => { lab[i].setAttribute('x', a[0][0] + a[1]); lab[i].setAttribute('y', a[0][1] + a[2]); });
+    const q0 = h1 - h4, l = h2 - h1;
+    o.innerHTML = 'p<sub>0</sub> = <b>' + pe.toFixed(2) + '</b> bar, p<sub>k</sub> = <b>' + pk.toFixed(2) + '</b> bar, tỉ số nén π = <b>' + (pk / pe).toFixed(1) + '</b>' + (pk / pe > 13 ? ' ⛔ vượt 13: cần nén hai cấp' : '') + '<br>q₀ = h₁−h₄ = <b>' + q0.toFixed(0) + '</b> kJ/kg · l = h₂−h₁ = <b>' + l.toFixed(0) + '</b> kJ/kg · q<sub>k</sub> = ' + (h2 - h3).toFixed(0) + ' kJ/kg · COP = <b>' + (q0 / l).toFixed(2) + '</b><br><i>1→2 nén (đẳng entropy gần đúng, hiệu suất 80%), 2→3 ngưng, 3→4 tiết lưu (đẳng entanpy), 4→1 bay hơi. Kéo thanh: ngưng càng cao/bay hơi càng thấp thì l càng lớn, COP giảm.</i>';
+  };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+
+// ================= Chương 4 =================
+function dlPoly(pts) { const seg = []; let L = 0; for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(d); L += d; } return { len: L, at(d) { d = ((d % L) + L) % L; for (let i = 0; i < seg.length; i++) { if (d <= seg[i]) { const f = seg[i] ? d / seg[i] : 0; return [pts[i][0] + (pts[i + 1][0] - pts[i][0]) * f, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * f, i]; } d -= seg[i]; } return pts[0].concat(0); } }; }
+function dlLoop(host, fn, ms) { const id = setInterval(fn, ms || 100); new MutationObserver((m, ob) => { if (!document.body.contains(host)) { clearInterval(id); ob.disconnect(); } }).observe(document.body, { childList: true, subtree: true }); return id; }
+
+WIDGETS['dl-fridge-parts'] = host => dlHot(host, {
+  vb: [680, 400], label: 'Hệ thống lạnh của tủ lạnh',
+  bg: svg => { dlBox(svg, 20, 10, 640, 380, 'none', null, { stroke: 'currentColor', dash: '6 4', op: .35 }); dlTxt(svg, 340, 28, 'Vỏ tủ cách nhiệt (nhìn từ phía sau)', { s: 12 }); },
+  parts: [
+    { n: 'Dàn bay hơi + ngăn đông', x: 60, y: 50, w: 190, h: 90, c: '#0ea5e9', t: 'Ga lỏng áp thấp sôi, thu nhiệt buồng lạnh. Dàn tấm nhôm hoặc ống xoắn bám tuyết. Thermostat cảm nhiệt gắn vào dàn này.' },
+    { n: 'Bầu tích lỏng', x: 270, y: 70, w: 70, h: 50, c: '#38bdf8', t: 'Cuối dàn bay hơi: giữ lỏng lại, chỉ cho hơi về máy nén để tránh va đập thủy lực (khi xả băng, nhiều thực phẩm nóng).' },
+    { n: 'Ống hút', x: 360, y: 90, w: 90, h: 30, c: '#7dd3fc', t: 'Dẫn hơi áp thấp về máy nén; thường ghép với ống mao thành hồi nhiệt (tăng năng suất lạnh).', s: 10 },
+    { n: 'Máy nén (blốc)', x: 470, y: 250, w: 150, h: 90, c: '#64748b', t: 'Máy nén pittông kín + động cơ trong vỏ hàn, treo trên 4 lò xo. Hút – nén – đẩy ga, có ống làm mát dầu.' },
+    { n: 'Dàn ngưng', x: 70, y: 200, w: 260, h: 110, c: '#f97316', t: 'Ống thép Ø5 hàn cánh tản nhiệt hoặc ống gắn vào vỏ tủ (phía sau, hai bên sườn). Hơi nóng thải nhiệt ra và ngưng thành lỏng.' },
+    { n: 'Phin sấy lọc', x: 350, y: 290, w: 85, h: 36, c: '#f59e0b', t: 'Giữ ẩm (silicagel/zeolit 4A) và cặn bẩn trước ống mao. Luôn thay mới khi sửa chữa.' },
+    { n: 'Ống mao', x: 350, y: 215, w: 90, h: 28, c: '#a855f7', t: 'Ống Ø0,6–2 mm dài 0,5–5 m: tiết lưu lỏng, giữ chênh áp. Dễ tắc ẩm, tắc bẩn, bẹp.', s: 10 },
+    { n: 'Rơle KĐ + bảo vệ', x: 490, y: 190, w: 120, h: 36, c: '#8b5cf6', t: 'Cắm trực tiếp vào 3 cọc C–S–R của blốc: khởi động và bảo vệ quá tải.', s: 10 },
+    { n: 'Thermostat', x: 300, y: 150, w: 100, h: 30, c: '#14b8a6', t: 'Đóng ngắt máy nén theo nhiệt độ dàn bay hơi nhờ bầu cảm nhiệt + hộp xếp.', s: 10 }
+  ]
+});
+WIDGETS['dl-fridge-path'] = host => {
+  host.innerHTML = '<div class="row"><button id="b" type="button">⏸ Tạm dừng</button> <span id="st"></span></div>';
+  const svg = dlSvg(host, [680, 360], 'Đường đi của ga trong tủ lạnh'); const st = host.querySelector('#st');
+  const pts = [[470, 290], [470, 250], [380, 250], [60, 250], [60, 330], [380, 330], [380, 290], [380, 200], [200, 200], [200, 70], [60, 70], [60, 40], [400, 40], [400, 90], [470, 90], [470, 290]];
+  const stages = ['Máy nén: nén', 'Ống đẩy', 'Dàn ngưng: ngưng tụ', 'Phin sấy lọc', 'Ống mao: tiết lưu', 'Dàn bay hơi: sôi', 'Ống hút'];
+  dlLn(svg, [[470, 290], [470, 250], [60, 250], [60, 330], [380, 330]], '#f97316', 5, { op: .55 });
+  dlLn(svg, [[380, 330], [380, 200], [200, 200]], '#a855f7', 3, { op: .6 });
+  dlLn(svg, [[200, 200], [200, 70], [60, 70], [60, 40], [400, 40], [400, 90], [470, 90], [470, 290]], '#0ea5e9', 5, { op: .55 });
+  dlBox(svg, 430, 290, 90, 50, '#64748b', 'Máy nén'); dlBox(svg, 40, 235, 150, 28, '#f97316', 'Dàn ngưng (ngoài)', { s: 10 }); dlBox(svg, 340, 300, 80, 24, '#f59e0b', 'Phin lọc', { s: 10 });
+  dlBox(svg, 340, 205, 100, 24, '#a855f7', 'Ống mao', { s: 10 }); dlBox(svg, 40, 30, 380, 22, '#0ea5e9', 'Dàn bay hơi trong ngăn đông', { s: 10 });
+  dlTxt(svg, 560, 120, 'Hơi áp thấp ⟶ về máy nén', { c: '#0ea5e9', s: 11, a: 'middle' }); dlTxt(svg, 270, 280, 'Lỏng áp cao', { c: '#f97316' }); dlTxt(svg, 300, 190, 'Lỏng → hơi ẩm thấp áp', { c: '#a855f7', a: 'end', s: 10 });
+  const poly = dlPoly(pts), dots = []; for (let i = 0; i < 20; i++) dots.push(rfEl('circle', { r: 4, stroke: '#111', 'stroke-width': .5 }, svg));
+  let t = 0, run = true;
+  const draw = () => {
+    if (run) t += 4;
+    dots.forEach((c, k) => { const d = t + k * poly.len / dots.length, p = poly.at(d); c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); const hot = p[2] <= 2, cold = p[2] >= 8; const gas = !!(p[2] <= 1 || p[2] >= 9 || (p[2] === 2)); c.setAttribute('fill', hot ? '#fb923c' : cold ? '#7dd3fc' : '#c084fc'); c.setAttribute('r', gas ? 3 : 4.6); });
+    const head = poly.at(t); st.textContent = 'Đang xem: ' + (head[2] <= 0 ? stages[0] : head[2] <= 1 ? stages[1] : head[2] <= 4 ? stages[2] : head[2] <= 5 ? stages[3] : head[2] <= 7 ? stages[4] : head[2] <= 11 ? stages[5] : stages[6]);
+  };
+  host.querySelector('#b').onclick = e => { run = !run; e.target.textContent = run ? '⏸ Tạm dừng' : '▶ Tiếp tục'; };
+  dlLoop(host, draw, 60); draw();
+};
+WIDGETS['dl-compressor'] = host => {
+  host.innerHTML = '<div class="row"><label>Tốc độ <input id="sp" type="range" min="1" max="10" value="4"></label><label>t bay hơi <input id="te" type="range" min="-30" max="5" value="-10"> <b id="tev"></b></label><label>t ngưng <input id="tk" type="range" min="30" max="60" value="45"> <b id="tkv"></b></label></div>';
+  const svg = dlSvg(host, [520, 300], 'Máy nén pittông'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  dlBox(svg, 170, 30, 180, 150, 'none', null, { stroke: 'currentColor', sw: 3, r: 4 });
+  dlBox(svg, 100, 30, 70, 40, '#38bdf8', 'Hút', { s: 11 }); dlBox(svg, 350, 30, 70, 40, '#ef4444', 'Đẩy', { s: 11 });
+  const vs = rfEl('rect', { x: 200, y: 22, width: 40, height: 10, fill: '#16a34a' }, svg), vd = rfEl('rect', { x: 282, y: 22, width: 40, height: 10, fill: '#94a3b8' }, svg);
+  dlTxt(svg, 220, 15, 'clape hút', { s: 10 }); dlTxt(svg, 302, 15, 'clape đẩy', { s: 10 });
+  const pist = rfEl('rect', { x: 176, width: 168, height: 24, rx: 3, fill: '#64748b' }, svg), rod = rfEl('line', { x1: 260, x2: 260, stroke: '#64748b', 'stroke-width': 8 }, svg), crank = rfEl('circle', { cx: 260, cy: 260, r: 22, fill: 'none', stroke: 'currentColor', 'stroke-width': 3 }, svg), pin = rfEl('circle', { r: 5, fill: '#facc15', stroke: '#111' }, svg);
+  const gas = rfEl('rect', { x: 174, width: 172, fill: '#7dd3fc', opacity: .55 }, svg); svg.insertBefore(gas, pist);
+  const lab = dlTxt(svg, 430, 140, '', { a: 'start', s: 12, w: 700 });
+  let a = 0;
+  const draw = () => {
+    const te = +host.querySelector('#te').value, tk = +host.querySelector('#tk').value; host.querySelector('#tev').textContent = te + ' °C'; host.querySelector('#tkv').textContent = tk + ' °C';
+    a += +host.querySelector('#sp').value * 0.03;
+    const y = 120 + 60 * Math.cos(a); // 60 (điểm chết trên) – 180 (dưới)
+    const down = Math.sin(a) < 0; // cos giảm khi sin>0: tính theo đạo hàm của y
+    pist.setAttribute('y', y); gas.setAttribute('y', y + 24); gas.setAttribute('height', Math.max(0, 180 - y - 24));
+    const px = 260 + 22 * Math.sin(a), py = 260 - 22 * Math.cos(a) * 0; pin.setAttribute('cx', px); pin.setAttribute('cy', 260 + 22 * Math.cos(a));
+    rod.setAttribute('y1', y + 24); rod.setAttribute('y2', 260 + 22 * Math.cos(a)); rod.setAttribute('x2', px);
+    const moving = -Math.sin(a) * 60; // dy/da: y tăng = đi xuống
+    const suction = Math.sin(a) < 0 ? false : true; // sin>0 => y giảm (đi lên)? y = 120+60cos a ; dy/da = -60 sin a ; sin>0 => y giảm => piston đi lên (nén)
+    const comp = Math.sin(a) > 0;
+    const pr = (pk, pe) => pk / pe;
+    const pe = dlSatP('R22', te), pk = dlSatP('R22', tk), pi = pk / pe, lam = 1 - 0.04 * (Math.pow(pi, 1 / 1.18) - 1);
+    const frac = (y - 60) / 120; // 0 = đỉnh, 1 = đáy
+    const open_d = comp && frac < 0.12, open_s = !comp;
+    vs.setAttribute('fill', open_s ? '#16a34a' : '#94a3b8'); vd.setAttribute('fill', open_d ? '#dc2626' : '#94a3b8');
+    lab.textContent = open_s ? 'HÚT' : open_d ? 'ĐẨY' : 'NÉN'; lab.setAttribute('fill', open_s ? '#16a34a' : '#dc2626');
+    o.innerHTML = 'Pittông đi ' + (comp ? 'lên (nén; clape đẩy mở khi p trong xilanh > p ngưng)' : 'xuống (hút; clape hút mở)') + '.<br>Tỉ số nén π = p<sub>k</sub>/p<sub>0</sub> = ' + pk.toFixed(1) + '/' + pe.toFixed(1) + ' = <b>' + pi.toFixed(1) + '</b>' + (pi > 13 ? ' ⛔ > 13: cần nén hai cấp' : '') + ' · hiệu suất thể tích λ ≈ <b>' + Math.max(0, lam).toFixed(2) + '</b> (giảm khi π tăng; thể tích chết 4%).';
+  };
+  dlLoop(host, draw, 50); draw();
+};
+WIDGETS['dl-compressor-test'] = host => {
+  host.innerHTML = '<div class="row"><label>Tình trạng blốc <select id="sc"><option value="0">Rất tốt (A=34 bar, kim đứng im)</option><option value="1">Còn tốt (A=26 bar)</option><option value="2">Quá yếu (A=14 bar)</option><option value="3">Clape đẩy đóng muội (kim tụt từ từ về 0)</option><option value="4">Clape đẩy cong vênh (tụt về B rồi nhanh về 0)</option><option value="5">Clape đẩy vênh, hở (tụt nhanh)</option></select></label><button id="go" type="button">▶ Chạy máy</button> <button id="st" type="button">⏹ Dừng máy</button></div>';
+  const svg = dlSvg(host, [320, 200], 'Áp kế thử blốc'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  rfEl('circle', { cx: 160, cy: 110, r: 85, fill: 'none', stroke: 'currentColor', 'stroke-width': 3 }, svg);
+  for (let b = 0; b <= 40; b += 5) { const an = Math.PI * (1.15 - b / 40 * 1.3); const x1 = 160 + 85 * Math.cos(an), y1 = 110 - 85 * Math.sin(an), x2 = 160 + 70 * Math.cos(an), y2 = 110 - 70 * Math.sin(an); rfEl('line', { x1, y1, x2, y2, stroke: 'currentColor' }, svg); dlTxt(svg, 160 + 58 * Math.cos(an), 110 - 58 * Math.sin(an) + 3, b, { s: 9 }); }
+  dlTxt(svg, 160, 145, 'bar', { s: 11 }); const nd = rfEl('line', { x1: 160, y1: 110, stroke: '#ef4444', 'stroke-width': 3, 'stroke-linecap': 'round' }, svg);
+  const A = [34, 26, 14, 30, 30, 30]; let p = 0, mode = 'idle', t = 0;
+  const show = () => { const an = Math.PI * (1.15 - Math.min(p, 40) / 40 * 1.3); nd.setAttribute('x2', 160 + 72 * Math.cos(an)); nd.setAttribute('y2', 110 - 72 * Math.sin(an)); };
+  const verdict = () => { const k = +host.querySelector('#sc').value, a = A[k]; return a > 32 ? 'A > 32 bar: <b>rất tốt</b>' : a >= 21 ? 'A = 21–32 bar: <b>còn tốt</b>' : 'A < 17 bar: <b>quá yếu</b>'; };
+  host.querySelector('#go').onclick = () => { mode = 'run'; t = 0; }; host.querySelector('#st').onclick = () => { if (mode === 'run') { mode = 'stop'; t = 0; } };
+  host.querySelector('#sc').onchange = () => { mode = 'idle'; p = 0; show(); };
+  dlLoop(host, () => {
+    const k = +host.querySelector('#sc').value; t++;
+    if (mode === 'run') { p += (A[k] - p) * 0.08; if (Math.abs(A[k] - p) < .05) p = A[k]; o.innerHTML = 'Kim tăng nhanh, chậm dần rồi dừng ở A = <b>' + p.toFixed(0) + ' bar</b> — ' + verdict() + '. Bấm "Dừng máy" để thử clape đẩy.'; }
+    else if (mode === 'stop') { const rate = [0, 0, 0, 0.12, 0.25, 1.6][k]; if (k === 4 && p > 18) p -= 0.25; else if (k === 4) p = Math.max(0, p - 2.2); else p = Math.max(0, p - rate); o.innerHTML = [ 'Kim đứng im tại A: <b>clape đẩy kín</b>.', 'Kim đứng im tại A: <b>clape đẩy kín</b>.', 'Kim đứng im nhưng A rất thấp: máy yếu (mòn pittông/xilanh).', 'Kim quay từ từ về 0: <b>clape đẩy đóng muội</b>.', 'Kim tụt chậm về B rồi quay nhanh về 0: <b>clape đẩy cong vênh</b>.', 'Kim quay nhanh về 0: <b>clape đẩy vênh, hở, rò</b>.'][k] + ' (p = ' + p.toFixed(0) + ' bar)'; }
+    else o.innerHTML = 'Lắp áp kế 40 bar vào đầu đẩy, bịt xì hở, bấm "Chạy máy".';
+    show();
+  }, 60); show();
+};
+WIDGETS['dl-capillary'] = host => dlCalc(host, [
+  { id: 'm', label: 'Phương pháp', v: '1', opts: [['1', 'PP1: chỉ ống + phin + blốc đo ở đầu đẩy'], ['2', 'PP2: trên hệ hoàn chỉnh (đo cao nhất)']] },
+  { id: 'k', label: 'Loại tủ', v: 'a', opts: [['a', 'Tủ 1 sao (−6 °C)'], ['b', 'Tủ 2 sao (−12 °C)'], ['c', 'Tủ 3 sao / kem / bảo quản đông'], ['d', 'Đối lưu tự nhiên (PP2)'], ['e', 'Dàn ngưng quạt (PP2: tủ kem, tủ đá)']] },
+  { id: 'q', label: 'Blốc', v: 'g', opts: [['g', 'khỏe (lấy số cao)'], ['w', 'yếu (lấy số thấp)']] }, { id: 'p', label: 'Đo được (psi)', v: 150, step: 1 }
+], v => {
+  const R = { a: [130, 150], b: [150, 160], c: [160, 180], d: [150, 210], e: [75, 140] }[v.k]; const tgt = v.q === 'g' ? R[1] : R[0];
+  const diff = v.p - tgt; let adv;
+  if (Math.abs(diff) <= 8) adv = '✅ Đạt: ống mao phù hợp.'; else if (diff < 0) adv = '↘ Trở lực nhỏ: <b>nối thêm ống mao</b> (cắt thử từng ~5 cm).'; else adv = '↗ Trở lực lớn: <b>cắt bớt ống mao</b>.';
+  return 'Khoảng tham khảo: <b>' + R[0] + '–' + R[1] + ' psi</b> (≈ ' + (R[0] * 0.0689).toFixed(1) + '–' + (R[1] * 0.0689).toFixed(1) + ' bar). Mục tiêu theo blốc: ~' + tgt + ' psi. Đo ' + v.p + ' psi → ' + adv + '<br><i>Trở lực càng lớn, độ lạnh càng sâu nhưng năng suất lạnh càng nhỏ: chỉ cân vừa đủ. Nên chọn ống mao Ø lớn + dài để tránh tắc.</i>';
+});
+
+// ================= Chương 5 =================
+WIDGETS['dl-csr'] = host => {
+  host.innerHTML = '<div class="row"><button id="nw" type="button">🔀 Đề mới</button> <button id="ab" type="button">Đo A–B</button> <button id="bc" type="button">Đo B–C</button> <button id="ac" type="button">Đo A–C</button> <span class="calc" id="rd" style="min-width:140px">— Ω —</span></div><div class="row"><label>A là <select id="a"></select></label><label>B là <select id="b"></select></label><label>C là <select id="c"></select></label><button id="ck" type="button">Kiểm tra</button></div><div class="info" id="m"></div>';
+  const svg = dlSvg(host, [360, 110], 'Ba cọc blốc'); host.insertBefore(svg, host.querySelector('.info'));
+  ['A', 'B', 'C'].forEach((n, i) => { rfEl('circle', { cx: 80 + i * 100, cy: 55, r: 22, fill: '#64748b' }, svg); dlTxt(svg, 80 + i * 100, 60, n, { c: '#fff', s: 16, w: 700 }); });
+  ['a', 'b', 'c'].forEach(id => { host.querySelector('#' + id).innerHTML = '<option value="?">?</option><option value="C">C – chung</option><option value="R">R – chạy</option><option value="S">S – khởi động</option>'; });
+  let ans, ohm; const rr = () => { const p = ['C', 'R', 'S']; for (let i = 2; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; } ans = { A: p[0], B: p[1], C: p[2] }; ohm = { R: 8 + Math.floor(Math.random() * 5), S: 14 + Math.floor(Math.random() * 6) }; host.querySelector('#m').textContent = 'Đo ba cặp, rồi xác định mỗi cọc. S–R lớn nhất; C–R nhỏ nhất.'; host.querySelector('#rd').textContent = '— Ω —'; ['a', 'b', 'c'].forEach(id => host.querySelector('#' + id).value = '?'); };
+  const meas = (x, y) => { const s = x + y; let val; const set = [ans[x], ans[y]].sort().join(''); if (set === 'CR') val = ohm.R; else if (set === 'CS') val = ohm.S; else val = ohm.R + ohm.S; host.querySelector('#rd').textContent = x + '–' + y + ': ' + val + ' Ω'; };
+  host.querySelector('#ab').onclick = () => meas('A', 'B'); host.querySelector('#bc').onclick = () => meas('B', 'C'); host.querySelector('#ac').onclick = () => meas('A', 'C');
+  host.querySelector('#nw').onclick = rr;
+  host.querySelector('#ck').onclick = () => { const g = { A: host.querySelector('#a').value, B: host.querySelector('#b').value, C: host.querySelector('#c').value }; const ok = ['A', 'B', 'C'].every(k => g[k] === ans[k]); host.querySelector('#m').innerHTML = ok ? '✅ Đúng! Cọc chung C là cọc không thuộc cặp có điện trở lớn nhất (S–R).' : '❌ Chưa đúng. Cặp lớn nhất = S–R ⇒ cọc còn lại là C; từ C, điện trở nhỏ nhất ⇒ R.'; };
+  rr();
+};
+WIDGETS['dl-relay'] = host => {
+  host.innerHTML = '<div class="row"><button id="go" type="button">▶ Bấm khởi động</button><label>Thời gian <input id="t" type="range" min="0" max="100" value="0"></label></div>';
+  const svg = dlSvg(host, [520, 260], 'Dòng khởi động'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const X = t => 50 + t * 4.2, Y = i => 220 - i * 18;
+  rfEl('line', { x1: 50, y1: 220, x2: 480, y2: 220, stroke: 'currentColor' }, svg); rfEl('line', { x1: 50, y1: 30, x2: 50, y2: 220, stroke: 'currentColor' }, svg);
+  dlTxt(svg, 270, 245, 'thời gian (≈ 1 s khởi động)', { s: 10 }); dlTxt(svg, 22, 125, 'I (A)', { s: 10 });
+  [[9.2, 'B  LRA 9,2'], [2.5, 'C  2,5'], [1.3, 'D  FLA 1,3']].forEach(a => { rfEl('line', { x1: 48, x2: 480, y1: Y(a[0]), y2: Y(a[0]), stroke: 'currentColor', opacity: .15, 'stroke-dasharray': '3 3' }, svg); dlTxt(svg, 482, Y(a[0]) + 4, a[1], { a: 'start', s: 9 }); });
+  const n = t => 1 - Math.exp(-t / 22), tc = -22 * Math.log(1 - 0.75); // t tới 75%
+  const I = t => { const nn = n(t); return t < tc ? 1.3 + 7.9 * Math.pow(1 - nn, 1.2) + (t < 2 ? 0 : 0) : 1.3 + 0.2 * Math.exp(-(t - tc) / 8); };
+  let d = 'M'; for (let t = 0; t <= 100; t += 1) d += (t ? ' L' : '') + X(t) + ' ' + Y(I(t)); rfEl('path', { d, fill: 'none', stroke: '#16a34a', 'stroke-width': 2.5 }, svg);
+  const cur = rfEl('circle', { r: 6, fill: '#ef4444' }, svg); const kx = rfEl('line', { y1: 30, y2: 220, stroke: '#facc15', 'stroke-dasharray': '4 3' }, svg);
+  const set = t => { host.querySelector('#t').value = t; const nn = n(t), k = t < tc; cur.setAttribute('cx', X(t)); cur.setAttribute('cy', Y(I(t))); kx.setAttribute('x1', X(tc)); kx.setAttribute('x2', X(tc)); o.innerHTML = 'Tốc độ rôto: <b>' + (nn * 100).toFixed(0) + '%</b> · dòng ≈ <b>' + I(t).toFixed(1) + ' A</b> · tiếp điểm K rơle: <b>' + (k ? 'ĐÓNG (cuộn khởi động S có điện)' : 'MỞ (chỉ cuộn làm việc R chạy)') + '</b><br>Khi bấm: lõi rơle bị hút bởi dòng lớn (A: 5 A) → K đóng → dòng ngắn mạch 9,2 A (B) → rôto quay → dòng giảm → tới ~2,5 A (C, 75% tốc độ) K ngắt → dòng làm việc 1,3 A (D).'; };
+  let run = null; host.querySelector('#t').oninput = e => set(+e.target.value);
+  host.querySelector('#go').onclick = () => { clearInterval(run); let t = 0; run = setInterval(() => { t += 1.5; if (t >= 100) { t = 100; clearInterval(run); } set(t); }, 40); };
+  new MutationObserver((m, ob) => { if (!document.body.contains(host)) { clearInterval(run); ob.disconnect(); } }).observe(document.body, { childList: true, subtree: true });
+  set(0);
+};
+WIDGETS['dl-overload'] = host => {
+  host.innerHTML = '<div class="row"><label>Dòng so với định mức <input id="k" type="range" min="1" max="5" step="0.1" value="1"> <b id="kv">1,0×</b></label><button id="rs" type="button">Làm nguội</button></div>';
+  const svg = dlSvg(host, [460, 200], 'Rơle bảo vệ'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  dlBox(svg, 30, 40, 70, 20, '#f59e0b', 'Dây điện trở', { s: 9 }); const bi = rfEl('path', { fill: 'none', stroke: '#64748b', 'stroke-width': 8, 'stroke-linecap': 'round' }, svg);
+  rfEl('line', { x1: 380, y1: 100, x2: 380, y2: 135, stroke: 'currentColor', 'stroke-width': 3 }, svg); rfEl('circle', { cx: 380, cy: 100, r: 5, fill: '#facc15' }, svg); dlTxt(svg, 380, 150, 'tiếp điểm cố định', { s: 10 }); dlTxt(svg, 120, 100, 'thanh lưỡng kim', { s: 10, a: 'start' });
+  const tc = rfEl('circle', { cy: 100, r: 6, fill: '#22c55e' }, svg);
+  const bar = rfEl('rect', { x: 40, y: 175, height: 10, rx: 4, fill: '#22c55e' }, svg); rfEl('rect', { x: 40, y: 175, width: 360, height: 10, rx: 4, fill: 'none', stroke: 'currentColor', opacity: .3 }, svg);
+  dlTxt(svg, 400, 183, '120 °C', { a: 'start', s: 9 });
+  let T = 30, trip = false;
+  dlLoop(host, () => { const k = +host.querySelector('#k').value; host.querySelector('#kv').textContent = k.toFixed(1).replace('.', ',') + '×'; T += (0.55 * k * k - 0.0095 * (T - 28)) * 2; if (!trip && T >= 105) trip = true; if (trip && T <= 60) trip = false; T = Math.max(28, T);
+    const bend = (T - 28) / 100 * 40; bi.setAttribute('d', 'M100 100 Q' + (240) + ' ' + (100 + bend * 0.1) + ' 380 ' + (trip ? 100 - 25 : 100 - Math.min(bend, 14))); tc.setAttribute('cx', 380); tc.setAttribute('cy', trip ? 75 : 100); tc.setAttribute('fill', trip ? '#ef4444' : '#22c55e');
+    bar.setAttribute('width', Math.min(360, (T - 28) / 92 * 360)); bar.setAttribute('fill', T > 95 ? '#ef4444' : T > 70 ? '#f59e0b' : '#22c55e');
+    o.innerHTML = 'Nhiệt thanh lưỡng kim ≈ <b>' + T.toFixed(0) + ' °C</b> · tiếp điểm: <b>' + (trip ? 'MỞ – ngắt động cơ (nghe tiếng “tách”), vài phút sau nguội tự đóng lại' : 'ĐÓNG – động cơ đang chạy') + '</b>' + (k >= 1.5 && !trip ? '<br>⚠ Dòng cao hơn định mức: nhiệt đang tích lũy, sắp nhảy.' : ''); }, 100);
+  host.querySelector('#rs').onclick = () => { T = 40; host.querySelector('#k').value = 1; };
+};
+WIDGETS['dl-thermo'] = host => {
+  host.innerHTML = '<div class="row"><label>Nhiệt độ đặt <input id="sp" type="range" min="-18" max="8" value="4"> <b id="spv"></b></label><label>Vi sai ± <input id="df" type="range" min="1" max="5" step="0.5" value="3"> <b id="dfv"></b></label><label>Nhiệt độ ngoài <input id="am" type="range" min="15" max="38" value="28"> <b id="amv"></b></label></div>';
+  const svg = dlSvg(host, [560, 240], 'Nhiệt độ buồng lạnh theo thời gian'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const draw = () => {
+    const sp = +host.querySelector('#sp').value, df = +host.querySelector('#df').value, am = +host.querySelector('#am').value;
+    host.querySelector('#spv').textContent = sp + ' °C'; host.querySelector('#dfv').textContent = '±' + df + ' K'; host.querySelector('#amv').textContent = am + ' °C';
+    svg.innerHTML = ''; const lo = sp - df, hi = sp + df; const Ymin = lo - 4, Ymax = hi + 4; const Y = T => 200 - (T - Ymin) / (Ymax - Ymin) * 170, X = m => 40 + m * 7;
+    rfEl('line', { x1: 40, y1: 200, x2: 540, y2: 200, stroke: 'currentColor', opacity: .4 }, svg);
+    [[hi, '#ef4444', 'đóng ' + hi + ' °C'], [lo, '#0ea5e9', 'ngắt ' + lo + ' °C']].forEach(a => { rfEl('line', { x1: 40, x2: 540, y1: Y(a[0]), y2: Y(a[0]), stroke: a[1], 'stroke-dasharray': '5 4' }, svg); dlTxt(svg, 542, Y(a[0]) + 4, a[2], { a: 'start', s: 9, c: a[1] }); });
+    let T = hi + 1, on = true, d = 'M', onT = 0, trans = 0, tm = 0; const rateOn = -0.45, rateOff = 0.012 * (am - T + 14) + 0.05; const pts = [];
+    for (let k = 0; k <= 700; k++) { const m = k * 0.1; const ro = 0.0045 * (am - T) + 0.03; T += on ? rateOn * 0.1 - 0 : ro * 0.1 * 6; if (on && T <= lo) { on = false; trans++; } else if (!on && T >= hi) { on = true; trans++; } if (on) onT++; pts.push([X(m), Y(T)]); }
+    rfEl('path', { d: 'M' + pts.map(p => p.join(' ')).join(' L'), fill: 'none', stroke: '#16a34a', 'stroke-width': 2 }, svg);
+    for (let m = 0; m <= 70; m += 10) dlTxt(svg, X(m), 216, m + ' ph', { s: 9 });
+    const cyc = trans / 2, b = onT / 701; o.innerHTML = 'Trong 70 phút: ~<b>' + cyc.toFixed(1) + '</b> chu kỳ ⇒ <b>' + (cyc / 70 * 60).toFixed(1) + '</b> lần khởi động/giờ · hệ số thời gian làm việc b ≈ <b>' + (b * 100).toFixed(0) + '%</b>.<br>' + (df <= 1.5 ? '⚠ Vi sai nhỏ: số lần đóng ngắt tăng nhiều, tuổi thọ rơle/động cơ giảm.' : 'Vi sai lớn hơn: ít đóng ngắt nhưng nhiệt độ buồng dao động rộng.') + (am >= 34 ? '<br>⚠ Ngoài trời nóng: máy chạy gần như liên tục.' : '');
+  };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['dl-defrost'] = host => {
+  host.innerHTML = '<div class="row"><label>Kiểu xả băng <select id="md"><option value="r">Điện trở (máy nén ngừng)</option><option value="h">Hơi nóng (máy nén vẫn chạy)</option></select></label><button id="go" type="button">❄→💧 Bấm xả băng</button></div>';
+  const svg = dlSvg(host, [560, 260], 'Xả băng'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const comp = dlBox(svg, 40, 190, 110, 46, '#64748b', 'Máy nén'), cond = dlBox(svg, 40, 40, 150, 36, '#f97316', 'Dàn ngưng'), ev = dlBox(svg, 360, 100, 160, 70, '#0ea5e9', 'Dàn bay hơi (băng)');
+  const frost = rfEl('rect', { x: 360, y: 100, width: 160, height: 70, rx: 8, fill: '#e0f2fe', opacity: .85 }, svg); const heater = dlBox(svg, 380, 180, 120, 14, '#ef4444', 'Điện trở', { s: 9 }); heater.style.display = 'none';
+  const normal = dlLn(svg, [[150, 200], [220, 200], [220, 58], [190, 58]], '#f97316', 3, { op: .35 }), n2 = dlLn(svg, [[40, 58], [10, 58], [10, 135], [360, 135]], '#a855f7', 3, { op: .35 }), n3 = dlLn(svg, [[520, 135], [540, 135], [540, 214], [150, 214]], '#0ea5e9', 3, { op: .35 });
+  const hot = dlLn(svg, [[150, 190], [250, 190], [250, 115], [360, 115]], '#ef4444', 5, { op: 0 }); dlTxt(svg, 300, 100, 'hơi nóng đi tắt vào dàn', { c: '#ef4444', s: 10 });
+  dlBox(svg, 255, 170, 60, 24, '#8b5cf6', 'Van ĐT', { s: 10 });
+  let st = 'idle', T = -15, ft = 100, cnt = 0;
+  host.querySelector('#go').onclick = () => { if (st === 'idle') { st = 'def'; T = -15; ft = 100; } };
+  dlLoop(host, () => {
+    const hotMode = host.querySelector('#md').value === 'h';
+    if (st === 'def') { T += 0.28; ft = Math.max(0, ft - 1.2); if (T >= 8) { st = 'idle'; } }
+    else if (T > -15) T -= 0.1;
+    frost.setAttribute('opacity', st === 'def' || ft > 0 ? Math.max(0, ft / 100) * .85 : 0); hot.setAttribute('opacity', st === 'def' && hotMode ? 1 : 0); heater.style.display = st === 'def' && !hotMode ? '' : 'none';
+    if (st === 'idle' && ft < 100) ft = Math.min(100, ft + 0.15);
+    o.innerHTML = 'Trạng thái: <b>' + (st === 'def' ? 'ĐANG XẢ BĂNG' : 'làm lạnh bình thường') + '</b> · nhiệt độ dàn ≈ <b>' + T.toFixed(0) + ' °C</b> · máy nén: <b>' + (st === 'def' && !hotMode ? 'NGỪNG' : 'chạy') + '</b>' + (st === 'def' ? (hotMode ? ' · van điện từ MỞ: hơi nóng từ đầu đẩy vào thẳng dàn bay hơi' : ' · điện trở xả băng có điện') : '') + '<br>Đạt 7–10 °C: rơle nhiệt độ xả băng kết thúc chu kỳ, tủ làm lạnh lại. Nước băng chảy vào khay trên blốc rồi bay hơi.';
+  }, 100);
+};
+WIDGETS['dl-fla'] = host => dlCalc(host, [
+  { id: 'n', label: 'Công suất động cơ (W)', v: 120, step: 1 }, { id: 'u', label: 'Điện áp (V)', v: 220, step: 1 }, { id: 'c', label: 'cosφ', v: 0.75, min: 0.6, max: 0.9, step: 0.01 }, { id: 'tk', label: 't ngưng (°C)', v: 40, step: 1 }, { id: 'te', label: 't bay hơi (°C)', v: -10, step: 1 }
+], v => {
+  const i0 = v.n / (v.u * v.c), i = i0 * (1 + 0.015 * (v.tk - 40) + 0.015 * (v.te + 10));
+  return 'I = N/(U·cosφ) = <b>' + i0.toFixed(2) + ' A</b> (ở t<sub>k</sub> 40 °C, t<sub>0</sub> −10 °C).<br>Hiệu chỉnh theo nhiệt độ làm việc (≈ 1,5%/K): <b>' + i.toFixed(2) + ' A</b>. Ngưng tụ cao/bay hơi cao (bỏ nhiều thực phẩm nóng) làm dòng tăng → rơle bảo vệ có thể nhảy.<br><i>Công suất 120 W, 220 V, cosφ 0,75 ⇒ ≈ 0,73 A (sách tính 0,78 A với cosφ=0,70).</i>';
+});
+
+// ================= Mạch điện tủ lạnh =================
+WIDGETS['dl-fridge-circuit'] = host => {
+  host.innerHTML = '<div class="row"><button id="pw" type="button">⏻ Có điện</button><label><input type="checkbox" id="dr"> Cửa mở</label><label>Kiểu xả băng <select id="md"><option value="0">Không có</option><option value="1">Bán tự động – điện trở</option><option value="2">Bán tự động – hơi nóng</option><option value="3">Tự động – điện trở (đồng hồ)</option><option value="4">Tự động – hơi nóng (đồng hồ)</option></select></label><button id="xb" type="button">❄ Bấm nút xả băng</button><button id="ov" type="button">⚠ Gây quá tải</button></div><div class="row"><label>Nhiệt độ đặt <input id="sp" type="range" min="0" max="8" step="0.5" value="4"> <b id="spv"></b></label><span>Nhiệt độ buồng: <b id="tv"></b></span></div>';
+  const svg = dlSvg(host, [760, 470], 'Mạch điện tủ lạnh'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const OFF = '#94a3b8', ON = '#22c55e', HOT = '#f97316';
+  const L = 40, N = 430; const wires = {};
+  const W = (id, pts) => { wires[id] = dlLn(svg, pts, OFF, 3.5); };
+  rfEl('line', { x1: 20, y1: L, x2: 740, y2: L, stroke: '#ef4444', 'stroke-width': 3 }, svg); rfEl('line', { x1: 20, y1: N, x2: 740, y2: N, stroke: '#3b82f6', 'stroke-width': 3 }, svg); dlTxt(svg, 14, L - 6, 'L (nóng) 220 V', { a: 'start', s: 10, c: '#ef4444' }); dlTxt(svg, 14, N + 16, 'N (trung tính)', { a: 'start', s: 10, c: '#3b82f6' });
+  // cửa & đèn
+  W('d1', [[60, L], [60, 140]]); W('d2', [[60, 180], [60, 250]]); W('d3', [[60, 290], [60, N]]);
+  const sw = dlBox(svg, 42, 140, 36, 40, '#64748b', 'cửa', { s: 9 }); const lamp = rfEl('circle', { cx: 60, cy: 270, r: 20, fill: '#334155', stroke: '#facc15', 'stroke-width': 2 }, svg); dlTxt(svg, 60, 274, 'Đèn', { s: 10, c: '#fff' });
+  // chuỗi thermostat – bảo vệ – bus
+  W('t1', [[170, L], [170, 100]]); W('t2', [[170, 140], [170, 190]]); W('t3', [[170, 230], [170, 270], [300, 270]]);
+  dlBox(svg, 148, 100, 44, 40, '#14b8a6', 'Thermo', { s: 9 }); dlBox(svg, 148, 190, 44, 40, '#8b5cf6', 'Bảo vệ', { s: 9 });
+  W('c1', [[300, 270], [300, 270]]);
+  dlBox(svg, 300, 250, 60, 40, '#a855f7', 'Cuộn rơle', { s: 9 }); W('j', [[360, 270], [420, 270]]);
+  W('r1', [[420, 270], [420, 310]]); dlBox(svg, 398, 310, 44, 50, '#f97316', 'R', { s: 13 }); W('r2', [[420, 360], [420, N]]);
+  W('s1', [[420, 270], [500, 270]]); const kb = dlBox(svg, 500, 250, 50, 40, '#ec4899', 'K', { s: 13 }); W('s2', [[550, 270], [590, 270], [590, 310]]); dlBox(svg, 568, 310, 44, 50, '#eab308', 'S', { s: 13 }); W('s3', [[590, 360], [590, N]]);
+  rfEl('ellipse', { cx: 505, cy: 335, rx: 135, ry: 62, fill: 'none', stroke: 'currentColor', 'stroke-dasharray': '5 4', opacity: .4 }, svg); dlTxt(svg, 505, 410, 'Động cơ máy nén (blốc): R + S', { s: 10 });
+  // xả băng
+  W('x1', [[660, L], [660, 100]]); dlBox(svg, 640, 100, 40, 40, '#0ea5e9', 'XB', { s: 11 });
+  W('x2', [[660, 140], [660, 190]]); dlBox(svg, 638, 190, 44, 60, '#ef4444', 'ĐT xả băng', { s: 9 }); W('x3', [[660, 250], [660, N]]);
+  W('v1', [[660, 160], [720, 160], [720, 190]]); dlBox(svg, 700, 190, 40, 60, '#a855f7', 'Van ĐT', { s: 9 }); W('v2', [[720, 250], [720, N]]);
+  const c = { th: false, ov: false, ovT: 0, run: false, start: 0, defr: 0, T: 9, pw: true, ev: -14, timer: 0 };
+  const set = (k, col) => { wires[k].setAttribute('stroke', col); };
+  const draw = () => {
+    const door = host.querySelector('#dr').checked, md = +host.querySelector('#md').value, sp = +host.querySelector('#sp').value; host.querySelector('#spv').textContent = sp.toFixed(1).replace('.', ',') + ' °C';
+    if (c.pw) {
+      if (c.T >= sp + 3) c.th = true; else if (c.T <= sp - 3) c.th = false;
+      if (md >= 3) { c.timer++; if (c.timer > 700 && !c.defr) { c.defr = 1; c.timer = 0; } }
+      if (c.defr) { c.ev += 0.26; if (c.ev >= 8) { c.defr = 0; c.ev = -14; } }
+      const resistor = c.defr && (md === 1 || md === 3), hotg = c.defr && (md === 2 || md === 4);
+      if (c.ovT > 0) c.ovT--; c.ov = c.ovT > 0;
+      const want = c.th && !c.ov && !resistor; const was = c.run; c.run = want; if (c.run && !was) c.start = 12; if (c.start > 0) c.start--;
+      c.T += c.run ? -0.035 : 0.012 + (door ? 0.035 : 0); c.T = Math.max(-6, Math.min(16, c.T));
+      c.resistor = resistor; c.hotg = hotg;
+    } else { c.run = false; c.start = 0; c.resistor = c.hotg = false; c.T = Math.min(16, c.T + 0.01); }
+    const pw = c.pw, ds = pw && door, chain = pw && c.th, prot = chain && !c.ov, mot = prot && !c.resistor;
+    const K = mot && c.start > 0;
+    set('d1', pw ? (door ? ON : OFF) : OFF); set('d2', ds ? ON : OFF); set('d3', ds ? ON : OFF); lamp.setAttribute('fill', ds ? '#facc15' : '#334155');
+    set('t1', chain ? ON : OFF); set('t2', prot ? ON : OFF); set('t3', prot ? ON : OFF); set('j', mot ? ON : OFF); set('r1', mot ? ON : OFF); set('r2', mot ? ON : OFF);
+    set('s1', K ? HOT : OFF); set('s2', K ? HOT : OFF); set('s3', K ? HOT : OFF);
+    const xbOn = pw && md > 0 && !!c.defr; set('x1', xbOn ? ON : OFF); set('x2', c.resistor ? HOT : OFF); set('x3', c.resistor ? HOT : OFF); set('v1', c.hotg ? HOT : OFF); set('v2', c.hotg ? HOT : OFF);
+    kb.setAttribute('opacity', K ? 1 : .45);
+    host.querySelector('#tv').textContent = c.T.toFixed(1).replace('.', ',') + ' °C'; host.querySelector('#pw').textContent = c.pw ? '⏻ Có điện (bấm để cắt)' : '⏻ MẤT ĐIỆN (bấm để cấp điện)';
+    const phase = !pw ? 'mất điện' : c.ov ? 'rơle bảo vệ đã nhảy – chờ nguội' : c.resistor ? 'đang xả băng bằng điện trở: máy nén ngừng' : c.run ? (c.start > 0 ? 'KHỞI ĐỘNG (rơle đóng K; I ≈ 9,2 A)' : 'ĐANG CHẠY (K mở; I ≈ 1,3 A)') : 'thermostat ngắt – máy nghỉ';
+    o.innerHTML = 'Trạng thái: <b>' + phase + '</b>' + (ds ? ' · đèn sáng' : '') + (c.hotg ? ' · van điện từ mở: hơi nóng vào dàn bay hơi (máy nén vẫn chạy)' : '') + (c.defr ? ' · nhiệt độ dàn ≈ ' + c.ev.toFixed(0) + ' °C (kết thúc ở 7–10 °C)' : '') + '<br>Thermostat: đóng khi nhiệt độ ≥ ' + (sp + 3).toFixed(1) + ', ngắt khi ≤ ' + (sp - 3).toFixed(1) + ' (vi sai 6 K). Dây xanh = có điện; cam = dòng lớn/nóng; xám = không có điện.';
+  };
+  host.querySelector('#pw').onclick = () => { c.pw = !c.pw; };
+  host.querySelector('#ov').onclick = () => { c.ovT = 80; };
+  host.querySelector('#xb').onclick = () => { const md = +host.querySelector('#md').value; if (md > 0 && !c.defr) { c.defr = 1; c.ev = -14; } };
+  host.querySelector('#md').onchange = () => { c.defr = 0; c.ev = -14; c.timer = 0; };
+  dlLoop(host, draw, 100); draw();
+};
+
+// ================= Chương 6 =================
+WIDGETS['dl-onoff'] = host => {
+  host.innerHTML = '<div class="row"><label>Thời gian chạy <input id="a" type="range" min="2" max="10" value="4"> <b id="av"></b> ph</label><label>Thời gian nghỉ <input id="b" type="range" min="4" max="30" value="12"> <b id="bv"></b> ph</label></div>';
+  const svg = dlSvg(host, [600, 250], 'Áp suất trong chu kỳ'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const draw = () => {
+    const a = +host.querySelector('#a').value, b = +host.querySelector('#b').value; host.querySelector('#av').textContent = a; host.querySelector('#bv').textContent = b; svg.innerHTML = '';
+    const T = 2 * (a + b), X = m => 40 + m / T * 540, Y = p => 210 - p * 22; rfEl('line', { x1: 40, y1: 210, x2: 580, y2: 210, stroke: 'currentColor' }, svg);
+    [0, 2, 4, 6, 8].forEach(p => { dlTxt(svg, 34, Y(p) + 4, p, { a: 'end', s: 9 }); rfEl('line', { x1: 40, x2: 580, y1: Y(p), y2: Y(p), stroke: 'currentColor', opacity: .1 }, svg); });
+    dlTxt(svg, 12, 120, 'p (bar tuyệt đối)', { s: 9 }); let pk = 4.9, pe = 4.9, dk = [], de = [], run = true, tm = 0;
+    for (let k = 0; k <= 400; k++) { const m = k / 400 * T; const ph = m % (a + b); const on = ph < a; const tgtK = on ? 7.7 : 4.9, tgtE = on ? 1.4 : 4.9; pk += (tgtK - pk) * (on ? 0.12 : 0.15) * (T / 400); pe += (tgtE - pe) * (on ? 0.35 : 0.2) * (T / 400); dk.push([X(m), Y(pk)]); de.push([X(m), Y(pe)]); if (on && (m - ph) < 0.0001) { } }
+    rfEl('path', { d: 'M' + dk.map(p => p.join(' ')).join(' L'), fill: 'none', stroke: '#ef4444', 'stroke-width': 2.5 }, svg); rfEl('path', { d: 'M' + de.map(p => p.join(' ')).join(' L'), fill: 'none', stroke: '#0ea5e9', 'stroke-width': 2.5 }, svg);
+    for (let c = 0; c < 2; c++) { rfEl('rect', { x: X(c * (a + b)), y: 222, width: X(c * (a + b) + a) - X(c * (a + b)), height: 10, fill: '#22c55e' }, svg); rfEl('rect', { x: X(c * (a + b) + a), y: 222, width: X((c + 1) * (a + b)) - X(c * (a + b) + a), height: 10, fill: '#94a3b8' }, svg); }
+    dlTxt(svg, 80, 244, 'chạy (xanh)', { s: 9 }); dlTxt(svg, 240, 244, 'nghỉ (xám) – áp suất cân bằng ≈ 4,9 bar', { s: 9 }); dlTxt(svg, 470, 60, 'p ngưng tụ', { c: '#ef4444', s: 11 }); dlTxt(svg, 470, 185, 'p bay hơi', { c: '#0ea5e9', s: 11 });
+    o.innerHTML = 'b = ' + a + '/' + (a + b) + ' = <b>' + (a / (a + b)).toFixed(2) + '</b> · ' + (60 / (a + b)).toFixed(1) + ' lần khởi động/giờ.' + (b < 4 ? '<br>⛔ Nghỉ dưới 3–5 phút: áp suất chưa cân bằng, khởi động lại nặng → dễ cháy blốc.' : '<br>Sau khi dừng cần 3–5 phút để cân bằng áp suất (R12: ~4,9 bar ở 23 °C) rồi mới khởi động lại nhẹ nhàng.');
+  };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['dl-duty'] = host => dlCalc(host, [
+  { id: 'a', label: 'Chạy (phút)', v: 4, step: 0.5 }, { id: 'b', label: 'Nghỉ (phút)', v: 8, step: 0.5 }, { id: 'w', label: 'Công suất điện (W)', v: 100, step: 1 }, { id: 'g', label: 'Giá (đ/kWh)', v: 2500, step: 10 }
+], v => {
+  const b = v.a / (v.a + v.b || 1), kwh = v.w / 1000 * 24 * b;
+  return 'b = ' + v.a + '/(' + v.a + '+' + v.b + ') = <b>' + (b * 100).toFixed(0) + '%</b> → mỗi giờ chạy ≈ <b>' + (60 * b).toFixed(0) + ' phút</b>, ' + (60 / (v.a + v.b || 1)).toFixed(1) + ' lần khởi động/giờ.<br>Điện ≈ <b>' + kwh.toFixed(2) + ' kWh/ngày</b> ≈ ' + (kwh * 30).toFixed(0) + ' kWh/tháng ≈ <b>' + (kwh * 30 * v.g).toLocaleString('vi-VN') + ' đ/tháng</b>.<br><i>Mỗi +1 °C ngưng tụ hoặc −1 °C bay hơi, điện tăng thêm ~1,5%.</i>';
+});
+
+// ================= Chương 7 =================
+WIDGETS['dl-placement'] = host => dlCalc(host, [
+  { id: 'a', label: 'Nhiệt độ phòng (°C)', v: 30, step: 1 }, { id: 'g', label: 'Khoảng hở sau/bên dàn ngưng (cm)', v: 10, min: 0, step: 1 },
+  { id: 'o', label: 'Vật cản / giấy bao quanh dàn', v: 'n', opts: [['n', 'không'], ['y', 'có']] }, { id: 's', label: 'Nguồn nóng gần tủ (bếp, nắng)', v: 'n', opts: [['n', 'không'], ['y', 'có']] }
+], v => {
+  const tk = v.a + 15 + Math.max(0, 10 - v.g) * 0.9 + (v.o === 'y' ? 4 : 0) + (v.s === 'y' ? 4 : 0);
+  const dp = tk - (v.a + 15), dE = dp * 1.5;
+  return 'Nhiệt độ ngưng tụ ước tính ≈ <b>' + tk.toFixed(0) + ' °C</b> (chuẩn: ' + (v.a + 15) + ' °C). Điện năng tăng ≈ <b>' + dE.toFixed(0) + '%</b>.<br>' + (dp <= 0.5 ? '✅ Vị trí tốt: dàn ngưng thoáng, đối lưu theo hiệu ứng ống khói.' : '⚠ Dàn ngưng thoát nhiệt kém: máy nén nặng nề, năng suất lạnh giảm. Chừa ≥ 10 cm quanh tủ, bỏ vật cản, tránh bếp/nắng.');
+});
+
+// ================= Chương 8 =================
+WIDGETS['dl-fridge-diag'] = host => dlDiag(host, [
+  ['Tủ không chạy', ['Nổ cầu chì; điện áp thấp (lệch > 10%)', 'Rơle bảo vệ / nhiệt độ / khởi động hỏng', 'Dây điện đứt; tuột dây vào máy nén; đồng hồ xả băng', 'Máy nén hỏng'], 'Kiểm tra điện áp; thử từng thiết bị bằng đèn thử, thay thiết bị tốt vào thử; thay cầu chì; dùng ổn áp.'],
+  ['Buồng lạnh quá nóng, chạy liên tục', ['Mở cửa nhiều; thực phẩm nóng; nhồi bịt kín đối lưu', 'Đệm cửa không kín; đèn sáng khi đóng cửa', 'Thiếu ga; clape hút máy nén hở; dàn ngưng bị cản/bẩn', 'Môi trường ≥ 33 °C; thermostat hỏng'], 'Nhắc người dùng; ke lại tủ bằng nivô; chỉnh/thay đệm cửa; vệ sinh dàn ngưng; hút chân không nạp lại ga; thay blốc / thermostat.'],
+  ['Ngăn lạnh quá lạnh', ['Cửa gió ngăn lạnh đặt tối đa', 'Bộ chỉnh cửa gió hỏng', 'Điện trở sưởi cửa gió hỏng'], 'Chỉnh cửa gió về vị trí ít lạnh; loại bỏ trở ngại; thay bộ chỉnh / điện trở.'],
+  ['Ngăn đông quá lạnh', ['Núm thermostat đặt quá lạnh', 'Đầu cảm nhiệt gắn sai vị trí / lỏng', 'Thermostat hỏng hoặc gãy ống mao'], 'Xoay núm về ít lạnh; cố định đầu cảm nhiệt chặt và đúng vị trí; thay thermostat.'],
+  ['Chạy rất ồn', ['Tủ kê không vững', 'Ống chạm vào tủ gây rung', 'Khay hứng nước ngưng lỏng; cánh quạt chạm vỏ', 'Máy nén không có chống rung tốt'], 'Kê lại bằng nivô; uốn ống / xốp ép sát; bắt lại khay; kiểm tra quạt; kiểm tra bệ đỡ chống rung.'],
+  ['Rơle quá tải nhảy liên tục', ['Rơle quá tải yếu hoặc hỏng', 'Điện áp thấp', 'Máy nén hỏng, thiếu dầu, nạp thừa ga'], 'Đo dòng khởi động và dòng làm việc; nếu bình thường thì thay rơle quá tải (cùng đặc tính).'],
+  ['Mô tơ máy nén bị kẹt', ['Gãy lá van', 'Thiếu dầu', 'Máy nén quá nóng'], 'Khởi động bằng tụ/áp cao (PP khởi động blốc bó); bổ sung dầu; nếu không chạy phải thay blốc.'],
+  ['Băng tuyết dày trên dàn lạnh', ['Đồng hồ xả băng hỏng', 'Điện trở xả băng hỏng', 'Thermostat xả băng hỏng', 'Đệm cửa không kín'], 'Kiểm tra bằng đèn thử; thay đồng hồ / điện trở / thermostat; thay đệm cửa.'],
+  ['Ngăn đông lạnh xuống rồi lại ấm lên', ['Ẩm trong hệ thống (tắc ẩm)'], 'Hút chân không, nạp lại ga, lắp phin sấy lọc trên đường lỏng để loại hết ẩm. Không dùng metanol.'],
+  ['Năng suất lạnh giảm dần', ['Sáp / cặn bẩn tích tụ trong ống mao'], 'Dùng dụng cụ thông ống mao (R141b) hoặc thay ống mao mới và dầu không sáp.'],
+  ['Chạy liên tục, không lạnh, dàn ngưng không nóng', ['Mất ga hoàn toàn', 'Tắc bẩn hoàn toàn phin sấy lọc'], 'Tìm rò rỉ, hút chân không, nạp ga; hơ nóng phin và gõ nhẹ để thông, nếu không được phải thay.'],
+  ['Vỏ tủ lạnh, đổ mồ hôi, chạy liên tục', ['Cách nhiệt bị ẩm / đóng băng do vỏ hở hơi'], 'Ngắt điện cho tan đá, sấy khô cách nhiệt, bịt kín chỗ hở bằng silicon rồi lắp lại.']
+], 'Triệu chứng của tủ');
+WIDGETS['dl-test-wire'] = host => dlCalc(host, [
+  { id: 'c', label: 'Động cơ có tụ khởi động?', v: 'n', opts: [['n', 'Không (tủ lạnh dùng rơle dòng)'], ['y', 'Có tụ khởi động']] }, { id: 's', label: 'Đã nối tắt tụ qua 20 kΩ?', v: 'y', opts: [['y', 'rồi'], ['n', 'chưa']] }, { id: 't', label: 'Giữ nút (giây)', v: 1, step: 0.5, min: 0.5, max: 6 }, { id: 'g', label: 'Đã nối đất vỏ blốc?', v: 'y', opts: [['y', 'rồi'], ['n', 'chưa']] }
+], v => {
+  const bad = []; if (v.t > 2) bad.push('⛔ Giữ nút quá 2 giây: nếu động cơ không khởi động, cả hai cuộn có thể cháy.'); if (v.c === 'y' && v.s === 'n') bad.push('⛔ Chưa phóng điện tụ: có thể bị điện giật. Nối tắt hai đầu tụ qua điện trở 20 kΩ (hoặc bút thử điện).'); if (v.g === 'n') bad.push('⛔ Chưa nối đất cho động cơ khi thử.');
+  return 'Dây thử: phích cắm → cầu chì → nút bấm → đồng thời cấp điện cho cuộn R và S (bấm nút 5). ' + (bad.length ? bad.join('<br>') : '✅ An toàn: động cơ thường khởi động trong ≈ 0,5 giây. Nếu không khởi động: kiểm tra cuộn dây / kẹt cơ.') + '<br><i>Tất cả đầu dây thử phải bọc cách điện bằng nhựa hoặc ống cao su.</i>';
+});
+WIDGETS['dl-manifold'] = host => {
+  host.innerHTML = '<div class="row"><label>Van L (hạ áp) <select id="l"><option value="0">đóng</option><option value="1">mở</option></select></label><label>Van H (cao áp) <select id="h"><option value="0">đóng</option><option value="1">mở</option></select></label><label>Đầu C nối với <select id="c"><option value="p">bơm chân không</option><option value="g">chai ga (hơi)</option></select></label></div>';
+  const svg = dlSvg(host, [560, 270], 'Bộ nạp 3 dây'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  rfEl('rect', { x: 170, y: 130, width: 220, height: 36, rx: 6, fill: '#64748b' }, svg);
+  rfEl('circle', { cx: 170, cy: 75, r: 40, fill: 'none', stroke: '#0ea5e9', 'stroke-width': 5 }, svg); rfEl('circle', { cx: 390, cy: 75, r: 40, fill: 'none', stroke: '#ef4444', 'stroke-width': 5 }, svg);
+  dlTxt(svg, 170, 22, 'LO (hạ áp)', { c: '#0ea5e9' }); dlTxt(svg, 390, 22, 'HI (cao áp)', { c: '#ef4444' });
+  const vl = rfEl('circle', { cx: 210, cy: 148, r: 13 }, svg), vh = rfEl('circle', { cx: 350, cy: 148, r: 13 }, svg); dlTxt(svg, 210, 190, 'van L', {}); dlTxt(svg, 350, 190, 'van H', {});
+  [[170, '#0ea5e9', 'đường hút'], [280, '#eab308', 'C (giữa)'], [390, '#ef4444', 'đường đẩy']].forEach(a => { rfEl('line', { x1: a[0], y1: 166, x2: a[0], y2: 222, stroke: a[1], 'stroke-width': 6 }, svg); dlTxt(svg, a[0], 240, a[2], { s: 11 }); });
+  const needle = [rfEl('line', { x1: 170, y1: 75, x2: 170, y2: 45, stroke: '#0ea5e9', 'stroke-width': 3 }, svg), rfEl('line', { x1: 390, y1: 75, x2: 390, y2: 45, stroke: '#ef4444', 'stroke-width': 3 }, svg)];
+  const draw = () => {
+    const l = +host.querySelector('#l').value, h = +host.querySelector('#h').value, c = host.querySelector('#c').value;
+    vl.setAttribute('fill', l ? '#22c55e' : '#94a3b8'); vh.setAttribute('fill', h ? '#22c55e' : '#94a3b8');
+    needle[0].setAttribute('x2', 170 + (l ? 22 : 0)); needle[1].setAttribute('x2', 390 + (h ? -22 : 0));
+    let m;
+    if (!l && !h) m = '<b>Đo áp suất</b>: cả hai van đóng, ga chỉ tới đồng hồ. Mở nhích van dịch vụ 1/8–1/4 vòng để đọc áp hút trên LO và áp đẩy trên HI.';
+    else if (l && h && c === 'p') m = '<b>Hút chân không</b>: C nối bơm, mở cả L và H (và các van trên hệ). Hút ≈ 1 giờ, tráng ga 2 lần trước khi nạp.';
+    else if (l && !h && c === 'g') m = '<b>Nạp ga/dầu phía hút</b>: mở van L, mở dần van chai ga. Nạp HƠI (không nạp lỏng vào đầu hút tủ lạnh).';
+    else if (!l && h && c === 'g') m = '<b>Nạp ga phía đẩy</b>: nạp lỏng (quay ngược chai), hút chân không toàn hệ trước, đóng L; chỉ dùng khi máy NGỪNG.';
+    else if (l && h && c === 'g') m = '⚠ Mở cả hai van với C nối chai ga: ga đi thẳng từ đường đẩy sang đường hút → có thể trào lỏng về máy nén. Không nên.';
+    else if (l && !h && c === 'p') m = 'Hút chân không chỉ phía hút (nhiều bộ nạp 3 dây chỉ dùng phía hạ áp cho tủ gia đình).';
+    else m = 'Chưa phải thao tác chuẩn; hãy chọn một trong 4 dịch vụ cơ bản.';
+    o.innerHTML = m;
+  };
+  host.querySelectorAll('select').forEach(s => s.onchange = draw); draw();
+};
+
+// ================= Chương 9 =================
+WIDGETS['dl-ac-cycle'] = host => {
+  const ret = dlHot(host, {
+    vb: [700, 400], label: 'Chu trình lạnh máy điều hòa 2 cụm', intro: 'Bấm một bộ phận để xem chức năng. Vách giữa tách trong nhà và ngoài trời.',
+    bg: svg => {
+      rfEl('rect', { x: 20, y: 20, width: 300, height: 360, rx: 10, fill: '#38bdf8', 'fill-opacity': .08, stroke: '#38bdf8', 'stroke-dasharray': '5 4' }, svg); rfEl('rect', { x: 380, y: 20, width: 300, height: 360, rx: 10, fill: '#f97316', 'fill-opacity': .08, stroke: '#f97316', 'stroke-dasharray': '5 4' }, svg);
+      dlTxt(svg, 170, 40, 'TRONG NHÀ (cụm bay hơi)', { c: '#0ea5e9', s: 12, w: 700 }); dlTxt(svg, 530, 40, 'NGOÀI TRỜI (cụm ngưng tụ)', { c: '#ea580c', s: 12, w: 700 });
+      dlLn(svg, [[470, 300], [470, 340], [320, 340], [220, 340], [220, 300]], '#0ea5e9', 5, { op: .5 }); dlLn(svg, [[540, 300], [600, 300], [600, 120], [540, 120]], '#ef4444', 5, { op: .5 });
+      dlLn(svg, [[420, 120], [400, 120], [400, 220], [320, 220], [320, 110], [200, 110]], '#f97316', 3, { op: .5 });
+    },
+    parts: [
+      { n: 'Dàn bay hơi', x: 70, y: 190, w: 160, h: 50, c: '#0ea5e9', t: 'Ga sôi ở ~5 °C, thu nhiệt và hơi ẩm của không khí phòng; quạt lồng sóc thổi gió lạnh vào phòng.' },
+      { n: 'Quạt lồng sóc', x: 60, y: 90, w: 120, h: 36, c: '#38bdf8', t: 'Quạt ngang dòng hút gió phòng qua phin lọc và dàn lạnh, thổi vào phòng.', s: 10 },
+      { n: 'Máy nén', x: 470, y: 270, w: 90, h: 50, c: '#64748b', t: 'Rôto/xoắn ốc: hút hơi, nén lên áp cao, đẩy vào dàn ngưng.' },
+      { n: 'Dàn ngưng', x: 420, y: 90, w: 130, h: 60, c: '#f97316', t: 'Hơi nóng thải nhiệt cho không khí ngoài trời và ngưng thành lỏng; quạt dàn ngưng thổi gió.' },
+      { n: 'Phin lọc + ống mao', x: 380, y: 190, w: 140, h: 30, c: '#a855f7', t: 'Phin lọc cặn bẩn rồi ống mao giảm áp, phun lỏng vào dàn bay hơi (ống mao thường đặt ở dàn nóng).', s: 10 }
+    ]
+  });
+  const pts = [[470, 300], [470, 340], [220, 340], [220, 300], [220, 215], [230, 215], [320, 215], [320, 110], [420, 110], [550, 120], [600, 120], [600, 300], [560, 300]]; // gần đúng
+  const poly = dlPoly([[515, 270], [600, 270], [600, 120], [480, 120], [400, 120], [400, 205], [320, 205], [230, 215], [150, 215], [150, 300], [220, 340], [470, 340], [470, 300], [515, 300], [515, 270]]);
+  const dots = []; for (let i = 0; i < 22; i++) dots.push(rfEl('circle', { r: 3.5, stroke: '#111', 'stroke-width': .4, 'pointer-events': 'none' }, ret.svg));
+  let t = 0; dlLoop(host, () => { t += 4; dots.forEach((c, k) => { const p = poly.at(t + k * poly.len / dots.length); c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); const i = p[2]; c.setAttribute('fill', i <= 1 ? '#ef4444' : i <= 3 ? '#fb923c' : i <= 5 ? '#c084fc' : '#7dd3fc'); c.setAttribute('r', (i <= 2 || i >= 9) ? 3 : 4.4); }); }, 60);
+};
+WIDGETS['dl-ac-window'] = host => {
+  const ret = dlHot(host, {
+    vb: [700, 330], label: 'Máy điều hòa cửa sổ (mặt cắt ngang)',
+    bg: svg => { rfEl('rect', { x: 20, y: 40, width: 300, height: 220, fill: '#38bdf8', 'fill-opacity': .08 }, svg); rfEl('rect', { x: 340, y: 40, width: 340, height: 220, fill: '#f97316', 'fill-opacity': .08 }, svg); rfEl('rect', { x: 316, y: 20, width: 10, height: 260, fill: '#64748b' }, svg); dlTxt(svg, 170, 30, 'TRONG PHÒNG', { c: '#0ea5e9', w: 700 }); dlTxt(svg, 510, 30, 'NGOÀI TRỜI', { c: '#ea580c', w: 700 }); dlTxt(svg, 321, 295, 'vách cách nhiệt 5 mm', { s: 10 }); dlTxt(svg, 170, 310, '← gió lạnh vào phòng · gió phòng hút vào ←', { s: 10 }); dlTxt(svg, 510, 310, 'gió làm mát vào bên sườn → thổi nóng ra mặt sau', { s: 10 }); },
+    parts: [
+      { n: 'Phin lọc bụi', x: 30, y: 150, w: 40, h: 90, c: '#94a3b8', t: 'Lọc bụi gió phòng hút vào dàn lạnh. Vệ sinh 2 tuần/lần.', s: 9 },
+      { n: 'Dàn bay hơi', x: 80, y: 130, w: 70, h: 110, c: '#0ea5e9', t: 'Làm lạnh và khử ẩm không khí phòng, luôn ướt nước ngưng.', s: 10 },
+      { n: 'Quạt ly tâm', x: 170, y: 140, w: 70, h: 90, c: '#38bdf8', t: 'Hút gió qua dàn lạnh rồi thổi ra cửa gió phía trước.', s: 10 },
+      { n: 'Cửa gió tươi', x: 250, y: 60, w: 55, h: 30, c: '#22c55e', t: 'Núm điều chỉnh đóng/mở lấy gió tươi (máy 2 cụm không có).', s: 9 },
+      { n: 'Máy nén', x: 350, y: 150, w: 90, h: 100, c: '#64748b', t: 'Máy nén rôto đặt ngay trong vỏ nên máy cửa sổ khá ồn.' },
+      { n: 'Dàn ngưng', x: 460, y: 80, w: 70, h: 160, c: '#f97316', t: 'Nhả nhiệt cho gió lấy từ chớp gió hai bên sườn và phía trên.', s: 10 },
+      { n: 'Quạt hướng trục', x: 550, y: 110, w: 100, h: 90, c: '#fb923c', t: 'Quạt chung trục động cơ, thổi gió nóng ra mặt sau; dùng đồng thời cho quạt ly tâm.', s: 10 },
+      { n: 'Bảng điều khiển', x: 80, y: 60, w: 130, h: 36, c: '#a855f7', t: 'Núm chính 7 nấc: 1 quạt yếu, 2 quạt TB, 3 quạt mạnh, 4 lạnh yếu, 5 lạnh TB, 6 lạnh mạnh, 7 tắt. Núm thermostat chỉnh nhiệt độ phòng.', s: 10 }
+    ]
+  });
+};
+WIDGETS['dl-reversing-valve'] = host => {
+  host.innerHTML = '<div class="row"><label>Chế độ <select id="m"><option value="c">Làm lạnh</option><option value="h">Sưởi ấm</option></select></label><span id="s"></span></div>';
+  const svg = dlSvg(host, [560, 330], 'Van đảo chiều'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  dlBox(svg, 170, 100, 220, 90, 'none', null, { stroke: 'currentColor', sw: 3, r: 14 }); const pis = dlBox(svg, 245, 108, 60, 74, '#a855f7', 'pittông', { s: 10 });
+  dlBox(svg, 240, 50, 80, 36, '#ef4444', 'Cửa đẩy', { s: 10 }); dlBox(svg, 240, 204, 80, 36, '#0ea5e9', 'Cửa hút', { s: 10 }); dlBox(svg, 30, 120, 130, 50, '#38bdf8', 'Dàn trong nhà', { s: 11 }); dlBox(svg, 400, 120, 130, 50, '#f97316', 'Dàn ngoài trời', { s: 11 }); dlBox(svg, 200, 270, 160, 40, '#64748b', 'Máy nén', { s: 12 });
+  const p1 = dlLn(svg, [[280, 270], [280, 240]], '#0ea5e9', 5); const p2 = dlLn(svg, [[280, 270], [280, 255], [425, 255]], 'none', 0);
+  const flows = { d: dlLn(svg, [[200, 270], [150, 270], [150, 68], [240, 68]], '#ef4444', 4, { op: .5 }), s: dlLn(svg, [[320, 222], [360, 222], [360, 270]], '#0ea5e9', 4, { op: .5 }) };
+  const pathL = dlLn(svg, [[170, 145], [95, 145]], 'none', 1), L1 = dlLn(svg, [[170, 145], [130, 145]], '#94a3b8', 4), R1 = dlLn(svg, [[390, 145], [400, 145]], '#94a3b8', 4);
+  const info = dlTxt(svg, 280, 20, '', { s: 12, w: 700 }); const coil = dlBox(svg, 395, 205, 130, 30, '#16a34a', '', { s: 10, r: 6 }); const ct = dlTxt(svg, 460, 224, '', { c: '#fff', s: 10 });
+  const flowDots = []; for (let i = 0; i < 16; i++) flowDots.push(rfEl('circle', { r: 3.5, stroke: '#111', 'stroke-width': .4 }, svg));
+  let pos = 0, target = 0, t = 0, moveT = 0; // pos 0 = lạnh (pittông sang trái), 1 = sưởi
+  const polyC = { d: dlPoly([[200, 270], [150, 270], [150, 68], [240, 68], [280, 68], [330, 100], [440, 100], [440, 120]]), s: dlPoly([[95, 145], [95, 100], [170, 100], [200, 130], [250, 215], [320, 222], [360, 222], [360, 270], [320, 270]]) };
+  const polyH = { d: dlPoly([[200, 270], [150, 270], [150, 68], [240, 68], [200, 100], [130, 145], [95, 145]]), s: dlPoly([[440, 120], [440, 100], [380, 100], [340, 130], [320, 222], [360, 222], [360, 270], [320, 270]]) };
+  host.querySelector('#m').onchange = e => { target = e.target.value === 'h' ? 1 : 0; moveT = 100; };
+  dlLoop(host, () => {
+    t += 3; if (moveT > 0) { moveT--; pos += (target - pos) * 0.04; } else pos = target;
+    pis.setAttribute('transform', 'translate(' + (pos * 0 + (pos - 0.5) * -110) + ',0)'); // trái ↔ phải
+    const heat = target === 1, mv = moveT > 0; host.querySelector('#s').textContent = mv ? '⏳ đang đảo chiều (≈ 10 giây): hơi nóng tràn sang đường hút, áp tạm thời dao động' : '';
+    const P = heat ? polyH : polyC; const A = P.d, B = P.s;
+    flowDots.forEach((c, k) => { const isD = k < 8; const poly = isD ? A : B; const p = poly.at(t + (k % 8) * poly.len / 8); c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); c.setAttribute('fill', isD ? '#ef4444' : '#38bdf8'); c.setAttribute('opacity', mv ? .35 : 1); });
+    coil.firstChild.setAttribute('fill', heat ? '#dc2626' : '#16a34a'); ct.textContent = heat ? 'cuộn điện từ CÓ điện' : 'cuộn điện từ không điện';
+    o.innerHTML = heat ? '<b>SƯỞI ẤM</b>: cuộn điện từ có điện, kim van đóng sang trái, đầu trái van nối đường hút → pittông dịch sang phải. Hơi nóng đẩy vào <b>dàn trong nhà (thành dàn nóng)</b>, dàn ngoài trời trở thành dàn lạnh.' : '<b>LÀM LẠNH</b>: không có dòng qua cuộn điện từ, kim van đóng sang phải. Hơi nóng đẩy vào <b>dàn ngoài trời (dàn ngưng)</b>, hơi từ dàn trong nhà (dàn bay hơi) về đường hút. Cần hiệu áp tối thiểu 3,5 bar để pittông dịch chuyển.';
+    info.textContent = heat ? 'Chế độ sưởi (heat pump)' : 'Chế độ làm lạnh';
+  }, 60);
+};
+WIDGETS['dl-dehumidifier'] = host => {
+  host.innerHTML = '<div class="row"><label>Nhiệt độ phòng <input id="t" type="range" min="20" max="34" value="28"> <b id="tv"></b></label><label>Độ ẩm vào <input id="h" type="range" min="50" max="100" value="85"> <b id="hv"></b></label></div>';
+  const svg = dlSvg(host, [600, 190], 'Máy hút ẩm'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  dlBox(svg, 30, 50, 540, 90, 'none', null, { stroke: 'currentColor', sw: 2, r: 8 }); dlBox(svg, 170, 62, 70, 66, '#0ea5e9', 'Dàn lạnh 5 °C', { s: 10 }); dlBox(svg, 340, 62, 70, 66, '#f97316', 'Dàn nóng', { s: 10 }); dlBox(svg, 460, 62, 60, 66, '#64748b', 'Quạt', { s: 10 }); dlBox(svg, 170, 150, 70, 22, '#22d3ee', 'nước ngưng', { s: 9 });
+  dlLn(svg, [[10, 95], [160, 95]], '#16a34a', 4); dlLn(svg, [[250, 95], [330, 95]], '#0ea5e9', 4); dlLn(svg, [[420, 95], [590, 95]], '#fb923c', 4); const dots = []; for (let i = 0; i < 12; i++) dots.push(rfEl('circle', { r: 4, cy: 95 }, svg));
+  const psat = T => 0.6112 * Math.exp(17.62 * T / (243.12 + T)), w = (T, rh) => { const pv = psat(T) * rh / 100; return 0.622 * pv / (101.3 - pv) * 1000; };
+  let t = 0; dlLoop(host, () => { t += 4; dots.forEach((c, k) => { const x = (t + k * 50) % 600; c.setAttribute('cx', x); c.setAttribute('fill', x < 170 ? '#4ade80' : x < 330 ? '#38bdf8' : '#fb923c'); }); }, 60);
+  const draw = () => { const T = +host.querySelector('#t').value, H = +host.querySelector('#h').value; host.querySelector('#tv').textContent = T + ' °C'; host.querySelector('#hv').textContent = H + '%'; const w1 = w(T, H), w2 = Math.min(w1, w(5, 100)), T2 = T + 4, pv2 = w2 / 1000 * 101.3 / (0.622 + w2 / 1000), rh2 = pv2 / psat(T2) * 100; o.innerHTML = 'Vào: ' + T + ' °C, ' + H + '% (' + w1.toFixed(1) + ' g/kg). Qua dàn lạnh 5 °C: còn ≤ ' + w2.toFixed(1) + ' g/kg ⇒ ngưng ' + Math.max(0, w1 - w2).toFixed(1) + ' g nước/kg không khí. Sưởi lại bởi dàn nóng thành ≈ ' + T2 + ' °C: độ ẩm ra ≈ <b>' + Math.min(100, rh2).toFixed(0) + '%</b>.<br>Nhiệt độ phòng tăng chút ít, độ ẩm tương đối giảm đáng kể (mục tiêu 55–60%).'; };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['dl-scroll'] = host => {
+  host.innerHTML = '<div class="row"><label>Tốc độ <input id="sp" type="range" min="1" max="8" value="3"></label></div>';
+  const svg = dlSvg(host, [480, 330], 'Máy nén xoắn ốc'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const spiral = (off, rot) => { let d = 'M'; for (let a = 0; a <= 3.2 * Math.PI; a += 0.12) { const r = 10 + a * 12; d += (a ? ' L' : '') + (240 + off[0] + r * Math.cos(a + rot)) + ' ' + (160 + off[1] + r * Math.sin(a + rot)); } return d; };
+  const fixed = rfEl('path', { d: spiral([0, 0], 0), fill: 'none', stroke: '#64748b', 'stroke-width': 7, 'stroke-linecap': 'round' }, svg), orb = rfEl('path', { d: spiral([0, 0], Math.PI), fill: 'none', stroke: '#f97316', 'stroke-width': 7, 'stroke-linecap': 'round' }, svg);
+  dlTxt(svg, 70, 40, 'Vòng xoắn tĩnh (xám)', { c: '#64748b', a: 'start' }); dlTxt(svg, 70, 58, 'Vòng xoắn động quay lệch tâm (cam)', { c: '#f97316', a: 'start' }); dlTxt(svg, 240, 160, '⟵ cửa đẩy ở tâm', { s: 10, a: 'start' }); dlTxt(svg, 440, 40, 'hút ở thành bên', { s: 10, a: 'end' });
+  let a = 0; const dots = []; for (let i = 0; i < 12; i++) dots.push(rfEl('circle', { r: 4, fill: '#38bdf8' }, svg));
+  dlLoop(host, () => { a += +host.querySelector('#sp').value * 0.03; orb.setAttribute('transform', 'translate(' + (14 * Math.cos(a)) + ',' + (14 * Math.sin(a)) + ')'); dots.forEach((c, k) => { const th = 3.0 * Math.PI * (1 - ((a / 6 + k / 12) % 1)); const r = 10 + th * 12 + 14; c.setAttribute('cx', 240 + r * Math.cos(th + Math.PI / 2 + 0.6)); c.setAttribute('cy', 160 + r * Math.sin(th + Math.PI / 2 + 0.6)); c.setAttribute('opacity', 0.35 + 0.65 * (1 - th / (3 * Math.PI))); c.setAttribute('r', 5 - 3 * (th / (3 * Math.PI))); }); o.innerHTML = 'Vòng động không quay quanh trục của nó mà <b>quay theo quỹ đạo tròn nhỏ</b>, tạo các khoang hút → nén → đẩy giữa hai vòng; hơi bị dồn dần vào tâm và đẩy ra. Chấm xanh = hơi ga bị nén (nhỏ dần, đậm dần).'; }, 60);
+};
+WIDGETS['dl-ac-motor'] = host => {
+  host.innerHTML = '<div class="row"><button id="go" type="button">▶ Bấm khởi động</button><label><input type="checkbox" id="sc" checked> Tụ khởi động</label><label><input type="checkbox" id="rc" checked> Tụ làm việc</label></div>';
+  const svg = dlSvg(host, [560, 320], 'Động cơ máy nén điều hòa'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const w = {}; const W = (id, pts) => { w[id] = dlLn(svg, pts, '#94a3b8', 3.5); };
+  rfEl('line', { x1: 20, y1: 40, x2: 540, y2: 40, stroke: '#ef4444', 'stroke-width': 3 }, svg); rfEl('line', { x1: 20, y1: 290, x2: 540, y2: 290, stroke: '#3b82f6', 'stroke-width': 3 }, svg);
+  W('a', [[80, 40], [80, 100]]); dlBox(svg, 56, 100, 48, 40, '#8b5cf6', 'Quá tải', { s: 9 }); W('b', [[80, 140], [80, 180], [150, 180]]);
+  W('r', [[150, 180], [150, 200], [150, 290]]); dlBox(svg, 128, 200, 44, 50, '#f97316', 'R', { s: 13 });
+  W('k', [[150, 180], [260, 180]]); const rel = dlBox(svg, 260, 160, 56, 40, '#ec4899', 'K', { s: 13 }); W('k2', [[316, 180], [350, 180]]); const sc = dlBox(svg, 350, 160, 52, 40, '#14b8a6', 'Tụ KĐ', { s: 9 }); W('k3', [[402, 180], [440, 180], [440, 200]]);
+  W('s', [[440, 200], [440, 290]]); dlBox(svg, 418, 200, 44, 50, '#eab308', 'S', { s: 13 });
+  W('rc', [[150, 230], [210, 230], [210, 270], [440, 270]]); dlBox(svg, 270, 255, 60, 30, '#22c55e', 'Tụ làm việc', { s: 9 });
+  dlBox(svg, 248, 90, 120, 50, '#a855f7', 'Rơle điện áp: cuộn dây nhỏ, mảnh', { s: 9 });
+  W('v', [[150, 180], [150, 115], [248, 115]]); W('v2', [[368, 115], [440, 115], [440, 200]]);
+  const bar = rfEl('rect', { x: 20, y: 296, height: 12, rx: 4, fill: '#22c55e' }, svg); dlTxt(svg, 528, 306, 'tốc độ rôto', { a: 'end', s: 9 });
+  let n = 0, run = false;
+  const col = (id, c) => w[id].setAttribute('stroke', c);
+  dlLoop(host, () => {
+    const sc1 = host.querySelector('#sc').checked, rc1 = host.querySelector('#rc').checked;
+    if (run) n = Math.min(1, n + 0.012); const kClosed = run && n < 0.75, volt = 0.2 + 1.1 * n * n; const hot = run ? '#f97316' : '#94a3b8', on = run ? '#22c55e' : '#94a3b8';
+    ['a', 'b', 'r', 'k'].forEach(k => col(k, on)); col('k2', kClosed ? '#f97316' : '#94a3b8'); col('k3', kClosed ? '#f97316' : '#94a3b8'); col('s', kClosed || (run && rc1) ? '#f97316' : '#94a3b8'); col('rc', run && rc1 ? '#22c55e' : '#94a3b8'); col('v', run ? '#a855f7' : '#94a3b8'); col('v2', run ? '#a855f7' : '#94a3b8');
+    rel.firstChild.setAttribute('fill', kClosed ? '#ec4899' : '#94a3b8'); bar.setAttribute('width', n * 500);
+    o.innerHTML = 'Tốc độ ' + (n * 100).toFixed(0) + '% · điện áp cuộn rơle (C–S) ≈ <b>' + (volt * 220).toFixed(0) + ' V</b> · tiếp điểm rơle điện áp (thường đóng): <b>' + (kClosed ? 'ĐÓNG – tụ khởi động ' + (sc1 ? 'đang giúp tăng mômen' : 'không có (mômen khởi động yếu!)') : 'MỞ – ngắt tụ khởi động') + '</b>' + (rc1 ? ' · tụ làm việc luôn ở trong mạch (tăng hiệu suất).' : ' · không có tụ làm việc: hiệu suất giảm.') + (!run ? '<br>Bấm "Bấm khởi động".' : n >= 1 ? '<br>✅ Đã đạt tốc độ định mức, chạy bình thường.' : '');
+  }, 80);
+  host.querySelector('#go').onclick = () => { n = 0; run = true; };
+};
+WIDGETS['dl-voltage-relay'] = host => {
+  host.innerHTML = '<div class="row"><label>Tốc độ rôto <input id="n" type="range" min="0" max="100" value="0"> <b id="nv"></b></label></div>';
+  const svg = dlSvg(host, [520, 240], 'Rơle điện áp'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const X = n => 50 + n * 4.2, Y = v => 200 - v * 1.2;
+  rfEl('line', { x1: 50, y1: 200, x2: 480, y2: 200, stroke: 'currentColor' }, svg); rfEl('line', { x1: 50, y1: 30, x2: 50, y2: 200, stroke: 'currentColor' }, svg); dlTxt(svg, 20, 120, 'V cuộn (V)', { s: 9 }); dlTxt(svg, 270, 224, 'tốc độ rôto (%)', { s: 9 });
+  const V = n => 44 + 242 * Math.pow(n / 100, 2); let d = 'M'; for (let n = 0; n <= 100; n += 2) d += (n ? ' L' : '') + X(n) + ' ' + Y(V(n) / 2.2 * 0.8 * 1.22); rfEl('path', { d, fill: 'none', stroke: '#a855f7', 'stroke-width': 2.5 }, svg);
+  rfEl('line', { x1: X(75), y1: 30, x2: X(75), y2: 200, stroke: '#facc15', 'stroke-dasharray': '4 3' }, svg); dlTxt(svg, X(75), 24, '75%: rơle ngắt', { s: 10 }); const c = rfEl('circle', { r: 6, fill: '#ef4444' }, svg);
+  const set = n => { host.querySelector('#nv').textContent = n + '%'; c.setAttribute('cx', X(n)); c.setAttribute('cy', Y(V(n) / 2.2 * 0.8 * 1.22)); o.innerHTML = 'Điện áp cuộn ≈ <b>' + V(n).toFixed(0) + ' V</b> · tiếp điểm K: <b>' + (n < 75 ? 'ĐÓNG (tụ khởi động còn tham gia)' : 'MỞ (đã ngắt tụ khởi động)') + '</b><br>Khác rơle dòng (tủ lạnh): rơle điện áp có tiếp điểm thường đóng, dây cuộn rất mảnh nhiều vòng, dùng cho nhiều blốc công suất khác nhau và không gây tia lửa.'; };
+  host.querySelector('#n').oninput = e => set(+e.target.value); set(0);
+};
+
+// ================= Chương 10: mạch điện máy điều hòa =================
+WIDGETS['dl-ac-circuit'] = host => {
+  host.innerHTML = '<div class="row"><label>Núm chọn <select id="md"><option value="0">7 Tắt</option><option value="1">1 Quạt yếu</option><option value="2">3 Quạt mạnh</option><option value="3">4 Lạnh yếu</option><option value="4" selected>6 Lạnh mạnh</option></select></label><label><input type="checkbox" id="hp"> Máy 2 chiều (có van đảo chiều)</label><label><input type="checkbox" id="ht"> Chế độ sưởi</label><button id="ov" type="button">⚠ Gây quá tải</button></div><div class="row"><label>Nhiệt độ đặt <input id="sp" type="range" min="18" max="30" value="25"> <b id="spv"></b></label><span>Phòng: <b id="tv"></b></span></div>';
+  const svg = dlSvg(host, [760, 440], 'Mạch điện máy điều hòa'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const OFF = '#94a3b8', ON = '#22c55e', HOT = '#f97316', w = {}; const L = 40, N = 410;
+  const W = (id, pts) => { w[id] = dlLn(svg, pts, OFF, 3.5); };
+  rfEl('line', { x1: 20, y1: L, x2: 740, y2: L, stroke: '#ef4444', 'stroke-width': 3 }, svg); rfEl('line', { x1: 20, y1: N, x2: 740, y2: N, stroke: '#3b82f6', 'stroke-width': 3 }, svg); dlTxt(svg, 14, L - 6, 'L 220 V', { a: 'start', s: 10, c: '#ef4444' }); dlTxt(svg, 14, N + 16, 'N', { a: 'start', s: 10, c: '#3b82f6' });
+  W('i', [[60, L], [60, 80]]); dlBox(svg, 20, 80, 80, 60, '#64748b', 'Núm S', { s: 11 });
+  W('fq', [[100, 95], [190, 95], [190, 150]]); W('fn', [[100, 125], [150, 125], [150, 175], [190, 175]]); W('cm', [[100, 110], [240, 110], [240, 40]]);
+  dlTxt(svg, 140, 90, 'quạt yếu', { s: 8 }); dlTxt(svg, 140, 140, 'quạt mạnh', { s: 8 });
+  // quạt
+  W('f1', [[190, 175], [190, 215]]); dlBox(svg, 165, 215, 50, 50, '#0ea5e9', 'Quạt', { s: 11 }); W('f2', [[190, 265], [190, N]]);
+  // máy nén
+  W('t1', [[300, 95], [300, 130]]); dlBox(svg, 280, 130, 40, 36, '#14b8a6', 'TC', { s: 11 }); W('t2', [[300, 166], [300, 190]]); dlBox(svg, 280, 190, 40, 36, '#8b5cf6', 'F', { s: 11 }); W('t3', [[300, 226], [300, 250], [420, 250]]);
+  W('mr', [[420, 250], [420, 280]]); dlBox(svg, 398, 280, 44, 50, '#f97316', 'R', { s: 13 }); W('mr2', [[420, 330], [420, N]]);
+  W('ms', [[420, 250], [500, 250]]); const kk = dlBox(svg, 500, 232, 50, 36, '#ec4899', 'K', { s: 12 }); W('ms2', [[550, 250], [600, 250], [600, 280]]); dlBox(svg, 578, 280, 44, 50, '#eab308', 'S', { s: 13 }); W('ms3', [[600, 330], [600, N]]);
+  dlTxt(svg, 510, 360, 'Máy nén + tụ + rơle điện áp', { s: 10 }); rfEl('ellipse', { cx: 510, cy: 300, rx: 140, ry: 58, fill: 'none', stroke: 'currentColor', 'stroke-dasharray': '5 4', opacity: .4 }, svg);
+  W('y1', [[690, L], [690, 130]]); dlBox(svg, 660, 130, 60, 50, '#a855f7', 'Y1 van đảo chiều', { s: 9 }); W('y2', [[690, 180], [690, N]]);
+  W('com', [[240, 40], [240, 70], [300, 70], [300, 95]]);
+  const c = { T: 30, th: true, ov: 0 };
+  const set = (k, col) => w[k].setAttribute('stroke', col);
+  const draw = () => {
+    const md = +host.querySelector('#md').value, hp = host.querySelector('#hp').checked, ht = host.querySelector('#ht').checked && hp, sp = +host.querySelector('#sp').value; host.querySelector('#spv').textContent = sp + ' °C';
+    const fan = md >= 1, fast = md === 2 || md === 4, cool = md >= 3, comp = cool && c.th && !c.ov;
+    if (c.ov > 0) c.ov--;
+    if (!ht) { if (c.T >= sp + 1) c.th = true; else if (c.T <= sp - 1) c.th = false; } else { if (c.T <= sp - 1) c.th = true; else if (c.T >= sp + 1) c.th = false; }
+    c.T += comp ? (ht ? 0.05 : -0.06) : (fan && !cool ? 0 : (ht ? -0.01 : 0.012)); const start = comp && (c.k = (c.k || 0) + 1) < 14; if (!comp) c.k = 0;
+    set('i', md ? ON : OFF); set('cm', md ? ON : OFF); set('fq', fan && !fast ? ON : OFF); set('fn', fan && fast ? ON : OFF); set('f1', fan ? ON : OFF); set('f2', fan ? ON : OFF);
+    set('com', cool ? ON : OFF); set('t1', cool ? ON : OFF); set('t2', comp ? ON : OFF); set('t3', comp ? ON : OFF); set('mr', comp ? ON : OFF); set('mr2', comp ? ON : OFF);
+    set('ms', comp && start ? HOT : OFF); set('ms2', comp && start ? HOT : OFF); set('ms3', comp && start ? HOT : OFF); kk.setAttribute('opacity', comp && start ? 1 : .45);
+    const y = comp && ht; set('y1', y ? ON : OFF); set('y2', y ? ON : OFF);
+    host.querySelector('#tv').textContent = c.T.toFixed(1).replace('.', ',') + ' °C';
+    o.innerHTML = 'Quạt: <b>' + (fan ? (fast ? 'mạnh' : 'yếu') : 'tắt') + '</b> · Máy nén: <b>' + (comp ? (start ? 'KHỞI ĐỘNG (rơle điện áp đóng tụ KĐ, dòng lớn)' : 'ĐANG CHẠY') : cool ? (c.ov ? 'rơle quá tải đã nhảy' : 'thermostat ngắt') : 'nghỉ') + '</b>' + (y ? ' · Y1 có điện: van đảo chiều ở chế độ <b>sưởi</b>' : '') + '<br>Mạch: núm S → (quạt) và → thermostat TC → rơle quá tải F → cuộn R; cuộn S qua tiếp điểm K của rơle điện áp và tụ khởi động; tụ làm việc luôn trong mạch.';
+  };
+  host.querySelector('#ov').onclick = () => { c.ov = 60; };
+  host.querySelectorAll('select,input').forEach(i => { i.onchange = draw; i.oninput = draw; });
+  dlLoop(host, draw, 100); draw();
+};
+
+// ================= Chương 11 =================
+WIDGETS['dl-ac-size'] = host => dlCalc(host, [
+  { id: 'q', label: 'Năng suất lạnh', v: 12000, step: 'any' }, { id: 'u', label: 'Đơn vị', v: 'btu', opts: [['btu', 'Btu/h'], ['kw', 'kW'], ['hp', 'HP (≈ 9000 Btu/h)']] }, { id: 'e', label: 'COP / EER (W/W)', v: 3, step: 0.1 }, { id: 'v', label: 'Điện áp (V)', v: 220, step: 1 }
+], v => {
+  const kw = v.q * { btu: 0.00029307, kw: 1, hp: 2.64 }[v.u], pw = kw / (v.e || 3), I = pw * 1000 / (v.v * 0.9);
+  const std = [6000, 9000, 12000, 15000, 18000, 21000, 24000, 36000, 48000], b = kw / 0.00029307;
+  return '<b>' + kw.toFixed(2) + ' kW</b> = ' + b.toFixed(0) + ' Btu/h ≈ ' + (kw / 2.64).toFixed(1) + ' HP.<br>Công suất điện ≈ ' + pw.toFixed(2) + ' kW → dòng làm việc ≈ <b>' + I.toFixed(1) + ' A</b> (cosφ 0,9). Cỡ chuẩn gần nhất: <b>' + std.reduce((a, c) => Math.abs(c - b) < Math.abs(a - b) ? c : a) + ' Btu/h</b>.';
+});
+WIDGETS['dl-ac-ambient'] = host => dlCalc(host, [{ id: 't', label: 'Nhiệt độ ngoài trời (°C)', v: 35, min: 20, max: 52, step: 1 }], v => {
+  const cap = 105 - (v.t - 30) * 1.0, tk = v.t + 17, pk = dlSatP('R22', tk) - 1.013, I = 100 + 1.2 * (v.t - 35);
+  return 'Năng suất lạnh ≈ <b>' + cap.toFixed(0) + '%</b> định mức (30 °C: +5%; 50 °C: −15%) · áp suất đẩy R22 ≈ <b>' + pk.toFixed(1) + ' bar dư</b> (t ngưng ≈ ' + tk.toFixed(0) + ' °C) · dòng làm việc ≈ <b>' + I.toFixed(0) + '%</b> FLA.<br><i>Dùng để đánh giá áp đẩy cao do thời tiết hay do có khí không ngưng: tính từ nhiệt độ ngưng rồi so với áp đo.</i>';
+});
+WIDGETS['dl-ac-factors'] = host => dlCalc(host, [
+  { id: 'd', label: 'Nhiệt độ bay hơi so với chuẩn (°C)', v: 0, step: 1 }, { id: 'a', label: 'Lưu lượng gió', v: '1', opts: [['0.92', 'yếu / phin bẩn'], ['1', 'vừa'], ['1.06', 'mạnh']] }, { id: 'l', label: 'Chiều dài ống (m)', v: 5, min: 3, max: 20, step: 1 }, { id: 'h', label: 'Chênh cao hai dàn (m)', v: 3, min: 0, max: 15, step: 1 }
+], v => {
+  const lf = v.l <= 5 ? 1 : v.l <= 10 ? 1 - (v.l - 5) * 0.01 : 0.95 - (v.l - 10) * 0.02, hf = 1 - Math.max(0, v.h - 3) * 0.01, f = (1 + v.d * 0.03) * v.a * lf * hf;
+  return 'Hệ số hiệu chỉnh tổng ≈ <b>' + (f * 100).toFixed(0) + '%</b> (bay hơi +1 °C ⇒ +3%; gió: ' + (+v.a * 100).toFixed(0) + '%; ống ' + v.l + ' m: ' + (lf * 100).toFixed(0) + '%; chênh cao ' + v.h + ' m: ' + (hf * 100).toFixed(0) + '%).<br>' + (f < 0.9 ? '⚠ Năng suất lạnh giảm đáng kể: vệ sinh phin gió, rút ngắn ống, giảm chênh cao.' : '✅ Gần định mức.');
+});
+WIDGETS['dl-ac-load'] = host => dlCalc(host, [
+  { id: 'a', label: 'Diện tích sàn (m²)', v: 20, min: 1, step: 1 }, { id: 'k', label: 'Loại phòng', v: '450', opts: [['450', 'Phòng ở thường (400–500)'], ['550', 'Khách / ăn / làm việc (500–600)'], ['750', 'Văn phòng (700–800)'], ['850', 'Khách sạn (800–900)'], ['650', 'Cửa hàng quần áo (600–700)'], ['700', 'Bách hóa / ngân hàng (600–760)'], ['1100', 'Hội trường (1000–1200)'], ['1650', 'Vũ trường (1500–1800)']] },
+  { id: 'g', label: 'Toàn kính / nhiều thiết bị nóng', v: '1', opts: [['1', 'không'], ['1.2', 'có (+20%)']] }
+], v => {
+  const need = v.a * v.k * v.g, std = [6000, 9000, 12000, 15000, 18000, 21000, 24000, 36000, 48000], pick = std.find(s => s >= need) || 48000;
+  return 'Nhu cầu ≈ <b>' + need.toFixed(0) + ' Btu/h</b> ≈ ' + (need * 0.00029307).toFixed(2) + ' kW → chọn máy <b>' + pick + ' Btu/h</b> (' + (pick * 0.00029307).toFixed(2) + ' kW, ≈ ' + (pick / 9000).toFixed(1) + ' HP).<br><i>Ước tính cho Hà Nội: ngoài 33 °C, trong 27 °C, tường gạch 200, cửa sổ 20–25% mặt tiền, che nắng.</i>';
+});
+
+// ================= Chương 12 =================
+WIDGETS['dl-ac-install-check'] = host => dlCalc(host, [
+  { id: 'b', label: 'Cách tường sau (mm)', v: 300 }, { id: 's', label: 'Cách tường bên (mm)', v: 100 }, { id: 'f', label: 'Phía trước (mm)', v: 600 }, { id: 'h', label: 'Chênh cao (m)', v: 3, step: 0.5 }, { id: 'l', label: 'Dài ống (m)', v: 5, step: 0.5 }, { id: 'n', label: 'Nghiêng dàn nóng (°)', v: 0, step: 1 }
+], v => {
+  const r = []; if (v.b < 300) r.push('⛔ Dàn nóng sát tường sau (< 300 mm): gió quẩn, nóng.'); if (v.s < 100) r.push('⛔ Bên cạnh < 100 mm.'); if (v.f < 600) r.push('⛔ Phía trước < 600 mm: cản gió thổi ra.'); if (v.h > 3) r.push('⚠ Chênh cao > 3 m (máy gia dụng): năng suất giảm, cần bẫy dầu nếu dàn nóng cao hơn dàn lạnh.'); if (v.l > 5) r.push('⚠ Ống ga > 5 m: bổ sung ga theo mét ống, kiểm tra giới hạn của hãng (có hãng tới 15 m / 10 m).'); if (v.n > 5) r.push('⛔ Nghiêng quá 5°.');
+  return r.length ? r.join('<br>') : '✅ Các khoảng hở và độ cao đạt khuyến nghị.';
+});
+WIDGETS['dl-ac-piping'] = host => dlCalc(host, [
+  { id: 'l', label: 'Dài ống thực tế (m)', v: 10 }, { id: 'f', label: 'Dài ga nạp sẵn (m)', v: 5 }, { id: 'd', label: 'Ống lỏng', v: '20', opts: [['20', 'Φ 1/4" – 20 g/m'], ['50', 'Φ 3/8" – 50 g/m'], ['90', 'Φ 1/2" – 90 g/m'], ['150', 'Φ 5/8" – 150 g/m'], ['300', 'Φ 7/8" – 300 g/m']] }, { id: 'h', label: 'Chênh cao (m)', v: 3 }
+], v => {
+  const ex = Math.max(0, v.l - v.f), g = ex * +v.d; return 'Ống dài hơn phần nạp sẵn: <b>' + ex.toFixed(1) + ' m</b> ⇒ bổ sung ga ≈ <b>' + g.toFixed(0) + ' g</b>.' + (v.l > 5 || v.h > 3 ? '<br>⚠ Vượt khuyến nghị gia dụng (5 m / 3 m): năng suất lạnh giảm.' : '') + '<br>Hút chân không dàn lạnh và ống nối trước khi mở van dàn nóng (không xả ga để đuổi khí).';
+});
+WIDGETS['dl-ac-auto'] = host => dlCalc(host, [{ id: 't', label: 'Nhiệt độ phòng (°C)', v: 26, min: 10, max: 36, step: 0.5 }], v => {
+  const t = v.t; const r = t >= 30 ? ['COOL (làm lạnh)', 27] : t >= 27 ? ['COOL (làm lạnh)', 26] : t >= 24 ? ['DRY (hút ẩm)', 24] : t >= 22 ? ['MONITOR (giám sát)', 23] : ['HEAT (sưởi ấm)', null];
+  return 'Máy tự chọn: <b>' + r[0] + '</b>' + (r[1] ? ' · cài đặt <b>' + r[1] + ' °C</b>' : ' (máy 2 chiều)') + '. Quạt chạy rất nhẹ ~1 phút đầu để cảm nhận nhiệt độ. Đã chọn thì giữ chế độ; chỉ khi đang lạnh mà phòng < 22 °C thì chuyển sưởi, từ sưởi mà > 24 °C thì chuyển hút ẩm.';
+});
+WIDGETS['dl-ac-diag'] = host => dlDiag(host, [
+  ['Không hoạt động, đèn báo không sáng', ['Chưa bật aptomat / cầu chì nổ / mất điện', 'Pin điều khiển hết hoặc hẹn giờ sai', 'Tiếp điểm công tắc / rơle nhiệt độ hỏng; tụ / rơle khởi động hỏng', 'Dây nối hỏng; cuộn dây động cơ chạm chập'], 'Kiểm tra nguồn → pin → vạn năng kế đo thông mạch từng thiết bị; sửa hoặc thay; quấn lại / thay blốc.'],
+  ['Kém lạnh', ['Phin lọc khí bẩn; vật cản đường gió dàn nóng / dàn lạnh', 'Cài nhiệt độ sai; cửa mở', 'Lưu lượng gió / hướng gió sai; quạt không chạy'], 'Vệ sinh phin, loại bỏ trở ngại, cài lại nhiệt độ, kiểm tra quạt.'],
+  ['Quạt gió không quay', ['Mất điện, đứt cầu chì, tuột dây', 'Công tắc chính tiếp xúc kém', 'Cuộn dây động cơ quạt hỏng; tụ quạt hỏng; cánh quạt lỏng'], 'Đo bằng vạn năng kế; quấn lại / thay động cơ; thay tụ; siết vít.'],
+  ['Máy nén khởi động rồi dừng liên tục', ['Nhiệt độ cài sai', 'Dàn ngưng bẩn, gió quẩn, quạt lắp ngược → rơle quá tải ngắt liên tục'], 'Kiểm tra cài đặt; vệ sinh dàn nóng, bỏ vật cản, tránh gió quẩn, kiểm tra quạt.'],
+  ['Máy 2 chiều không đổi được nóng / lạnh', ['Cuộn dây điện từ của van đảo chiều hỏng (đứt / cháy)', 'Van đảo chiều kẹt pittông', 'Rơle nhiệt độ hỏng'], 'Thay cuộn dây; gõ nhẹ búa gỗ lên thân van, không được thì thay; thay / sửa rơle nhiệt độ.'],
+  ['Máy rung và ồn', ['Ốc vít, bulông lỏng; đường ống chạm nhau hoặc chạm vỏ', 'Máy nén hỏng; quạt hỏng'], 'Siết lại, lót đệm cao su / bọt xốp cách ly ống; thay máy nén / quạt.'],
+  ['Rò nước ra nhà', ['Ống thoát nước ngưng không thông / sai độ dốc', 'Lỗ thoát không dùng chưa bịt nút cứng; chuột bít lỗ thoát'], 'Thử đổ nước vào máng; chỉnh dốc, dọn bẫy nước; bịt nút cứng (không dùng dầu nhớt).'],
+  ['Máy dừng đột ngột, đèn vận hành nhấp nháy', ['Vật cản đường gió / phin tắc', 'Bảo vệ điện áp cao hoặc thấp quá', 'Nhiễu từ đèn ống tắc te, radio, tivi'], 'Vệ sinh phin, ngắt aptomat rồi bật lại, thử điều khiển; chờ 3 phút để máy tự chạy lại.']
+], 'Triệu chứng của máy');
+
+// ================= Chương 13 =================
+WIDGETS['dl-tube-bend'] = host => dlCalc(host, [{ id: 'd', label: 'Đường kính ống (mm)', v: 9.5, step: 0.1 }, { id: 'r', label: 'Bán kính uốn thực tế (mm)', v: 60, step: 1 }], v => {
+  const rmin = 5 * v.d, ok = v.r >= rmin; return 'R<sub>min</sub> = 5d = <b>' + rmin.toFixed(0) + ' mm</b>. Bán kính của bạn = ' + v.r + ' mm (' + (v.r / v.d).toFixed(1) + 'd) ⇒ ' + (ok ? '✅ an toàn, tiết diện giữ tròn.' : '⛔ quá gắt: ống bị bẹp / gập. Dùng lò xo uốn ống hoặc dụng cụ uốn cần xoay.');
+});
+WIDGETS['dl-flare'] = host => {
+  host.innerHTML = '<div class="row"><label>Cỡ ống <select id="s"><option value="0">Ø6,35 (1/4")</option><option value="1" selected>Ø9,5 (3/8")</option><option value="2">Ø12,7 (1/2")</option><option value="3">Ø15,9 (5/8")</option><option value="4">Ø19,1 (3/4")</option></select></label><label>Lỗi <select id="e"><option value="0">Đầu loe chuẩn</option><option value="1">Loe quá nhỏ</option><option value="2">Loe quá to</option><option value="3">Miệng loe nứt</option><option value="4">Bavia, trầy xước</option><option value="5">Mặt loe không đồng tâm</option></select></label></div>';
+  const svg = dlSvg(host, [420, 150], 'Đầu loe'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const A = ['8,3–8,7', '12,0–12,4', '15,4–15,8', '18,6–19,0', '22,9–23,3'], msg = ['Đạt: loe đủ 90°, miệng loe đồng tâm, nhẵn.', 'Ống nhô lên quá thấp: miệng loe nhỏ, khả năng rò ga lớn → cắt đi loe lại, nhô đúng cỡ (≈ 1 mm).', 'Ống nhô quá cao: miệng loe quá to, không lọt vào mũ ren hoặc bị rách, nhăn → rò. Cắt bỏ loe lại.', 'Ống bị hóa cứng: ram ống (nung đỏ thẫm rồi để nguội) rồi loe lại; nhớ tiến nửa vòng lùi 1/4 vòng.', 'Chưa nạo bavia / dũa vuông góc; mặt loe xây xát → rò ga. Dũa phẳng, doa bavia bên trong.', 'Ống chưa lắp vuông góc hoặc nón loe nghiêng → miệng méo. Kẹp lại, loe từ từ.'];
+  const draw = () => { const s = +host.querySelector('#s').value, e = +host.querySelector('#e').value; svg.innerHTML = ''; const w = e === 1 ? 24 : e === 2 ? 56 : 40; rfEl('rect', { x: 60, y: 60, width: 150, height: 30, fill: '#cbd5e1' }, svg); rfEl('path', { d: 'M210 60 L' + (240 + w * 0.4) + ' ' + (75 - w) + ' L' + (240 + w * 0.4) + ' ' + (75 + w) + ' L210 90 Z', fill: '#f59e0b', stroke: e === 3 ? '#ef4444' : '#92400e', 'stroke-width': e === 3 ? 3 : 1.5, 'stroke-dasharray': e === 3 ? '4 3' : '' }, svg); if (e === 4) { rfEl('path', { d: 'M215 70 l8 4 M222 82 l8 -3', stroke: '#111' }, svg); } dlTxt(svg, 210, 130, 'đường kính miệng loe chuẩn: ' + A[s] + ' mm', { s: 12 }); dlTxt(svg, 140, 50, 'ống đồng', { s: 11 }); o.innerHTML = msg[e]; };
+  host.querySelectorAll('select').forEach(x => x.onchange = draw); draw();
+};
+WIDGETS['dl-braze-flux'] = host => dlCalc(host, [{ id: 't', label: 'Nhiệt độ mối hàn (°C)', v: 300, min: 20, max: 650, step: 5 }], v => {
+  const t = v.t; const s = t < 100 ? 'Trợ dung khô, chưa có gì.' : t < 316 ? 'Ẩm bốc hơi ở 100 °C; trợ dung chuyển sang màu <b>trắng sữa</b>.' : t < 427 ? 'Từ ~316 °C trợ dung bắt đầu <b>sủi bọt</b>.' : t < 593 ? 'Từ ~427 °C trợ dung nằm trên mối hàn, màu trắng sữa, chưa tới nhiệt độ hàn.' : t < 604 ? 'Trợ dung thành chất lỏng trong <b>(~593 °C)</b>: sát nhiệt độ hàn; ngọn lửa chuyển xanh lục.' : t < 618 ? '<b>604 °C que bạc bắt đầu chảy</b>, 618 °C lưu động hoàn toàn.' : '⚠ Quá nhiệt: có thể cháy ống / làm hỏng mối hàn.';
+  return s + (t >= 604 && t <= 640 ? '<br>✅ Quét que hàn vào mép mối hàn (không đốt trực tiếp que bằng ngọn lửa).' : '');
+});
+WIDGETS['dl-tube-pinch'] = host => dlHot(host, {
+  vb: [520, 220], label: 'Thắt ống và kẹp ống',
+  bg: svg => { dlTxt(svg, 130, 20, 'Thắt ống', { w: 700 }); dlTxt(svg, 390, 20, 'Kẹp ống công nghệ', { w: 700 }); },
+  parts: [
+    { n: 'Ống lớn', x: 30, y: 60, w: 130, h: 36, c: '#d97706', t: 'Ống dàn bay hơi / ống từ phin lọc; hàn với ống nhỏ.' },
+    { n: 'Ống mao', x: 150, y: 70, w: 100, h: 14, c: '#a855f7', t: 'Ống nhỏ lồng vào ống lớn đã được thắt; nước hàn điền đầy khe, không chảy vào ống mao.', s: 8 },
+    { n: 'Bánh thắt', x: 80, y: 120, w: 70, h: 28, c: '#64748b', t: 'Dụng cụ thắt ống giống dao cắt ống nhưng lưỡi dao thay bằng bánh xe bóp thắt dần ống.', s: 10 },
+    { n: 'Kìm kẹp ống', x: 320, y: 70, w: 130, h: 40, c: '#16a34a', t: 'Kẹp ống công nghệ (Ø6, kín khó) trước khi cắt đầu và hàn bịt: dụng cụ ROBINAIR cho ống mềm tối đa Ø9,5 mm.' },
+    { n: 'Ống công nghệ', x: 340, y: 130, w: 90, h: 14, c: '#0ea5e9', t: 'Ống nạp ga; sau khi nạp đủ: kẹp → tháo van trích → cắt đầu → bóp đầu ống → hàn kín → thử kín mối hàn.', s: 8 }
+  ]
+});
+WIDGETS['dl-torque'] = host => dlCalc(host, [{ id: 'd', label: 'Cỡ ống', v: '12.7', opts: [['9.5', 'Ø9,5 – 33–40 N·m'], ['12.7', 'Ø12,7 – 50–62 N·m'], ['15.9', 'Ø15,9 – 63–77 N·m'], ['19.1', 'Ø19,1 – 100–120 N·m']] }, { id: 'n', label: 'Mômen đã siết (N·m)', v: 55, step: 1 }], v => {
+  const R = { '9.5': [33, 40], '12.7': [50, 62], '15.9': [63, 77], '19.1': [100, 120] }[v.d];
+  return 'Khoảng chuẩn: <b>' + R[0] + '–' + R[1] + ' N·m</b> (' + R[0] * 10 + '–' + R[1] * 10 + ' kG·cm). Bạn siết ' + v.n + ' N·m ⇒ ' + (v.n < R[0] ? '⚠ quá lỏng: nguy cơ rò ga.' : v.n > R[1] ? '⛔ quá chặt: nguy cơ đứt / vỡ côn loe.' : '✅ đúng mômen.') + '<br>Quy trình: tháo mũ ren → nhỏ dầu nhớt đầu loe → chỉnh thẳng, vặn tay 4–5 vòng → siết cờ lê lực (2 cờ lê: giữ + siết).';
+});
+
+// ================= Chương 14 =================
+WIDGETS['dl-service-valve'] = host => {
+  host.innerHTML = '<div class="row"><label><input type="radio" name="v" value="0" checked> Vặn xuống (đóng đường)</label><label><input type="radio" name="v" value="1"> Lưng chừng (3 ngả)</label><label><input type="radio" name="v" value="2"> Nâng lên hết (vận hành)</label></div>';
+  const svg = dlSvg(host, [560, 230], 'Van dịch vụ'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  dlBox(svg, 40, 90, 120, 50, '#f97316', 'Về dàn ngưng / máy nén', { s: 9 }); dlBox(svg, 400, 90, 130, 50, '#0ea5e9', 'Ống nối dàn lạnh', { s: 10 }); dlBox(svg, 230, 150, 100, 40, '#64748b', 'Cửa dịch vụ', { s: 10 });
+  rfEl('rect', { x: 160, y: 95, width: 240, height: 40, rx: 6, fill: 'none', stroke: 'currentColor', 'stroke-width': 3 }, svg); const stem = rfEl('rect', { x: 262, width: 36, height: 55, fill: '#a855f7' }, svg); const kn = dlBox(svg, 252, 20, 56, 26, '#7c3aed', 'tay van', { s: 9 });
+  const a = dlLn(svg, [[160, 115], [260, 115]], '#94a3b8', 6), b = dlLn(svg, [[300, 115], [400, 115]], '#94a3b8', 6), c = dlLn(svg, [[280, 135], [280, 150]], '#94a3b8', 6);
+  const draw = () => { const ck = host.querySelector('input:checked'); const p = ck ? +ck.value : 0; stem.setAttribute('y', p === 0 ? 85 : p === 1 ? 62 : 36); kn.setAttribute('transform', 'translate(0,' + (p === 0 ? 65 : p === 1 ? 42 : 16) + ')'); a.setAttribute('stroke', p === 2 ? '#22c55e' : p === 1 ? '#22c55e' : '#94a3b8'); b.setAttribute('stroke', p === 0 ? '#22c55e' : p === 1 ? '#22c55e' : '#22c55e'); c.setAttribute('stroke', p === 1 ? '#22c55e' : '#94a3b8');
+    o.innerHTML = ['<b>Kim van vặn xuống:</b> khóa đường thông với máy nén / dàn ngưng (nhốt ga lúc xuất xưởng); ống nối dàn lạnh thông cửa dịch vụ.', '<b>Kim van ở lưng chừng:</b> thông cả 3 ngả (dàn nóng – dàn lạnh – cửa dịch vụ): dùng khi đo áp suất, hút chân không, nạp ga.', '<b>Kim van nâng lên hết:</b> khóa cửa dịch vụ, dàn nóng và dàn lạnh thông nhau – vị trí vận hành bình thường sau khi lắp xong.'][p]; };
+  host.querySelectorAll('input').forEach(i => i.onchange = draw); draw();
+};
+WIDGETS['dl-leak-test'] = host => dlCalc(host, [
+  { id: 'p1', label: 'Áp kế hôm trước (bar)', v: 12, step: 0.1 }, { id: 'b1', label: 'Khí quyển hôm trước (bar)', v: 1.013, step: 0.001 }, { id: 't1', label: 'Nhiệt độ hôm trước (°C)', v: 32, step: 1 }, { id: 't2', label: 'Nhiệt độ hôm sau (°C)', v: 26, step: 1 }, { id: 'b2', label: 'Khí quyển hôm sau (bar)', v: 1.013, step: 0.001 }, { id: 'p2', label: 'Áp kế hôm sau (bar)', v: 11.5, step: 0.1 }
+], v => {
+  const e = (v.t2 + 273) / (v.t1 + 273) * (v.p1 + v.b1) - v.b2, d = v.p2 - e;
+  return 'Áp suất dự kiến nếu hệ kín: <b>' + e.toFixed(2) + ' bar</b> (p<sub>d2</sub> = T₂/T₁·(p<sub>d1</sub>+p<sub>b1</sub>) − p<sub>b2</sub>). Đo được ' + v.p2 + ' bar ⇒ ' + (d >= -0.15 ? '✅ khớp: hệ thống <b>kín</b> (tụt do nhiệt độ).' : '⛔ thấp hơn dự kiến ' + (-d).toFixed(2) + ' bar: <b>có rò</b> — tìm bằng nước xà phòng.');
+});
+WIDGETS['dl-halide'] = host => {
+  host.innerHTML = '<div class="row"><label>Mức rò ga <input id="l" type="range" min="0" max="10" value="0"> <b id="lv"></b></label></div>';
+  const svg = dlSvg(host, [360, 220], 'Đèn halide'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  dlBox(svg, 140, 140, 80, 60, '#64748b', 'bình propan', { s: 9 }); dlBox(svg, 162, 90, 36, 50, '#94a3b8', null); dlBox(svg, 130, 70, 100, 24, '#a16207', 'tấm đồng', { s: 10 });
+  const fl = rfEl('path', { d: 'M180 70 Q165 40 180 10 Q195 40 180 70', fill: '#bfdbfe', opacity: .85 }, svg);
+  const draw = () => { const l = +host.querySelector('#l').value; host.querySelector('#lv').textContent = l; const c = l === 0 ? '#e0e7ff' : l < 5 ? '#4ade80' : '#38bdf8'; fl.setAttribute('fill', c); fl.setAttribute('transform', 'translate(0,' + (-l * 1.2) + ') scale(1,' + (1 + l * 0.04) + ')'); o.innerHTML = l === 0 ? 'Ngọn lửa propan/butan gần như không màu (xanh nhạt): <b>không rò</b>.' : l < 5 ? 'Ngọn lửa <b>xanh lục</b>: có halogen (freon) — rò nhẹ.' : 'Ngọn lửa <b>xanh da trời sáng</b>: rò <b>nhiều</b>. Phát hiện nhỏ tới ≈ 5 g/tháng.'; };
+  host.querySelector('#l').oninput = draw; draw();
+};
+WIDGETS['dl-fridge-charge'] = host => {
+  host.innerHTML = '<div class="row"><label>Lượng ga nạp <input id="c" type="range" min="50" max="140" value="100"> <b id="cv"></b></label></div>';
+  const svg = dlSvg(host, [560, 200], 'Tuyết bám dàn bay hơi'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const segs = []; for (let i = 0; i < 8; i++) segs.push(rfEl('rect', { x: 40 + i * 50, y: 40, width: 40, height: 70, rx: 6, fill: '#0ea5e9' }, svg)); const fr = segs.map(s => rfEl('rect', { x: +s.getAttribute('x'), y: 40, width: 40, height: 70, rx: 6, fill: '#fff', opacity: 0 }, svg));
+  dlTxt(svg, 220, 30, 'Dàn bay hơi', { w: 700 }); const hut = rfEl('rect', { x: 40, y: 140, width: 480, height: 18, rx: 6, fill: '#7dd3fc' }, svg); const hf = rfEl('rect', { x: 40, y: 140, width: 480, height: 18, rx: 6, fill: '#fff', opacity: 0 }, svg); dlTxt(svg, 280, 180, 'Ống hút về máy nén', { s: 11 });
+  const draw = () => { const c = +host.querySelector('#c').value; host.querySelector('#cv').textContent = c + '%'; const cover = Math.max(0, Math.min(8, (c - 55) / 45 * 8)); fr.forEach((r, i) => r.setAttribute('opacity', i < cover ? Math.min(1, cover - i) * 0.9 : 0)); hf.setAttribute('opacity', c > 108 ? Math.min(1, (c - 108) / 20) * 0.9 : 0);
+    o.innerHTML = c < 90 ? '⚠ <b>Thiếu ga</b>: dàn bám tuyết một phần; áp đẩy và áp hút thấp; tủ chạy gần như liên tục. (Cũng phải tìm chỗ rò!)' : c <= 108 ? '✅ <b>Đủ ga</b>: toàn bộ dàn bám tuyết đều, ống hút không bám tuyết / đổ mồ hôi.' : '⚠ <b>Thừa ga</b>: tuyết bám lan sang ống hút; ba áp suất đều cao; ướt cách nhiệt, tủ chạy liên tục — rút bớt ga.'; };
+  host.querySelector('#c').oninput = draw; draw();
+};
+WIDGETS['dl-clamp'] = host => dlCalc(host, [{ id: 'i', label: 'Dòng thực (A)', v: 1.3, step: 0.1 }, { id: 'r', label: 'Nấc thang', v: '15', opts: [['6', '6 A'], ['15', '15 A'], ['60', '60 A'], ['150', '150 A']] }, { id: 'j', label: 'Gọng kìm ngoặm', v: '1', opts: [['1', 'MỘT dây dẫn'], ['2', 'cả hai dây (pha + trung tính)'], ['0', 'không ngoặm']] }], v => {
+  if (v.j !== '1') return '⛔ Số chỉ ≈ <b>0 A</b>: từ trường hai dây ngược chiều triệt tiêu / không có dây. Chỉ ngoặm <b>một dây</b>.';
+  const r = +v.r; if (v.i > r) return '⛔ Dòng ' + v.i + ' A vượt nấc ' + r + ' A: chuyển lên nấc cao hơn (chưa biết dòng thì để nấc cao nhất).';
+  return 'Kim chỉ ≈ <b>' + (v.i / r * 100).toFixed(0) + '%</b> thang đo ⇒ ' + (v.i / r < 0.15 ? 'kim ở vị trí thấp, hạ xuống nấc nhỏ hơn cho dễ đọc.' : '✅ đọc được ' + v.i + ' A.') + '<br><i>Dòng khởi động LRA chỉ xuất hiện ≈ 1 s: đo ngay lúc đóng điện; không đo > 100 A quá lâu; điện áp tối đa 600 V.</i>';
+});
+WIDGETS['dl-multimeter'] = host => dlDiag(host, [
+  ['Điện áp ổ cắm (xoay chiều)', ['ACV'], 'Núm xoay vào nấc ACV phù hợp (cao nhất nếu chưa biết); que đen cắm ổ ⊖, que đỏ ổ ⊕; mắc <b>song song</b> với tải / nguồn.'],
+  ['Điện áp pin / mạch một chiều', ['DCV'], 'Núm xoay vào nấc DCV; que đen cực âm, que đỏ cực dương, mắc song song với tải.'],
+  ['Dòng điện một chiều nhỏ (mA)', ['DCmA'], 'Ngắt hộ tiêu thụ khỏi mạch và mắc <b>nối tiếp</b> vạn năng kế: que đen cực âm, que đỏ cực dương. Giá trị có thể tới 50 µA ở thang 10 nhân hệ số 5.'],
+  ['Điện trở cuộn dây / thông mạch', ['Ω'], 'Núm xoay vào nấc Ω; chập hai que đo và hiệu chỉnh kim về 0 bằng núm OΩ ADJ (không về 0 được ⇒ thay pin). <b>Luôn cắt nguồn điện</b> trước khi đo điện trở.'],
+  ['Xác định C – S – R của blốc', ['Ω'], 'Đo ba cặp cọc: C–R nhỏ nhất, C–S trung bình, S–R lớn nhất.'],
+  ['Thử pin vạn năng kế', ['Tải 10 Ω'], 'Đo điện áp pin bằng tải 10 Ω; so sánh nấc DC 3 V; thang chia 0,9–1,8 V.']
+], 'Cần đo');
+
+// ================= Chương 15 =================
+WIDGETS['dl-compressor-diag'] = host => dlCheck(host, [
+  ['Vệ sinh sạch bên ngoài blốc', 'Tránh bụi bẩn lọt vào khi mở nắp cọc.'], ['Mở nắp bảo vệ cọc tiếp điện', ''], ['Tháo rơle khởi động, rơle bảo vệ, tụ khởi động', 'Loại trừ hỏng hóc của thiết bị ngoài.'],
+  ['Đo thông mạch cuộn dây & điện trở cách điện với vỏ (mêgaôm)', 'Đạt ≥ 5 MΩ.'], ['Đo điện trở các cuộn dây (chập vòng)', 'R<sub>R</sub> < R<sub>S</sub>; so với thông số.'], ['Chọn tụ & rơle phù hợp, đấu mạch khởi động thử bằng phích riêng', 'Dùng dây thử, giữ nút ≤ 2 giây.'],
+  ['Blốc khởi động tốt ⇒ hỏng ở mạch ngoài; không khởi động ⇒ quấn lại / thay blốc', ''], ['Thử nén bằng van trích: chạy 5–10 phút, ghi độ chân không rồi dừng máy', 'Chân không giảm nhanh về 680 → 330 mbar: van xả rò.']
+], '✅ Đã thực hiện đủ các bước chẩn đoán blốc.');
+WIDGETS['dl-pressure-charge'] = host => {
+  host.innerHTML = '<div class="row"><label>Tình trạng <select id="s"><option value="0">Đủ ga</option><option value="1">Thừa ga</option><option value="2">Thiếu ga</option><option value="3">Ống mao quá nhỏ / dài</option></select></label><label>Nhiệt độ môi trường <input id="a" type="range" min="15" max="38" value="23"> <b id="av"></b></label></div>';
+  const svg = dlSvg(host, [520, 200], 'Áp suất'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const draw = () => { const s = +host.querySelector('#s').value, a = +host.querySelector('#a').value; host.querySelector('#av').textContent = a + ' °C'; svg.innerHTML = '';
+    const pb = dlSatP('R12', a), pk0 = dlSatP('R12', a + 17), pe0 = dlSatP('R12', a - 45);
+    const f = [[1, 1, 1], [1.2, 1.3, 1.12], [0.85, 0.75, 0.82], [1.35, 0.7, 1]][s]; const pk = pk0 * f[0], pe = Math.max(0.3, pe0 * f[1]), pc = pb * f[2];
+    const bars = [['Ngưng tụ', pk, '#ef4444'], ['Bay hơi', pe, '#0ea5e9'], ['Cân bằng (dừng 4 ph)', pc, '#16a34a']]; const Y = p => 170 - p * 11;
+    bars.forEach((b, i) => { rfEl('rect', { x: 70 + i * 150, y: Y(b[1]), width: 70, height: 170 - Y(b[1]), fill: b[2], rx: 4 }, svg); dlTxt(svg, 105 + i * 150, Y(b[1]) - 6, b[1].toFixed(1) + ' bar', { s: 11, w: 700 }); dlTxt(svg, 105 + i * 150, 188, b[0], { s: 10 }); });
+    o.innerHTML = ['<b>Đủ ga</b>: nhiệt độ ngưng ≈ t<sub>mt</sub> + 17 °C (' + (a + 17) + ' °C); dàn ngưng chỉ có lỏng ở đoạn cuối gần phin; ống hút không đổ mồ hôi.', '<b>Thừa ga</b>: áp ngưng, bay hơi, cân bằng đều cao hơn bình thường; ống hút đổ mồ hôi / bám tuyết.', '<b>Thiếu ga</b>: cả ba áp suất đều nhỏ hơn bình thường; chỉ một phần dàn bám tuyết.', '<b>Ống mao quá nhỏ</b>: áp ngưng quá cao, áp bay hơi quá thấp, dàn ngưng ngập lỏng, dàn bay hơi thiếu lỏng (giống thiếu ga nhưng không phải thiếu ga).'][s]; };
+  host.querySelectorAll('select,input').forEach(x => { x.onchange = draw; x.oninput = draw; }); draw();
+};
+WIDGETS['dl-block-test'] = host => dlDiag(host, [
+  ['Cắt ống mao sát phin, mở van trích: CÓ hơi ga xì ra ở phin sấy lọc', ['Phin sấy lọc không tắc'], 'Kiểm tra tiếp ống mao.'],
+  ['Cắt ống mao sát phin: KHÔNG thấy ga ra ở phin', ['Phin sấy lọc bị tắc'], 'Thay phin sấy lọc mới.'],
+  ['Phía ống mao không thấy hơi ra', ['Ống mao bị tắc (ẩm, sáp, bẹp)'], 'Thông bằng dụng cụ áp cao (R141b); không thông được thì thay mới.'],
+  ['Hơ nóng ống trước phin 10 cm, sờ thấy RẤT nóng', ['Thiếu ga (bên trong chỉ có hơi truyền nhiệt kém)'], 'Tìm rò, nạp lại ga.'],
+  ['Hơ nóng ống trước phin, ít nóng', ['Đủ ga (có lỏng bay hơi)'], 'Chưa phải thiếu ga: xét ống mao / phin.'],
+  ['Mở van trích trước phin: chỉ có hơi xì ra', ['Hệ thống thiếu ga'], 'Hút chân không, nạp lại đúng lượng.'],
+  ['Mở van trích trước phin: có ga lỏng xì ra', ['Hệ thống đủ ga'], 'Hệ vẫn ổn về lượng nạp.']
+], 'Kết quả quan sát');
+WIDGETS['dl-burnout'] = host => dlDiag(host, [
+  ['Ẩm lọt vào hệ thống', ['Ẩm + ga freon + dầu ⇒ axit HCl, HF, bùn', 'Ăn mòn, hỏng sơn emay cách điện cuộn dây', 'Chập vòng dây ⇒ cháy động cơ'], 'Hút chân không ≥ 1 giờ + 3 bước, thay phin sấy lọc, súc rửa bằng R141b, thay dầu.'],
+  ['Khí không ngưng / dàn ngưng bẩn', ['Áp suất đầu đẩy cao ⇒ nhiệt độ cuối tầm nén cao', 'Dầu biến chất, hóa bùn', 'Khi t đầu đẩy ≥ 170 °C: dầu mất khả năng bôi trơn ⇒ bạc biên, sécmăng cháy ⇒ bó máy nén ⇒ cháy động cơ'], 'Vệ sinh dàn ngưng bằng khí nén / nitơ, xả khí không ngưng, kiểm tra quạt.'],
+  ['Thiếu ga lạnh về làm mát môtơ', ['Động cơ quá nhiệt (cuộn dây được làm mát bằng hơi hút về)', 'Rơle bảo vệ nhảy nhiều lần, để lâu hỏng', 'Cháy cuộn dây'], 'Tìm rò rỉ, nạp đúng lượng; thay rơle bảo vệ yếu.'],
+  ['Điện áp thấp / cắm nhầm 110 V vào 220 V', ['Không khởi động được nhiều lần (dòng LRA kéo dài)', 'Quá dòng ⇒ nhiệt tăng', 'Cháy cuộn dây'], 'Dùng ổn áp / biến thế đúng điện áp; kiểm tra điện áp lúc khởi động.'],
+  ['Máy nén bị kẹt (thiếu dầu, mòn)', ['Rôto không quay, dòng ngắn mạch kéo dài', 'Rơle bảo vệ hỏng không ngắt', 'Cháy cuộn dây'], 'Thay blốc; nạp đủ dầu.']
+], 'Nguyên nhân gốc');
+WIDGETS['dl-replace-steps'] = host => dlCheck(host, [
+  ['Vệ sinh sạch đầu ống nối phía hệ thống và phía máy nén', 'Giảm bụi bẩn lọt vào.'], ['Lắp van trích / đầu ga van dịch vụ / ống công nghệ', ''], ['Đặt blốc mới, thêm ống nối nếu cần; hàn bạc ít thuốc hàn', 'Che chắn vỏ cách nhiệt, quấn giẻ ướt các mối hàn khác.'],
+  ['Làm sạch ống nối phin, thay phin sấy lọc mới (cùng cỡ); thêm phin thứ hai ở ống hút', ''], ['Nạp ga ~2 bar thử kín', ''], ['Hút chân không ≥ 1 giờ, khóa van kiểm tra độ kín chân không', 'Kim không tăng ⇒ hệ kín.'], ['Nạp chút ga cho ngang khí quyển; lắp lại thiết bị điện', ''],
+  ['Nạp đủ lượng ga (nạp hơi dư rồi xả bớt) và chạy thử qua nhiều chu kỳ', ''], ['Tháo bộ nạp 3 dây, bịt kín cửa dịch vụ; ghi nhiệt độ 24 giờ nếu có thể', ''], ['Kiểm tra nhiệt độ đầu blốc, đầu đẩy, dàn ngưng, ống hút', 'Có phù hợp thông số?']
+], '✅ Đã thay blốc đúng quy trình.');
+WIDGETS['dl-toolbox'] = host => {
+  const T = [['Cờ lê / mỏ lết', '🔧', 'Siết mũ ren, tháo lắp van; dùng hai cờ lê khi siết mối loe.'], ['Tuốc nơ vít', '🪛', 'Tháo lắp vít; không dùng nạy tuyết dàn nhôm.'], ['Kìm cắt / kìm bấm', '✂️', 'Cắt dây, ống; cắt ống mao cần kìm hoặc dũa chứ không dùng cưa.'], ['Dao cắt ống + nạo bavia', '⭕', 'Cắt ống đồng, nạo bavia, tránh mạt đồng rơi vào ống.'], ['Bộ loe ống', '🔔', 'Loe đầu ống 90° với bàn loe đúng cỡ.'], ['Lò xo uốn ống', '🌀', 'Uốn ống không bị bẹp; R ≥ 5d.'], ['Đèn khò / mỏ hàn', '🔥', 'Hàn bạc / hàn đồng các mối nối ga.'], ['Đèn dò ga halide', '🕯️', 'Phát hiện rò ga lạnh qua màu ngọn lửa.'], ['Bộ nạp 3 dây', '🧰', 'Đo áp suất, hút chân không, nạp ga.'], ['Bơm chân không', '💨', 'Hút ẩm và không khí khỏi hệ thống.'], ['Xi lanh nạp ga / cân', '⚖️', 'Nạp đúng lượng ga lạnh.'], ['Ampe kìm / vạn năng kế / mêgaôm', '📟', 'Đo dòng, điện áp, điện trở, cách điện.'], ['Nhiệt kế / phong tốc kế', '🌡️', 'Đo nhiệt độ bề mặt, tốc độ gió.']];
+  dlHot(host, { vb: [680, 330], label: 'Hộp dụng cụ', intro: 'Bấm một dụng cụ để xem công dụng.', parts: T.map((t, i) => ({ n: t[0], x: 20 + (i % 5) * 130, y: 10 + Math.floor(i / 5) * 105, w: 120, h: 92, c: '#475569', t: t[2], draw: g => { rfEl('rect', { x: 20 + (i % 5) * 130, y: 10 + Math.floor(i / 5) * 105, width: 120, height: 92, rx: 10, fill: '#475569', opacity: .92 }, g); dlTxt(g, 80 + (i % 5) * 130, 55 + Math.floor(i / 5) * 105, t[1], { s: 30 }); dlTxt(g, 80 + (i % 5) * 130, 90 + Math.floor(i / 5) * 105, t[0].length > 20 ? t[0].slice(0, 19) + '…' : t[0], { c: '#fff', s: 10, w: 600 }); } })) });
+};
