@@ -1440,13 +1440,171 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "dperf",
+  "title": "Designing for Performance",
+  "subtitle": "Cân bằng thẩm mỹ và tốc độ trang",
+  "author": "Lara Callender Hogan (O'Reilly, 2014)",
+  "cat": "Thiết kế web",
+  "tags": [
+    "Hiệu năng web",
+    "Tối ưu ảnh",
+    "CSS",
+    "Responsive",
+    "WebPagetest",
+    "UX"
+  ],
+  "level": "Cơ bản → Trung cấp",
+  "emoji": "⚡",
+  "color": "#f59e0b",
+  "desc": "8 chương dành cho designer và developer: tốc độ là trải nghiệm, cách trình duyệt dựng trang, tối ưu ảnh/HTML/CSS/font, responsive hiệu quả, đo lường (WebPagetest, RUM), ngân sách hiệu năng, thí nghiệm A/B và xây văn hóa hiệu năng. Có máy tính và mô phỏng tương tác.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Hiệu năng chính là trải nghiệm người dùng",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Kiến thức cơ bản về tốc độ trang",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Tối ưu hình ảnh",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Tối ưu markup và style",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Responsive web design và hiệu năng",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Đo lường và cải tiến hiệu năng",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Cân bằng giữa thẩm mỹ và hiệu năng",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Thay đổi văn hóa trong tổ chức",
+      "ready": true
+    }
+  ]
+},
+{
+  "id": "hpws",
+  "title": "High Performance Web Sites",
+  "subtitle": "14 quy tắc tăng tốc website cho kỹ sư frontend",
+  "author": "Steve Souders – O'Reilly, 2007",
+  "cat": "Lập trình & AI",
+  "tags": [
+    "Hiệu năng web",
+    "HTTP",
+    "Cache",
+    "Frontend",
+    "YSlow"
+  ],
+  "level": "Cơ bản → Trung cấp",
+  "emoji": "🚀",
+  "color": "#f97316",
+  "desc": "17 chương: Quy tắc vàng 80/20, tổng quan HTTP, 14 quy tắc (giảm request, CDN, Expires, gzip, CSS/JS đặt đâu, DNS, minify, redirect, ETag, Ajax) và phân tích 10 website hàng đầu. Có flashcard, trắc nghiệm và bài ghép cặp cho từng chương.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Tầm quan trọng của hiệu năng frontend",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Tổng quan về HTTP",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Rule 1: Giảm số HTTP request",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Rule 2: Dùng mạng phân phối nội dung (CDN)",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Rule 3: Thêm header Expires",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Rule 4: Nén thành phần bằng gzip",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Rule 5: Đặt stylesheet ở đầu trang",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Rule 6: Đặt script ở cuối trang",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Rule 7: Tránh CSS expression",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Rule 8: Tách JavaScript và CSS ra file ngoài",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Rule 9: Giảm số lần tra cứu DNS",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Rule 10: Minify JavaScript",
+      "ready": true
+    },
+    {
+      "n": 13,
+      "title": "Rule 11: Tránh redirect",
+      "ready": true
+    },
+    {
+      "n": 14,
+      "title": "Rule 12: Loại bỏ script trùng lặp",
+      "ready": true
+    },
+    {
+      "n": 15,
+      "title": "Rule 13: Cấu hình ETag",
+      "ready": true
+    },
+    {
+      "n": 16,
+      "title": "Rule 14: Làm cho Ajax cacheable",
+      "ready": true
+    },
+    {
+      "n": 17,
+      "title": "Phân tích 10 website hàng đầu",
+      "ready": true
+    }
+  ]
 }
 ];
-
-
-
-
-
-
-
-

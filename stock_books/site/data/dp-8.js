@@ -1,0 +1,45 @@
+window.BOOK_DATA = window.BOOK_DATA || {};
+BOOK_DATA.dperf = BOOK_DATA.dperf || { chapters: [] };
+BOOK_DATA.dperf.chapters.push({
+  n: 8,
+  title: 'Thay đổi văn hóa trong tổ chức',
+  intro: 'Rào cản lớn nhất để có hiệu năng tốt và bền vững là văn hóa tổ chức. Chương này nói về vì sao "cảnh sát/lao công hiệu năng" dẫn đến kiệt sức, cách thuyết phục cấp trên bằng số liệu kinh doanh và trải nghiệm thật, và cách giáo dục – trao quyền – vinh danh đồng nghiệp.',
+  sections: [
+    { icon: '🚓', title: 'Cảnh sát và lao công hiệu năng', blocks: [
+      { t: 'p', x: 'Hiệu năng thường bắt đầu từ tiếng nói của một người: bạn thấy các site khác tối ưu, đo đối thủ bằng WebPagetest, học được những thắng lợi dễ làm. Nhưng dọn dẹp sau lưng người khác thành việc vặt và dẫn đến kiệt sức (burnout).' },
+      { t: 'list', items: ['Kỹ thuật mới xuất hiện (như picture); phần cứng, thương hiệu và code của site già đi; nhân sự mới vào, người giỏi hiệu năng rời đi; trình duyệt và chuẩn web (HTTP/2) tiến hóa.', 'Cần có <b>người/đội dẫn dắt hiệu năng</b> (champion), nhưng trách nhiệm duy trì phải thuộc về <b>tất cả</b> mọi người làm trên site.', 'Nếu thiết kế viên/lập trình viên khác không được giáo dục và trao quyền, champion chỉ đi dọn dẹp những thứ lẽ ra phòng ngừa được.'] },
+      { t: 'h3', x: 'Đội chuyên trách nên tập trung vào' },
+      { t: 'list', items: ['Giảng bài, lunch-and-learn, workshop.', 'Vinh danh công việc tốt của các đội khác.', 'Xây công cụ đưa dữ liệu hiệu năng vào quy trình hằng ngày của người khác.', 'Đặt yêu cầu nền: ngân sách hiệu năng cho mỗi dự án, thời gian tải tối đa toàn site.', 'Học công nghệ mới; công khai thay đổi và bài học thí nghiệm (báo cáo hiệu năng của Etsy liệt kê thời gian tải các trang chính và nguyên nhân thay đổi mỗi quý).'] }
+    ] },
+    { icon: '📣', title: 'Thuyết phục cấp trên (upward management)', blocks: [
+      { t: 'p', x: 'Tốc độ là vấn đề vô hình, chủ yếu về cảm nhận. Cần một champion có quyền lực. Có hai hướng: <b>số liệu kinh doanh</b> và <b>trải nghiệm thật của người dùng</b>.' },
+      { t: 'h3', x: 'Tác động lên chỉ số kinh doanh' },
+      { t: 'list', items: ['Dùng nghiên cứu công khai đã nêu ở Chương 1 (Akamai 75%, Gomez 88%, Google 400 ms, DoubleClick +12% CTR).', 'Tìm ra lãnh đạo quan tâm chỉ số nào (doanh thu? thành viên? tương tác mạng xã hội?) rồi gắn nghiên cứu với chỉ số đó; liên hệ bounce rate, CTR, người dùng quay lại với doanh thu.', 'Nếu được, tự chạy thí nghiệm trên site: không ai muốn bạn làm chậm site cố ý, nên hãy tìm <b>thắng lợi nhanh tác động lớn</b> (nén ảnh, cache tốt hơn), đo tác động lên chỉ số tương tác, tốt nhất bằng A/B test (nhóm đối chứng và biến thể mới). Nếu không A/B được, đo trước và sau (không khoa học nhưng là lập luận tốt nhất).', 'Đo cả thời gian bạn bỏ ra: giờ thiết kế/phát triển là chi phí; quy đổi số giờ thành lợi ích doanh thu là tài sản lớn nhất trong cuộc trò chuyện.'] },
+      { t: 'widget', name: 'dp-roi', title: 'Tính hiệu quả (ROI) của một cải thiện hiệu năng' },
+      { t: 'h3', x: 'Cho họ "cảm nhận" tốc độ' },
+      { t: 'p', x: 'Hầu hết người trong tổ chức dùng phần cứng mới, kết nối nhanh, gần datacenter. Hãy chạy nhiều WebPagetest từ các địa điểm/thiết bị khác nhau và ghép vào một filmstrip: webpagetest.org/video/compare.php?tests=ID1,ID2... Ví dụ với Huffington Post: Chrome desktop ở Virginia, IE8 từ Singapore, Chrome Android từ Virginia. Con số thì nhiều, nhưng filmstrip và video giúp cảm nhận khác biệt.' },
+      { t: 'list', items: ['<b>Lòng tự hào và cạnh tranh</b>: Visual Comparison của WebPagetest nhập nhiều URL (Dulles, Virginia) so sánh trang của bạn và đối thủ; xuất video tải song song, không cần con số. Tốc độ không phải bí mật — đối thủ cũng đo được bạn.', 'Dùng filmstrip/video để so sánh trước và sau cải tiến, nhất là khi cải thiện hiệu năng cảm nhận chứ không phải tổng thời gian tải.'] }
+    ] },
+    { icon: '🤝', title: 'Làm việc với designer và developer khác', blocks: [
+      { t: 'key', x: 'Giáo dục và trao quyền là chìa khóa. Ca ngợi thắng lợi thường hiệu quả hơn về lâu dài so với chỉ nhấn mạnh hậu quả của hiệu năng kém.' },
+      { t: 'h3', x: 'Giáo dục' },
+      { t: 'list', items: ['Ngữ nghĩa và tái sử dụng ngay từ đầu tiết kiệm công sức thiết kế/phát triển về sau; code sạch dễ sửa, pattern cập nhật được đồng loạt.', 'Brown-bag lunch, bài giảng, workshop về hiệu năng di động, tác động của thiết kế, cải thiện hiệu năng cảm nhận; chia sẻ slide/video của người khác. Đây là việc liên tục (nhân viên mới, người quên khi bận).', 'Đặt <b>chuẩn nền</b>: "chúng ta nhắm 1 giây cho mỗi trang", hoặc lấy trang nhanh nhất làm chuẩn; đo các trang chậm nhất có nhiều traffic và kêu gọi cả đội làm nhanh chúng.', 'Chạy test tự động cho trang quan trọng, cảnh báo khi chậm đi và chia sẻ để mọi người học; mỗi dự án mới có ngân sách hiệu năng mà ai cũng hiểu.'] },
+      { t: 'h3', x: 'Trao quyền' },
+      { t: 'list', items: ['Đưa dữ liệu hiệu năng vào công việc hiện tại của họ: Etsy có thanh công cụ cho nhân viên đăng nhập, hiển thị dữ liệu lượt truy cập, thí nghiệm đang chạy, công cụ xem bản di động, số đo thời gian và cảnh báo khi vi phạm thỏa thuận mức dịch vụ (SLA) hiệu năng.', 'Gửi email tự động khi có hồi quy hiệu năng; làm cho kiến thức hiệu năng thành một phần tự nhiên của công việc.'] },
+      { t: 'widget', name: 'dp-culture', title: 'Chọn hành động văn hóa phù hợp với tình huống' },
+      { t: 'h3', x: 'Công khai và ăn mừng' },
+      { t: 'list', items: ['Công bố nỗ lực: tác giả viết bài blog về dọn template ở Dyn kèm kết quả hiệu năng; Roberts chia sẻ số liệu với khách hàng khiến họ hào hứng tự chạy test.', 'Etsy xuất bản báo cáo hiệu năng đầu tiên năm 2011, cố ý có con số đáng xấu hổ: đội trang chủ nhận ra và cải thiện mạnh bằng những quyết định khó về tính năng và thiết kế, thể hiện trong báo cáo thứ hai. Công khai tạo trách nhiệm và mong muốn giúp đỡ.', 'Làm cho việc đóng góp dễ dàng: liệt kê "trái chín thấp" (dọn và chuẩn hóa style nút, tìm đoạn CSS nghi ngờ không dùng để nhờ người xác nhận, liệt kê ảnh lớn để xuất lại/nén); mỗi ticket đủ chi tiết, nhỏ vài giờ; nếu lâu hơn thì ghi lại tiến độ để người khác tiếp.', '<b>Vinh danh</b> mọi người đóng góp: Etsy có dashboard "performance heroes" với ảnh, biểu đồ cải thiện và mô tả giải pháp, kèm email thông báo để mọi người chúc mừng.'] },
+      { t: 'tip', x: 'Hiệu năng là trách nhiệm của tất cả những ai ảnh hưởng tới trải nghiệm người dùng. Bạn có thể một mình làm nên trải nghiệm rất nhanh nhưng sẽ phải chiến đấu ngược dốc khi người khác chạm vào site hoặc khi Web tiến hóa. Hãy tạo ra nhiều champion trong tổ chức — cân bằng thẩm mỹ và tốc độ để cùng thắng.' }
+    ] }
+  ],
+  summary: ['Hiệu năng là vấn đề văn hóa nhiều hơn kỹ thuật.', 'Đừng làm "cảnh sát/lao công": chia sẻ trách nhiệm cho cả tổ chức.', 'Thuyết phục cấp trên bằng chỉ số kinh doanh và cảm nhận thực tế (filmstrip, so sánh đối thủ).', 'Giáo dục, đặt chuẩn nền, trao quyền (dữ liệu trong công việc, cảnh báo tự động).', 'Công khai, làm việc đóng góp dễ dàng và vinh danh người đóng góp.'],
+  cards: [['Hậu quả của việc một người gánh hiệu năng?', 'Kiệt sức; dọn dẹp những thứ lẽ ra phòng ngừa được'], ['Hai hướng thuyết phục cấp trên?', 'Chỉ số kinh doanh và trải nghiệm người dùng thật'], ['Làm gì khi không thể chạy A/B?', 'Đo chỉ số tương tác trước và sau cải tiến'], ['Vì sao đo thời gian bạn bỏ ra?', 'Giờ làm là chi phí; quy đổi sang lợi ích doanh thu'], ['Filmstrip giúp gì?', 'Cho người xem cảm nhận trực quan khác biệt tốc độ'], ['Etsy "performance heroes" là gì?', 'Dashboard vinh danh người đóng góp cải thiện hiệu năng'], ['Thanh công cụ của Etsy cho nhân viên?', 'Hiện dữ liệu thời gian, thí nghiệm và cảnh báo vi phạm SLA'], ['Vì sao báo cáo hiệu năng công khai hiệu quả?', 'Tạo trách nhiệm và mong muốn giúp đỡ'], ['Mỗi ticket hiệu năng nên?', 'Nhỏ (vài giờ), đủ chi tiết để làm ngay'], ['Việc đầu tiên của đội chuyên trách?', 'Giáo dục, vinh danh, công cụ, chuẩn nền, công khai']],
+  quiz: [
+    { q: 'Trách nhiệm hiệu năng tốt nhất thuộc về:', o: ['Một cảnh sát hiệu năng', 'Đội hạ tầng', 'Mọi người ảnh hưởng tới site', 'Chỉ lập trình viên'], a: 2, e: 'Chia sẻ trong toàn tổ chức.' },
+    { q: 'Cách thuyết phục lãnh đạo hiệu quả nhất:', o: ['Khoe điểm YSlow', 'Gắn hiệu năng với chỉ số họ quan tâm', 'Làm chậm site thử', 'Đe dọa'], a: 1, e: 'Liên hệ doanh thu, tương tác.' },
+    { q: 'Thắng lợi nhanh để bắt đầu thí nghiệm:', o: ['Viết lại toàn bộ site', 'Nén ảnh, cache tốt hơn', 'Đổi hosting', 'Xóa site'], a: 1, e: 'Dễ làm, tác động lớn.' },
+    { q: 'Công khai báo cáo hiệu năng có mục đích:', o: ['Xấu hổ để phạt', 'Tạo trách nhiệm và động lực giúp đỡ', 'Giấu số liệu', 'Cạnh tranh nội bộ'], a: 1, e: 'Etsy đã làm vậy.' },
+    { q: 'Với đồng nghiệp, cách hiệu quả hơn về lâu dài là:', o: ['Chỉ nhấn mạnh hậu quả xấu', 'Ca ngợi và vinh danh thắng lợi', 'Phớt lờ', 'Tự làm hết'], a: 1, e: 'Champion và celebrate.' }
+  ],
+  match: [['Performance cop', 'Dẫn đến kiệt sức'], ['Filmstrip', 'Cảm nhận tốc độ'], ['Performance heroes', 'Dashboard vinh danh'], ['SLA hiệu năng', 'Cảnh báo khi vi phạm'], ['Low-hanging fruit', 'Việc nhỏ ai cũng làm được']]
+});

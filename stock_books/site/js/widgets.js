@@ -2675,3 +2675,155 @@ WIDGETS['dl-toolbox'] = host => {
   const T = [['Cờ lê / mỏ lết', '🔧', 'Siết mũ ren, tháo lắp van; dùng hai cờ lê khi siết mối loe.'], ['Tuốc nơ vít', '🪛', 'Tháo lắp vít; không dùng nạy tuyết dàn nhôm.'], ['Kìm cắt / kìm bấm', '✂️', 'Cắt dây, ống; cắt ống mao cần kìm hoặc dũa chứ không dùng cưa.'], ['Dao cắt ống + nạo bavia', '⭕', 'Cắt ống đồng, nạo bavia, tránh mạt đồng rơi vào ống.'], ['Bộ loe ống', '🔔', 'Loe đầu ống 90° với bàn loe đúng cỡ.'], ['Lò xo uốn ống', '🌀', 'Uốn ống không bị bẹp; R ≥ 5d.'], ['Đèn khò / mỏ hàn', '🔥', 'Hàn bạc / hàn đồng các mối nối ga.'], ['Đèn dò ga halide', '🕯️', 'Phát hiện rò ga lạnh qua màu ngọn lửa.'], ['Bộ nạp 3 dây', '🧰', 'Đo áp suất, hút chân không, nạp ga.'], ['Bơm chân không', '💨', 'Hút ẩm và không khí khỏi hệ thống.'], ['Xi lanh nạp ga / cân', '⚖️', 'Nạp đúng lượng ga lạnh.'], ['Ampe kìm / vạn năng kế / mêgaôm', '📟', 'Đo dòng, điện áp, điện trở, cách điện.'], ['Nhiệt kế / phong tốc kế', '🌡️', 'Đo nhiệt độ bề mặt, tốc độ gió.']];
   dlHot(host, { vb: [680, 330], label: 'Hộp dụng cụ', intro: 'Bấm một dụng cụ để xem công dụng.', parts: T.map((t, i) => ({ n: t[0], x: 20 + (i % 5) * 130, y: 10 + Math.floor(i / 5) * 105, w: 120, h: 92, c: '#475569', t: t[2], draw: g => { rfEl('rect', { x: 20 + (i % 5) * 130, y: 10 + Math.floor(i / 5) * 105, width: 120, height: 92, rx: 10, fill: '#475569', opacity: .92 }, g); dlTxt(g, 80 + (i % 5) * 130, 55 + Math.floor(i / 5) * 105, t[1], { s: 30 }); dlTxt(g, 80 + (i % 5) * 130, 90 + Math.floor(i / 5) * 105, t[0].length > 20 ? t[0].slice(0, 19) + '…' : t[0], { c: '#fff', s: 10, w: 600 }); } })) });
 };
+
+// ===== Designing for Performance (dp-*) — dùng trợ giúp dl* (dlCalc, dlHot, dlDiag, dlSvg, dlTxt, dlBox, dlLn) =====
+WIDGETS['dp-latency'] = host => dlCalc(host, [{ id: 'm', label: 'Độ trễ phản hồi (ms)', v: 250, min: 0, max: 5000, step: 10 }], v => {
+  const m = v.m; const s = m < 100 ? ['Tức thì', '#16a34a'] : m <= 300 ? ['Nhận thấy được', '#ca8a04'] : m <= 1000 ? ['Cảm giác "máy đang làm việc"', '#ea580c'] : ['Người dùng bắt đầu chuyển sự chú ý sang việc khác', '#dc2626'];
+  return '<b style="color:' + s[1] + '">' + s[0] + '</b><div style="height:10px;border-radius:5px;background:' + s[1] + ';width:' + Math.min(100, m / 20) + '%;margin-top:6px"></div>';
+});
+WIDGETS['dp-rtt'] = host => dlCalc(host, [
+  { id: 'n', label: 'Số request', v: 40, min: 1, step: 1 }, { id: 'net', label: 'Mạng', v: '50|0', opts: [['50|0', 'WiFi máy tính (RTT 50 ms)'], ['300|1500', '3G di động (RTT 300 ms + kênh vô tuyến 1,5 s)'], ['300|0', 'Di động, kênh đã mở']] }, { id: 'p', label: 'Kết nối song song', v: 6, min: 1, max: 8, step: 1 }
+], v => {
+  const [rtt, radio] = v.net.split('|').map(Number); const waves = Math.ceil(v.n / v.p), t = radio + rtt * (2 + waves) + 0;
+  return 'Ước tính chỉ riêng độ trễ: ' + radio + ' ms (kênh) + (2 + ' + waves + ') × ' + rtt + ' ms = <b>' + (t / 1000).toFixed(2) + ' giây</b>' + (t > 3000 ? '<br>⛔ Vượt 3 giây: tới 40% người dùng có thể bỏ đi. Giảm số request!' : t > 2000 ? '<br>⚠ Vượt chuẩn 2 giây.' : '<br>✅ Trong chuẩn 2 giây.') + '<br><i>Mô hình đơn giản (chưa tính băng thông, xử lý): để thấy tác động của số request trên mạng độ trễ cao.</i>';
+});
+WIDGETS['dp-logo'] = host => {
+  const D = [['PNG-24 trong suốt', 7.6], ['PNG-8 nền đặc', 5.0], ['PNG-8 với matte xanh nhạt', 2.7], ['JPEG 75% nền đặc', 20.2]];
+  host.innerHTML = '<div class="row"><label>Định dạng <select id="f">' + D.map((d, i) => '<option value="' + i + '">' + d[0] + '</option>').join('') + '</select></label></div><div class="calc" id="o"></div>';
+  const draw = () => { const i = +host.querySelector('#f').value; host.querySelector('#o').innerHTML = D.map((d, k) => '<div style="display:flex;gap:8px;align-items:center;margin:3px 0' + (k === i ? ';font-weight:700' : '') + '"><span style="flex:0 0 190px">' + d[0] + '</span><span style="height:10px;border-radius:5px;background:' + (d[1] === 2.7 ? '#16a34a' : '#0ea5e9') + ';width:' + d[1] * 8 + 'px"></span>' + d[1] + ' KB</div>').join('') + (i === 2 ? '✅ Nhỏ nhất: matte trộn bóng với nền xanh nhạt nên không cần trong suốt.' : i === 3 ? '⛔ JPEG nặng nhất vì logo có cạnh sắc và nền đặc.' : ''); };
+  host.querySelector('#f').onchange = draw; draw();
+};
+WIDGETS['dp-pipeline'] = host => dlHot(host, {
+  vb: [720, 150], label: 'Chu trình tải trang', intro: 'Bấm một bước.',
+  parts: ['DNS lookup|#8b5cf6|Tìm máy chủ ứng với tên miền (trình duyệt nhớ kết quả một thời gian).', 'Kết nối (+SSL)|#f97316|Thiết lập kết nối TCP; HTTPS cần thêm đàm phán SSL.', 'Request|#0ea5e9|Gửi yêu cầu nội dung.', 'TTFB|#16a34a|Byte đầu tiên nhận về: chỉ báo tốc độ backend.', 'Tải xuống|#64748b|Tải nội dung; càng lớn càng lâu.', 'DOM + CSSOM|#a855f7|Phân tích HTML và CSS (JS chặn dựng DOM, CSS chặn render).', 'Render tree + vẽ|#dc2626|Tính kích thước, vị trí rồi vẽ lên màn hình.'].map((s, i) => { const a = s.split('|'); return { n: a[0], x: 8 + i * 102, y: 50, w: 96, h: 50, c: a[1], t: a[2], s: 10 }; })
+});
+WIDGETS['dp-waterfall'] = host => {
+  host.innerHTML = '<div class="row"><label>Số request <input id="n" type="range" min="4" max="40" value="16"> <b id="nv"></b></label><label>RTT (ms) <input id="r" type="range" min="20" max="400" value="100" step="10"> <b id="rv"></b></label><label>Kết nối song song <input id="c" type="range" min="1" max="8" value="6"> <b id="cv"></b></label></div>';
+  const svg = dlSvg(host, [620, 260], 'Waterfall'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const draw = () => {
+    const n = +host.querySelector('#n').value, r = +host.querySelector('#r').value, c = +host.querySelector('#c').value; host.querySelector('#nv').textContent = n; host.querySelector('#rv').textContent = r; host.querySelector('#cv').textContent = c; svg.innerHTML = '';
+    const free = new Array(c).fill(0); let end = 0; const rows = [];
+    for (let i = 0; i < n; i++) { const k = free.indexOf(Math.min(...free)); const first = i < c; const st = free[k] + (i === 0 ? 0 : 0); const dur = (first ? 2 * r : r) + 40 + (i === 0 ? 60 : 80); rows.push([st, dur, k, first]); free[k] = st + dur; end = Math.max(end, free[k]); }
+    const X = t => 20 + t / end * 560, h = Math.min(8, 220 / n);
+    rows.forEach((q, i) => { const y = 14 + i * (h + 1.5); if (q[3]) rfEl('rect', { x: X(q[0]), y, width: X(q[0] + r) - X(q[0]), height: h, fill: '#8b5cf6' }, svg); if (q[3]) rfEl('rect', { x: X(q[0] + r), y, width: X(q[0] + 2 * r) - X(q[0] + r), height: h, fill: '#f97316' }, svg); rfEl('rect', { x: X(q[0] + (q[3] ? 2 * r : 0)), y, width: X(q[0] + q[1]) - X(q[0] + (q[3] ? 2 * r : 0)), height: h, fill: '#0ea5e9' }, svg); });
+    dlTxt(svg, 310, 252, 'tím: DNS · cam: kết nối · xanh: request + tải', { s: 10 });
+    o.innerHTML = 'Tổng ≈ <b>' + (end / 1000).toFixed(2) + ' giây</b> với ' + n + ' request / ' + c + ' kết nối. Giảm số request (sprite, gộp file) hoặc giảm số miền khiến mỗi kết nối phải DNS + kết nối mới.';
+  };
+  host.querySelectorAll('input').forEach(i => i.oninput = draw); draw();
+};
+WIDGETS['dp-crp'] = host => dlDiag(host, [
+  ['CSS trong head, không có media', ['Chặn render (render-blocking) — bắt buộc'], 'Giữ ở head; giảm kích thước, gộp thành ít file; tránh @import.'],
+  ['CSS với media="print"', ['Không chặn render ban đầu'], 'Chỉ áp dụng khi in.'],
+  ['CSS với media="(min-width: 61.5em)"', ['Chỉ chặn khi viewport ≥ 61,5em'], 'Trên màn hình nhỏ hơn thì không chặn.'],
+  ['Script đồng bộ trong head', ['Chặn dựng DOM cho tới khi tải và chạy xong'], 'Chuyển xuống cuối trang hoặc thêm async.'],
+  ['Script có thuộc tính async', ['Không chặn dựng DOM; chạy khi tải xong'], 'Thứ tự không đảm bảo; cẩn thận phụ thuộc và dịch chuyển bố cục.'],
+  ['Phần tử display:none', ['Không nằm trong render tree'], 'Nhưng ảnh bên trong vẫn có thể bị tải.']
+], 'Tài nguyên');
+WIDGETS['dp-env'] = host => dlCalc(host, [{ id: 'd', label: 'Khoảng cách tới máy chủ (km)', v: 12000, step: 100 }, { id: 'n', label: 'Mạng', v: '1', opts: [['1', 'Cáp/WiFi tốt'], ['2.5', 'Mạng trung bình'], ['5', 'Mạng chậm/di động']] }, { id: 'q', label: 'Số request tuần tự', v: 10 }, { id: 'cdn', label: 'Dùng CDN', v: 'n', opts: [['n', 'Không'], ['y', 'Có (máy chủ gần ~300 km)']] }], v => {
+  const km = v.cdn === 'y' ? 300 : v.d, rtt = (km / 200000 * 2 * 1000) * 1.8 + 15 * v.n, t = rtt * v.q;
+  return 'RTT ước tính ≈ <b>' + rtt.toFixed(0) + ' ms</b> (ánh sáng trong cáp ≈ 200.000 km/s) ⇒ ' + v.q + ' request ≈ <b>' + (t / 1000).toFixed(2) + ' giây</b> chỉ riêng độ trễ.' + (v.cdn === 'n' && v.d > 8000 ? '<br>💡 Người dùng ở xa: CDN giảm độ trễ đáng kể.' : '');
+});
+
+// ----- Chương 3
+WIDGETS['dp-format'] = host => dlCalc(host, [{ id: 'k', label: 'Loại ảnh', v: 'photo', opts: [['photo', 'Ảnh chụp, nhiều màu'], ['few', 'Ít màu, cạnh sắc (logo, UI)'], ['alpha', 'Cần trong suốt một phần (bóng đổ)'], ['anim', 'Animation đơn giản'], ['icon', 'Icon một màu / vector']] }], v => ({
+  photo: '<b>JPEG</b> (xuất progressive, giảm nhiễu, thử nhiều mức chất lượng). Tránh PNG-24 (lớn 5–10 lần).', few: '<b>PNG-8</b> (thường nhỏ hơn GIF); giảm số màu và dither.', alpha: '<b>PNG-24</b> (hoặc PNG-8 + matte nếu nền cố định). Nếu không cần trong suốt mà nhiều màu → JPEG.', anim: 'Thử <b>CSS3 animation</b> trước; nếu cần dùng <b>GIF</b> (giảm màu, giảm nhiễu dọc).', icon: '<b>SVG</b> (retina đẹp, nhỏ) hoặc sprite/CSS3 gradient; dự phòng PNG cho trình duyệt cũ.'
+}[v.k]));
+WIDGETS['dp-jpeg'] = host => dlCalc(host, [{ id: 'q', label: 'Chất lượng (1–100)', v: 75, min: 1, max: 100, step: 1 }, { id: 'n', label: 'Nhiễu (%)', v: 5, min: 0, max: 20, step: 1 }, { id: 'p', label: 'Progressive', v: 'n', opts: [['n', 'Baseline'], ['y', 'Progressive']] }], v => {
+  const size = 10 * (0.25 + 1.5 * Math.pow(v.q / 100, 2)) * (1 + 0.1 * v.n) * (v.p === 'y' ? 0.97 : 1);
+  return 'Ước tính (ảnh minh họa): <b>' + size.toFixed(1) + ' KB</b>' + (v.q < 40 ? ' · ⚠ nhiều artifact quanh cạnh tương phản' : '') + (v.n >= 10 ? ' · ⚠ nhiễu 10% làm file gần gấp đôi nhiễu 5%' : '') + '<br>' + (v.p === 'y' ? 'Progressive hiện cả ảnh chất lượng thấp rồi nâng dần (nhưng Mobile Safari không dựng dần; tốn CPU).' : 'Baseline hiện từ trên xuống từng hàng.');
+});
+WIDGETS['dp-gif'] = host => dlCalc(host, [{ id: 'c', label: 'Số màu', v: 40, min: 2, max: 256, step: 1 }, { id: 'd', label: 'Dithering (0–100)', v: 0, min: 0, max: 100, step: 5 }, { id: 'o', label: 'Hướng gradient', v: 'h', opts: [['h', 'Ngang (mẫu lặp theo hàng)'], ['v', 'Dọc (nhiễu dọc)']] }], v => {
+  const s = 4.8 * (0.5 + v.c / 80) * (1 + v.d / 100) * (v.o === 'v' ? 2.2 : 1);
+  return 'GIF ước tính ≈ <b>' + s.toFixed(1) + ' KB</b> (gốc: 40 màu, dither 0 = 4,8 KB; dither 100 = 9,7 KB; gradient dọc = 21 KB).<br>' + (v.o === 'v' ? '⚠ GIF nén theo mẫu ngang nên chi tiết dọc làm file phình ra.' : '') + (v.d >= 50 ? ' Dithering làm mịn màu nhưng nặng hơn.' : '') + '<br>💡 Thử PNG-8: nén cả mẫu ngang và dọc, thường nhỏ hơn.';
+});
+WIDGETS['dp-compress'] = host => dlCalc(host, [{ id: 'n', label: 'Số ảnh', v: 30 }, { id: 'kb', label: 'KB trung bình / ảnh', v: 60 }, { id: 's', label: 'Tiết kiệm khi nén lossless (%)', v: 20 }, { id: 'r', label: 'RTT (ms)', v: 300 }], v => {
+  const tot = v.n * v.kb, sv = tot * v.s / 100; return 'Tổng ảnh: <b>' + (tot / 1000).toFixed(2) + ' MB</b> → tiết kiệm <b>' + (sv / 1000).toFixed(2) + ' MB</b> (' + sv.toFixed(0) + ' KB) mà không giảm chất lượng. Với 1 Mbps ≈ <b>' + (sv * 8 / 1000).toFixed(1) + ' giây</b> tải ít hơn.';
+});
+WIDGETS['dp-sprite'] = host => dlCalc(host, [{ id: 'n', label: 'Số icon', v: 12 }, { id: 'kb', label: 'KB mỗi icon rời', v: 1.5, step: 0.1 }, { id: 'sp', label: 'KB của sprite gộp', v: 9, step: 0.5 }, { id: 'r', label: 'RTT (ms)', v: 200 }, { id: 'c', label: 'Kết nối song song', v: 6 }], v => {
+  const t1 = Math.ceil(v.n / v.c) * v.r + v.n * v.kb * 8 / 1000 * 1000 / 8 * 0.1, t2 = v.r + v.sp * 0.8;
+  return 'Ảnh rời: ' + v.n + ' request ≈ <b>' + t1.toFixed(0) + ' ms</b> (' + (v.n * v.kb).toFixed(1) + ' KB).<br>Sprite: 1 request ≈ <b>' + t2.toFixed(0) + ' ms</b> (' + v.sp + ' KB + CSS).<br>' + (t2 < t1 ? '✅ Sprite nhanh hơn dù có thể nặng hơn.' : '⚠ Sprite không lợi trong cấu hình này.') + ' Thí nghiệm Etsy: 26 ảnh → −21% request, −35% thời gian, +60 KB.';
+});
+WIDGETS['dp-replace'] = host => dlDiag(host, [
+  ['Nền gradient lặp, bevel nút', ['CSS3 gradient'], 'Bớt một request, dễ đổi màu; nhớ background-color dự phòng và tiền tố trình duyệt.'],
+  ['Icon nhỏ dùng khắp site', ['Sprite hoặc SVG'], 'Sprite giảm request (nhưng phá cache khi đổi); SVG nét ở mọi mật độ pixel.'],
+  ['Ảnh cực nhỏ (tam giác, chấm)', ['Data URI (Base64) trong CSS'], 'Bỏ request nhưng không cache riêng và CSS to hơn; đo trước.'],
+  ['Logo một màu / icon cần retina', ['SVG'], 'Xóa DOCTYPE, comment Generator; nén bằng SVGO/Scour; dự phòng PNG (Grunticon).'],
+  ['Spinner / loading indicator', ['CSS3 animation'], 'Nhẹ hơn GIF.'],
+  ['Ảnh chụp lớn', ['Vẫn là ảnh (JPEG)'], 'Không thay được; xuất đúng kích thước, nén thêm, dùng picture/srcset.']
+], 'Loại ảnh');
+
+// ----- Chương 4
+WIDGETS['dp-semantic'] = host => quizBtns(host, [
+  ['.right', 1, ['Có ngữ nghĩa', 'Không (mô tả vị trí)']], ['#login', 0, ['Có ngữ nghĩa', 'Không (mô tả vị trí)']], ['.blue', 1, ['Có ngữ nghĩa', 'Không (mô tả màu)']], ['.breadcrumbs', 0, ['Có ngữ nghĩa', 'Không']], ['nav', 0, ['Có ngữ nghĩa (HTML5)', 'Không']], ['.big-left', 1, ['Có ngữ nghĩa', 'Không (mô tả hình thức)']]
+]);
+WIDGETS['dp-css-merge'] = host => dlCalc(host, [{ id: 'n', label: 'Số phần tử giống nhau', v: 3 }, { id: 'l', label: 'Số dòng khai báo mỗi phần tử', v: 6 }, { id: 'p', label: 'Phần trùng nhau (%)', v: 70, max: 100 }], v => {
+  const before = v.n * v.l, shared = Math.round(v.l * v.p / 100), after = shared + v.n * (v.l - shared) + 0; return 'Trước: <b>' + before + '</b> dòng · sau gộp: <b>' + after + '</b> dòng (tiết kiệm <b>' + (100 - after / before * 100).toFixed(0) + '%</b>). Nếu chuẩn hóa hẳn thành một pattern, còn ít hơn nữa.';
+});
+WIDGETS['dp-font'] = host => dlCalc(host, [{ id: 'w', label: 'Số độ đậm', v: 4, min: 1 }, { id: 'kb', label: 'KB mỗi file', v: 60 }, { id: 'sub', label: 'Subset', v: '1', opts: [['1', 'Toàn bộ'], ['0.4', 'Chỉ Latin'], ['0.05', 'Chỉ vài ký tự']] }, { id: 'rtt', label: 'RTT (ms)', v: 300 }, { id: 'lg', label: 'Chỉ tải trên màn hình lớn', v: 'n', opts: [['n', 'Không'], ['y', 'Có (bỏ trên di động)']] }], v => {
+  const kb = v.w * v.kb * +v.sub, t = v.rtt * Math.ceil(v.w / 6) + kb * 8 / 1; return 'Font: <b>' + kb.toFixed(0) + ' KB</b>, ' + v.w + ' request ⇒ khoảng <b>' + (t / 1000).toFixed(1) + ' giây</b> trên 1 Mbps' + (v.lg === 'y' ? '. Trên di động: <b>0 KB</b> (dùng font hệ thống).' : '.') + '<br>Mỗi độ đậm thêm là một request và nhiều KB — hãy đo ảnh hưởng tới chỉ số tương tác.';
+});
+WIDGETS['dp-load-order'] = host => dlCalc(host, [{ id: 'c', label: 'CSS đặt ở', v: 'h', opts: [['h', 'head'], ['b', 'cuối body']] }, { id: 'j', label: 'JavaScript', v: 'e', opts: [['h', 'head, đồng bộ'], ['e', 'cuối body'], ['a', 'async']] }, { id: 'n', label: 'Số file CSS', v: 3 }], v => {
+  const m = []; if (v.c === 'b') m.push('⛔ CSS cuối trang: nội dung hiện muộn hoặc nhảy khi style đến.'); else m.push('✅ CSS trong head: hiển thị dần.'); if (v.j === 'h') m.push('⛔ Script đồng bộ trong head chặn dựng DOM.'); else if (v.j === 'a') m.push('✅ async: không chặn (chú ý thứ tự và dịch chuyển bố cục).'); else m.push('✅ Script cuối trang: nội dung hiển thị trước.'); if (v.n > 1) m.push('⚠ ' + v.n + ' file CSS: gộp thành 1 (mục tiêu ≤ 30 KB), tránh @import.'); return m.join('<br>');
+});
+WIDGETS['dp-minify'] = host => dlCalc(host, [{ id: 's', label: 'Kích thước gốc (KB)', v: 100 }, { id: 'm', label: 'Minify giảm (%)', v: 15 }, { id: 'g', label: 'gzip giảm thêm (%)', v: 70 }], v => {
+  const a = v.s * (1 - v.m / 100), b = a * (1 - v.g / 100); return 'Gốc ' + v.s + ' KB → minify <b>' + a.toFixed(1) + ' KB</b> → minify + gzip <b>' + b.toFixed(1) + ' KB</b> (tiết kiệm ' + (100 - b / v.s * 100).toFixed(0) + '%).';
+});
+
+// ----- Chương 5
+WIDGETS['dp-bgimg'] = host => dlDiag(host, [
+  ['<img> bên trong div display:none (media query)', ['Trình duyệt VẪN tải ảnh'], 'Đừng làm vậy. Dùng picture/srcset hoặc không đưa vào HTML.'],
+  ['div background-image + display:none trên chính nó', ['Vẫn tải ảnh'], 'Không hiệu quả.'],
+  ['Ẩn phần tử CHA của phần tử có background-image', ['Không tải ảnh'], '#parent { display:none } trong media query.'],
+  ['Hai media query loại trừ nhau (min 601 / max 600)', ['Chỉ tải ảnh khớp'], 'Trình duyệt cũ có thể tải cả hai nếu các media query chồng lấn.'],
+  ['Mặc định regular.png + media query device-pixel-ratio 1.5 → retina.png', ['Chỉ tải bản retina trên màn retina'], 'Android 2.x ratio ≥ 1.5 tải cả hai (hiếm gặp).']
+], 'Kỹ thuật');
+WIDGETS['dp-srcset'] = host => dlCalc(host, [{ id: 'w', label: 'Viewport (px)', v: 1200, step: 10 }, { id: 'd', label: 'Mật độ điểm ảnh (DPR)', v: 1, step: 0.5 }], v => {
+  const disp = v.w >= 1000 ? v.w * 0.333 : v.w, need = disp * v.d, L = [400, 800, 1600], pick = L.find(x => x >= need) || 1600;
+  return 'sizes → ảnh hiển thị ≈ <b>' + disp.toFixed(0) + ' px</b> × DPR ' + v.d + ' = cần ≈ <b>' + need.toFixed(0) + ' px</b> ⇒ chọn <b>' + (pick === 400 ? 'small.jpg 400w' : pick === 800 ? 'medium.jpg 800w' : 'big.jpg 1600w') + '</b>.<br><i>srcset="small.jpg 400w, medium.jpg 800w, big.jpg 1600w" · sizes="(min-width: 1000px) 33.3vw, 100vw"</i>';
+});
+WIDGETS['dp-budget'] = host => dlCalc(host, [{ id: 'w', label: 'Chiều rộng (px)', v: 600 }, { id: 'kb', label: 'Trọng lượng trang (KB)', v: 420 }, { id: 't', label: 'Thời gian tải (giây)', v: 2.4, step: 0.1 }, { id: 'si', label: 'Speed Index', v: 1200 }], v => {
+  const lim = v.w >= 900 ? 500 : v.w <= 640 ? 300 : 400, r = []; r.push(v.kb <= lim ? '✅ Trọng lượng ' + v.kb + ' KB ≤ ' + lim + ' KB' : '⛔ Trọng lượng ' + v.kb + ' KB vượt ngân sách ' + lim + ' KB'); r.push(v.t <= 2 ? '✅ Thời gian tải đạt' : '⛔ Thời gian ' + v.t + ' s vượt 2 s'); r.push(v.si <= 1000 ? '✅ Speed Index đạt' : '⛔ Speed Index ' + v.si + ' vượt 1.000'); return r.join('<br>') + '<br><i>Ngân sách ví dụ: ≥ 900 px: 500 KB; ≤ 640 px: 300 KB (giữa: nội suy 400 KB).</i>';
+});
+
+// ----- Chương 6
+WIDGETS['dp-tools'] = host => dlDiag(host, [
+  ['Kiểm tra nhanh khi đang phát triển trang', ['YSlow, Chrome DevTools (audit, Network)'], 'Chạy khi phát triển và mỗi quý.'],
+  ['Tìm vùng gây giật khi cuộn', ['Chrome DevTools: FPS meter, Timeline'], 'Thử ẩn từng phần tử/bóng/animation để tìm thủ phạm.'],
+  ['So sánh trước–sau một thay đổi lớn', ['WebPagetest (5 lần chạy, filmstrip)'], 'Xem waterfall và Speed Index.'],
+  ['Theo dõi xu hướng hằng tháng', ['Catchpoint, Gomez, wpt-script (kiểm thử tổng hợp)'], 'Dashboard + cảnh báo.'],
+  ['Biết người dùng thật đang gặp gì', ['RUM: Google Analytics, mPulse, Glimpse'], 'Phân đoạn theo địa lý, mạng; xem trung vị và p95.'],
+  ['Kiểm thử site đang phát triển (chưa public)', ['WebPagetest private instance'], 'Có thể tự động hóa.']
+], 'Mục tiêu');
+WIDGETS['dp-speedindex'] = host => {
+  host.innerHTML = '<div class="row"><label>Trang B: nội dung hiện sớm thế nào <input id="e" type="range" min="1" max="10" value="3"></label></div>';
+  const svg = dlSvg(host, [560, 230], 'Visual progress'); const o = document.createElement('div'); o.className = 'calc'; host.appendChild(o);
+  const A = t => t < 2 ? 0 : Math.min(1, (t - 2) / 1.2), si = f => { let s = 0; for (let t = 0; t < 6; t += 0.05) s += (1 - f(t)) * 0.05; return s * 1000; };
+  const draw = () => { const k = +host.querySelector('#e').value, B = t => Math.min(1, (1 - Math.exp(-t * k / 4))); svg.innerHTML = ''; const X = t => 30 + t * 80, Y = p => 190 - p * 150; rfEl('line', { x1: 30, y1: 190, x2: 520, y2: 190, stroke: 'currentColor' }, svg);
+    [[A, '#dc2626'], [t => Math.min(1, B(t) * (t < 5.9 ? 0.9 : 1)), '#16a34a']].forEach((q, i) => { let d = 'M'; for (let t = 0; t <= 6; t += 0.1) d += (t ? ' L' : '') + X(t) + ' ' + Y(i ? Math.min(1, B(t)) : A(t)); rfEl('path', { d, fill: 'none', stroke: q[1], 'stroke-width': 2.5 }, svg); });
+    dlTxt(svg, 100, 30, 'A (đỏ): trống 2 s rồi hiện', { c: '#dc2626', a: 'start' }); dlTxt(svg, 100, 48, 'B (xanh): hiện dần sớm', { c: '#16a34a', a: 'start' }); dlTxt(svg, 280, 215, 'thời gian (giây)', { s: 10 });
+    o.innerHTML = 'Speed Index A ≈ <b>' + si(A).toFixed(0) + '</b>, B ≈ <b>' + si(t => Math.min(1, B(t))).toFixed(0) + '</b> (nhỏ hơn là tốt). Cả hai "xong" gần cùng lúc nhưng B cảm giác nhanh hơn vì nội dung nhìn thấy hiện sớm.'; };
+  host.querySelector('#e').oninput = draw; draw();
+};
+WIDGETS['dp-percentile'] = host => {
+  host.innerHTML = '<div class="row"><label>Thời gian tải (giây), cách nhau bằng dấu phẩy <input id="t" type="text" value="1.2, 1.4, 1.1, 1.8, 2.0, 1.5, 1.3, 9.5, 1.6, 1.7, 1.2, 2.2, 1.4, 1.5, 12.0, 1.3, 1.9, 1.6, 1.4, 1.5" style="width:420px"></label></div><div class="calc" id="o"></div>';
+  const draw = () => { const a = host.querySelector('#t').value.split(/[,\s]+/).map(parseFloat).filter(x => !isNaN(x)).sort((x, y) => x - y); const q = p => a.length ? a[Math.min(a.length - 1, Math.ceil(p * a.length) - 1)] : 0; const avg = a.reduce((s, x) => s + x, 0) / (a.length || 1); host.querySelector('#o').innerHTML = a.length + ' mẫu · trung bình <b>' + avg.toFixed(2) + ' s</b> · trung vị <b>' + q(0.5).toFixed(2) + ' s</b> · p95 <b>' + q(0.95).toFixed(2) + ' s</b><br>Trung bình bị kéo bởi vài mẫu rất chậm; p95 cho thấy mức 5% người dùng chậm nhất phải chịu (Google Analytics chỉ cho trung bình).'; };
+  host.querySelector('#t').oninput = draw; draw();
+};
+
+// ----- Chương 7, 8
+WIDGETS['dp-tradeoff'] = host => dlCalc(host, [{ id: 'r', label: 'Request thêm', v: 3, step: 1 }, { id: 'kb', label: 'KB thêm', v: 150, step: 10 }, { id: 'a', label: 'Giá trị thẩm mỹ (0–10)', v: 6, min: 0, max: 10 }, { id: 'c', label: 'Chi phí vận hành (giờ)', v: 8 }, { id: 'rtt', label: 'RTT (ms)', v: 300 }], v => {
+  const dt = (v.r * v.rtt / 6 + v.kb * 8 / 1.5) / 1000, risk = dt * 2 + v.c / 20, score = v.a - risk; return 'Chậm thêm khoảng <b>' + dt.toFixed(2) + ' s</b> (mạng di động). Điểm cân bằng = thẩm mỹ ' + v.a + ' − rủi ro ' + risk.toFixed(1) + ' = <b>' + score.toFixed(1) + '</b> ⇒ ' + (score > 3 ? '✅ Có thể đáng — nhưng hãy thử A/B.' : score > 0 ? '⚠ Lưỡng lự: tìm cách bù trong ngân sách.' : '⛔ Chi phí lớn hơn lợi ích: bỏ hoặc đơn giản hóa.');
+});
+WIDGETS['dp-budget2'] = host => dlCalc(host, [{ id: 'b', label: 'Ngân sách trọng lượng (KB)', v: 800 }, { id: 'cur', label: 'Hiện tại (KB)', v: 720 }, { id: 'add', label: 'Thêm (ảnh hero, KB)', v: 150 }, { id: 'sav', label: 'Tiết kiệm bù (KB)', v: 60 }], v => {
+  const after = v.cur + v.add - v.sav; return 'Sau thay đổi: <b>' + after + ' KB</b> / ' + v.b + ' KB ⇒ ' + (after <= v.b ? '✅ trong ngân sách' : '⛔ vượt ' + (after - v.b) + ' KB: cần bù thêm (bớt độ đậm font, bỏ script tracking, nén ảnh...)');
+});
+WIDGETS['dp-roi'] = host => dlCalc(host, [{ id: 'v', label: 'Lượt truy cập / tháng', v: 500000, step: 1000 }, { id: 'c', label: 'Tỉ lệ chuyển đổi (%)', v: 2, step: 0.1 }, { id: 'o', label: 'Giá trị đơn hàng', v: 40 }, { id: 'u', label: 'Tăng chuyển đổi do nhanh hơn (%)', v: 3 }, { id: 'h', label: 'Giờ công bỏ ra', v: 24 }, { id: 'r', label: 'Chi phí / giờ', v: 40 }], v => {
+  const base = v.v * v.c / 100 * v.o, gain = base * v.u / 100, cost = v.h * v.r; return 'Doanh thu cơ sở ≈ ' + base.toLocaleString('vi-VN') + ' / tháng → tăng ≈ <b>' + gain.toLocaleString('vi-VN') + ' / tháng</b>; chi phí công ≈ ' + cost.toLocaleString('vi-VN') + ' ⇒ hoàn vốn sau ≈ <b>' + (cost / (gain || 1)).toFixed(2) + ' tháng</b>.<br><i>Hãy dùng số đo thật từ A/B test thay cho giả định.</i>';
+});
+WIDGETS['dp-culture'] = host => dlDiag(host, [
+  ['Cấp trên chưa quan tâm tới tốc độ', ['Hiệu năng vô hình, khó cảm nhận'], 'Gắn với chỉ số họ quan tâm (doanh thu...), thắng lợi nhanh + A/B test, cho họ xem filmstrip/video so sánh với đối thủ.'],
+  ['Chỉ mình bạn lo hiệu năng, bắt đầu kiệt sức', ['Làm cảnh sát/lao công hiệu năng'], 'Giáo dục, đặt chuẩn nền, trao quyền, chia sẻ trách nhiệm; đội chuyên trách chỉ giữ vai trò champion.'],
+  ['Đồng nghiệp không biết ảnh hưởng của họ', ['Thiếu giáo dục và dữ liệu trong công việc'], 'Lunch-and-learn, thanh công cụ/hiển thị thời gian trên trang đang làm, email hồi quy tự động.'],
+  ['Không ai làm việc nhỏ về hiệu năng', ['Việc quá mơ hồ / quá lớn'], 'Lập danh sách trái chín thấp, ticket nhỏ vài giờ, đủ chi tiết.'],
+  ['Cần động lực lâu dài', ['Thiếu ghi nhận'], 'Vinh danh công khai (performance heroes), công bố báo cáo hiệu năng định kỳ.']
+], 'Tình huống');
