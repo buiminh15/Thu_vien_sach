@@ -202,6 +202,22 @@ window.BOOKS = [
     ]
   },
   {
+    id: "viz360",
+    href: "viz.html",
+    title: "Viz – đọc hiểu tạp chí hài Anh (số 360, 11/2026)",
+    subtitle: "Ảnh trang + tóm tắt tiếng Việt, ghi chú văn hóa/tiếng lóng, từ vựng",
+    author: "Tóm tắt và chú giải tiếng Việt (không phải bản dịch toàn văn)",
+    cat: "Tiếng Anh",
+    tags: ["viz","tiếng anh","hài anh","tiếng lóng","british humour","letterbocks","truyện tranh","18+"],
+    level: "Trung cấp – nâng cao",
+    emoji: "🤪",
+    color: "linear-gradient(135deg,#b91c1c,#f59e0b)",
+    desc: "Đọc hiểu tạp chí hài châm biếm Viz của Anh: mỗi trang có ảnh gốc, tóm tắt tiếng Việt, ghi chú văn hóa/chơi chữ (chấm số ngay trên ảnh) và từ vựng. Đã dựng thư bạn đọc (tr. 7–11), phiên tòa Viz Crown Court, Florence Nightingale và Profanisaurus. Nội dung 18+ (ngôn từ thô tục) – phần tóm tắt đã lược nhẹ.",
+    chapters: [
+      { n: 1, title: "Số 360 – đọc hiểu theo trang", ready: true }
+    ]
+  },
+  {
     id: "vuebook", "mindmap": "vuebook-mindmap.html",
     title: "Fullstack Vue (bản tiếng Việt dễ hiểu)",
     subtitle: "Vue.js, Vuex, Router, Form, Unit test – kèm chương bổ sung Vue 3",

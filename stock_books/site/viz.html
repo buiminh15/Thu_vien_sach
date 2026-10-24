@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Viz – đọc hiểu tạp chí hài Anh</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/viz.css">
+</head>
+<body class="viz-page">
+<header class="topbar"><div class="wrap viz-top">
+  <a class="brand" href="index.html">📚 <span class="hide-sm">Thư viện </span><span>Tự học</span></a>
+  <div class="grow"></div>
+  <select id="issue" class="viz-sel" aria-label="Số tạp chí"></select>
+  <button class="btn sm" id="tglmk" aria-pressed="true" title="Hiện/ẩn chấm số ghi chú trên ảnh">🔢 Chấm số</button>
+  <button class="btn sm hide-lg" id="tglnav">☰ Mục lục</button>
+  <a class="btn sm" href="index.html">← Sách</a>
+  <button class="btn sm" id="theme">🌓</button>
+</div></header>
+
+<div class="viz">
+  <nav class="viz-nav" id="nav" aria-label="Mục lục"></nav>
+  <main class="viz-main">
+    <div class="viz-bar">
+      <button class="btn sm" id="prev">◀ Trước</button>
+      <b id="pgtitle" class="viz-pt"></b>
+      <button class="btn sm" id="next">Sau ▶</button>
+    </div>
+    <div class="viz-grid">
+      <section class="viz-img" id="imgbox"></section>
+      <section class="viz-info" id="info"></section>
+    </div>
+  </main>
+</div>
+
+<div class="viz-modal" id="modal" hidden><button class="btn sm" id="mclose">✕ Đóng</button><div id="mbody"></div></div>
+
+<script src="js/common.js"></script>
+<script src="viz/index.js"></script>
+<script src="js/viz.js"></script>
+</body>
+</html>
