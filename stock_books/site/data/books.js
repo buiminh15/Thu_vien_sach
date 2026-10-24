@@ -469,7 +469,7 @@ window.BOOKS = [
   }
 ,
   {
-    id: "valuation",
+    id: "valuation", "mindmap": "valuation-mindmap.html",
     title: "Định giá đầu tư (Investment Valuation, ấn bản 2)",
     subtitle: "Investment Valuation – Tools and Techniques for Determining the Value of Any Asset",
     author: "Aswath Damodaran",
