@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Designing for Performance</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# ⚡ Designing for Performance
+## ⏱️ 1. Hiệu năng chính là trải nghiệm người dùng
+### ⏱️ Chuẩn mực tốc độ
+### 🏷️ Ảnh hưởng tới thương hiệu
+### 📱 Người dùng di động
+### 🎨 Tác động của nhà thiết kế
+### 📝 Tóm tắt
+- Chuẩn mực: tải trong 2 giây; sau 3 giây tới 40% người dùng rời đi.
+- Chậm làm hỏng niềm tin, giảm quay lại và tụt thứ hạng tìm kiếm.
+- Trên di động độ trễ (RTT trên 300 ms, kênh vô tuyến 1–2 s) là điểm nghẽn, không phải băng thông.
+- Tối ưu tốc độ cũng tiết kiệm pin.
+- Quyết định của nhà thiết kế (màu, bố cục, font, pattern) định hình hiệu năng ngay từ đầu.
+## 🌐 2. Kiến thức cơ bản về tốc độ trang
+### 🌐 Trình duyệt hiển thị nội dung thế nào
+### 📶 Request, kết nối, dung lượng trang
+### 🎞️ Hiệu năng cảm nhận và đường tới hạn
+### 🌍 Các yếu tố môi trường
+### 📝 Tóm tắt
+- Ba mục tiêu: ít tài nguyên, nhẹ, hiệu năng cảm nhận tốt.
+- TTFB đo tốc độ backend; waterfall cho thấy từng request.
+- Tối đa 6 (8 với IE10) kết nối song song; nhiều tên miền làm giảm tối ưu.
+- DOM + CSSOM → render tree → vẽ; CSS chặn render, JS chặn DOM (trừ async).
+- Theo dõi Start Render, Speed Index, time to interactivity.
+- Jank: tụt dưới 60 fps do paint tốn kém.
+- CDN giảm ảnh hưởng của khoảng cách địa lý.
+## 🧭 3. Tối ưu hình ảnh
+### 🧭 Chọn định dạng ảnh
+### 📷 JPEG
+### 🎞️ GIF
+### 🖼️ PNG-8 và PNG-24
+### 🗜️ Nén thêm và tự động hóa
+### 🧩 Giảm số request ảnh
+### 🔁 Lập kế hoạch và duy trì
+### 📝 Tóm tắt
+- Ảnh là phần nặng nhất của trang: tối ưu ảnh là chiến thắng dễ nhất.
+- JPEG cho ảnh chụp; PNG-8 cho ít màu; PNG-24 cho trong suốt một phần; GIF chủ yếu cho animation.
+- Giảm màu, giảm nhiễu, xuất đúng kích thước, chạy qua ImageOptim/Smush.it.
+- GIF/PNG nén theo mẫu ngang: tránh nhiễu dọc.
+- Giảm request: sprite, CSS3, data URI, SVG — đều cần đo hiệu quả.
+- Duy trì bằng kiểm tra định kỳ, style guide và tự động hóa.
+## 🧹 4. Tối ưu markup và style
+### 🧹 Dọn HTML
+### 🎨 Dọn CSS
+### 🔤 Tối ưu web font
+### 📚 Markup tái sử dụng và style guide
+### 📦 Thứ tự tải, minify, gzip, cache
+### 📝 Tóm tắt
+- HTML sạch, ngữ nghĩa: xóa divitis, inline style, code chết.
+- Dọn CSS: bỏ style không dùng, gộp/chuẩn hóa pattern, dùng shorthand, giảm độ đặc hiệu.
+- Tối ưu font: subset, ít độ đậm, font dự phòng, chỉ tải ở màn hình lớn.
+- Chuẩn hóa màu và pattern, ghi vào style guide.
+- CSS ở head, JS cuối trang và async; ít file; tránh @import.
+- Minify + gzip (trừ WOFF); cache tài sản tĩnh với Expires/max-age + Last-Modified/ETag.
+## 📐 5. Responsive web design và hiệu năng
+### 📐 Vấn đề của responsive
+### 🖼️ Ảnh: phục vụ đúng kích thước
+### 🔤 Font trong responsive
+### 🗂️ Cách tiếp cận
+### 📝 Tóm tắt
+- Responsive dễ gửi thừa byte: 72% site gửi cùng dung lượng cho mọi màn hình.
+- Phục vụ ảnh đúng kích thước hiển thị; RESS không phản ứng với xoay màn hình.
+- display:none không ngăn tải ảnh; ẩn phần tử cha hoặc dùng media query cho nền.
+- picture + srcset + sizes cho trình duyệt tự chọn ảnh tốt nhất.
+- Chỉ tải font ở màn hình lớn.
+- Đặt ngân sách hiệu năng theo breakpoint, mobile-first, đo từng breakpoint.
+## 🗓️ 6. Đo lường và cải tiến hiệu năng
+### 🗓️ Tổng quan công cụ
+### 🧰 Công cụ trình duyệt
+### 🧪 Kiểm thử tổng hợp: WebPagetest
+### 👥 Giám sát người dùng thật (RUM)
+### 📈 Theo dõi thay đổi theo thời gian
+### 📝 Tóm tắt
+- Benchmark định kỳ: plug-in (mỗi quý), WebPagetest (mỗi thay đổi lớn), xu hướng (hằng tháng), RUM (hằng tuần).
+- YSlow/DevTools cho khuyến nghị; DevTools Network và FPS meter tìm tắc nghẽn và jank.
+- WebPagetest: 5 lần chạy lấy trung vị, waterfall, Speed Index (nhỏ hơn là tốt).
+- RUM: phân đoạn theo địa lý, mạng; xem trung vị và p95.
+- Ghi lại lý do thay đổi, dùng dashboard + cảnh báo, theo dõi đối thủ, A/B test.
+## ⚖️ 7. Cân bằng giữa thẩm mỹ và hiệu năng
+### ⚖️ Tìm điểm cân bằng
+### 🔧 Đưa hiệu năng vào quy trình làm việc
+### 💰 Ngân sách hiệu năng (performance budget)
+### 🧪 Thí nghiệm với thiết kế
+### 📝 Tóm tắt
+- Hiệu năng là một phần của trải nghiệm; mọi quyết định đều có đánh đổi.
+- Cân nhắc: chênh lệch hiệu năng, thẩm mỹ, chi phí vận hành.
+- Đưa hiệu năng vào quy trình hằng ngày để giảm chi phí vận hành.
+- Đặt ngân sách hiệu năng đo được ngay từ đầu để đánh đổi có kiểm soát.
+- Chạy thí nghiệm A/B và đo; luôn hỏi "điều gì tốt nhất cho người dùng?".
+## 🚓 8. Thay đổi văn hóa trong tổ chức
+### 🚓 Cảnh sát và lao công hiệu năng
+### 📣 Thuyết phục cấp trên (upward management)
+### 🤝 Làm việc với designer và developer khác
+### 📝 Tóm tắt
+- Hiệu năng là vấn đề văn hóa nhiều hơn kỹ thuật.
+- Đừng làm "cảnh sát/lao công": chia sẻ trách nhiệm cho cả tổ chức.
+- Thuyết phục cấp trên bằng chỉ số kinh doanh và cảm nhận thực tế (filmstrip, so sánh đối thủ).
+- Giáo dục, đặt chuẩn nền, trao quyền (dữ liệu trong công việc, cảnh báo tự động).
+- Công khai, làm việc đóng góp dễ dàng và vinh danh người đóng góp.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>

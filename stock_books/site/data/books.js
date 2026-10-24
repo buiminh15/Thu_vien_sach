@@ -1442,7 +1442,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "dperf",
+  "id": "dperf", "mindmap": "dperf-mindmap.html",
   "title": "Designing for Performance",
   "subtitle": "Cân bằng thẩm mỹ và tốc độ trang",
   "author": "Lara Callender Hogan (O'Reilly, 2014)",
