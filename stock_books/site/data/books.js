@@ -2052,7 +2052,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "dtb",
+  "id": "dtb", "mindmap": "dtb-mindmap.html",
   "title": "The Day Trader's Bible",
   "subtitle": "Bí quyết giao dịch trong ngày của Wyckoff (1919)",
   "author": "Richard D. Wyckoff (1919; bản biên tập ePublishingETC)",
