@@ -297,7 +297,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "phantichtc",
+    id: "phantichtc", "mindmap": "phantichtc-mindmap.html",
     title: "Phân tích tài chính",
     subtitle: "Corporate Finance – Chương trình Giảng dạy Kinh tế Fulbright (FETP)",
     author: "Nguyễn Minh Kiều, Ngô Kim Phượng, Diệp Dũng, Trần Thị Kim Chi và FETP",
