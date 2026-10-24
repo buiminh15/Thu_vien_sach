@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Claude Code How-To (bản tiếng Việt)</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 🤖 Claude Code How-To (bản tiếng Việt)
+## ⌨️ 1. Lệnh Slash
+### ⌨️ Bốn loại lệnh slash
+### 🧰 Lệnh tích hợp hay dùng
+### ✍️ Tạo lệnh tùy chỉnh dưới dạng Skill
+### 🔡 Đối số, bối cảnh động, tham chiếu file
+### 📦 Lệnh ví dụ trong kho & thực hành tốt
+### 📝 Tóm tắt
+- Bốn loại lệnh slash: tích hợp, skills, plugin, MCP prompts.
+- Lệnh tùy chỉnh = skills (SKILL.md); skill thắng lệnh cũ khi trùng tên.
+- Biến: $ARGUMENTS, $0, $1; !`cmd` cho ngữ cảnh động; @file nhúng file.
+- disable-model-invocation: true cho lệnh có tác dụng phụ (deploy).
+- Mỗi lệnh một nhiệm vụ, description có điều kiện kích hoạt.
+## 🚀 2. Bộ nhớ: CLAUDE.md và Auto Memory
+### 🚀 Khởi tạo và cập nhật nhanh
+### 🏛 Hệ phân cấp bộ nhớ
+### 📐 Quy tắc mô-đun & cài đặt
+### 🧠 Auto Memory
+### ✅ Thực hành tốt
+### 📝 Tóm tắt
+- /init khởi tạo, /memory bảo trì, # thêm nhanh, @file import.
+- Thứ tự ưu tiên: Managed → Project → Rules → User → Local → Auto memory.
+- Auto memory: 200 dòng đầu MEMORY.md nạp khi khởi động, file chủ đề nạp theo yêu cầu.
+- Cụ thể, ngắn, không bí mật, dùng import tránh trùng lặp.
+## 🪜 3. Agent Skills
+### 🪜 Progressive disclosure: 3 cấp nạp
+### 📍 Vị trí và độ ưu tiên
+### 🧾 Viết SKILL.md
+### 🔤 Biến, ngữ cảnh động, subagent
+### 📚 Ví dụ trong kho
+### 🛠 Quản lý, bảo mật, so sánh
+### 📝 Tóm tắt
+- Skill = thư mục + SKILL.md; nạp theo 3 cấp (metadata → hướng dẫn → tài nguyên).
+- Mô tả phải nói rõ làm gì và khi nào; một skill một khả năng; giữ SKILL.md < 500 dòng.
+- Kiểm soát gọi: disable-model-invocation (chỉ bạn) vs user-invocable: false (chỉ Claude).
+- context: fork + agent chạy skill trong subagent.
+- Chỉ cài skill từ nguồn tin cậy.
+## 🧩 4. Tác nhân con (Subagents)
+### 🧩 Tại sao dùng & khi nào dùng
+### 📁 Định nghĩa một tác nhân con
+### 🧱 Tác nhân tích hợp sẵn
+### ▶️ Cách gọi & các chế độ chạy
+### 👥 Agent Teams (thử nghiệm)
+### ✅ Thực hành tốt & ví dụ
+### 📝 Tóm tắt
+- Subagent = trợ lý chuyên biệt, ngữ cảnh riêng, chỉ trả kết quả cô đọng.
+- File .claude/agents/*.md: name + description bắt buộc; giới hạn tools.
+- Gọi: tự động, rõ ràng, @-mention, --agent; chạy nền, worktree, bộ nhớ riêng.
+- Subagent không spawn subagent; Agent Teams là phiên độc lập liên lạc qua mailbox (thử nghiệm).
+## 🔌 5. MCP – Model Context Protocol
+### 🔌 Kiến trúc & khi nào dùng
+### 🚚 Giao thức vận chuyển & cài server
+### 🗂 Phạm vi, quản lý, biến môi trường
+### 📏 Giới hạn ngữ cảnh
+### 🧪 Ví dụ thực tế
+### 🛡 Doanh nghiệp, bảo mật, xử lý sự cố
+### 📝 Tóm tắt
+- MCP = kết nối chuẩn tới công cụ/dữ liệu thời gian thực; Memory = dữ liệu tĩnh.
+- Transport ưu tiên http; stdio cho server cục bộ; phạm vi local/project/user (local thắng).
+- Tool Search + giới hạn mô tả/đầu ra giảm phình ngữ cảnh; thực thi code còn giảm hơn nữa (~98,7%).
+- Credential trong biến môi trường, quyền tối thiểu; doanh nghiệp dùng managed-mcp.json + allow/deny list.
+## ⚙️ 6. Hooks – tự động hóa theo sự kiện
+### ⚙️ Cấu hình & năm loại hook
+### 📅 33 sự kiện hook
+### 🎛 Đầu vào, exit code & điều khiển
+### 🧪 Ví dụ thực tế
+### 🛡 Bảo mật & gỡ lỗi
+### 📝 Tóm tắt
+- Năm loại hook: command, http, mcp_tool, prompt, agent; cấu hình trong settings, plugin, frontmatter.
+- Exit 0 = ổn; exit 2 = chặn (stderr cho Claude); khác = lỗi không chặn.
+- PreToolUse điều khiển quyền (allow/deny/ask/defer, deny thắng); PostToolUse thêm ngữ cảnh; Stop kiểm tra hoàn thành.
+- Hook chạy shell tùy ý: xác thực đầu vào, trích dẫn biến, test cô lập.
+## 📦 7. Plugins – đóng gói và chia sẻ
+### 📦 Plugin chứa gì
+### 🧠 LSP, tùy chọn, dữ liệu
+### 🏬 Marketplace & nguồn plugin
+### 🧰 Lệnh CLI & vòng đời
+### 🏢 Quản trị & bảo mật
+### 🚀 Ví dụ, xuất bản, thực hành tốt
+### 📝 Tóm tắt
+- Plugin = gói lệnh + skill + agent + hook + MCP + LSP + cài đặt, cài một lệnh, có tiền tố /plugin:lệnh.
+- Manifest .claude-plugin/plugin.json; marketplace.json định nghĩa kho; nguồn: path, GitHub, git, git-subdir, npm.
+- Test bằng --plugin-dir, nạp lại bằng /reload-plugins.
+- Tổ chức kiểm soát qua enabledPlugins, strictKnownMarketplaces; agent trong plugin bị hạn chế hooks/mcpServers/permissionMode.
+## ⏪ 8. Checkpoints và Rewind
+### ⏪ Mở và dùng rewind
+### 🎚 Năm tùy chọn khi rewind
+### ⚙️ Cấu hình, giới hạn, git
+### 📝 Tóm tắt
+- Checkpoint tự tạo cho mỗi prompt; mở bằng Esc Esc hoặc /rewind.
+- Năm lựa chọn: code+hội thoại, hội thoại, code, tóm tắt, hủy.
+- Không theo dõi lệnh Bash hay thay đổi ngoài Claude; giữ 100 checkpoint gần nhất, 30 ngày.
+- Dùng cùng git, không thay thế git.
+## 🗺 9. Nâng cao (1): Plan, Thinking, Auto, Quyền, Tác vụ nền, Print, Phiên
+### 🗺 Chế độ lập kế hoạch (Plan Mode)
+### 💭 Extended Thinking (suy luận mở rộng)
+### 🤖 Auto Mode & sáu chế độ quyền
+### ⏱ Tác vụ nền & theo lịch
+### 🧾 Print mode (claude -p) cho script & CI
+### 🗂 Quản lý phiên
+### 📝 Tóm tắt
+- Plan mode: lập kế hoạch → duyệt → triển khai; /plan, --permission-mode plan, Shift+Tab; opusplan = Opus lập kế hoạch + Sonnet làm.
+- Extended thinking: Alt/Option+T, /effort; dùng cho quyết định phức tạp.
+- Sáu chế độ quyền: default, acceptEdits, plan, auto, dontAsk, bypassPermissions; auto có bộ phân loại (3 chặn liên tiếp/20 tổng → hỏi lại).
+- Ctrl+B + /tasks cho nền; /loop và /schedule cho lịch; claude -p cho CI; -c/-r/--fork-session cho phiên.
+## ⌨️ 10. Nâng cao (2): Phím tắt, Từ xa, Worktree, Sandbox, Quản trị, Cấu hình
+### ⌨️ Phím tắt & tương tác
+### 🌐 Channels, Chrome, từ xa, web, desktop
+### 🧱 Worktree & Sandbox
+### 🏢 Managed settings (doanh nghiệp)
+### ⚙️ Cấu hình & biến môi trường
+### 📝 Tóm tắt
+- Phím tắt: Esc+Esc rewind, Shift+Tab đổi quyền, Ctrl+B nền, Ctrl+T tác vụ, Ctrl+O verbose; keybindings.json cho tùy biến.
+- Mở rộng: Channels, Chrome, Remote Control (chạy trên máy bạn), Web (cloud), Desktop.
+- Cô lập: worktree (--worktree) và sandbox (OS-level) bổ sung cho quy tắc quyền.
+- Quản trị: managed settings (plist/Registry/files/drop-ins); MCP đặt trong .mcp.json.
+## 🧭 11. Tham chiếu CLI và tự động hóa
+### 🧭 Lệnh & cờ cốt lõi
+### 🤖 Mô hình, system prompt, quyền công cụ
+### 📤 Đầu ra, workspace, MCP, debug
+### 🏭 7 công thức giá trị cao
+### 🧮 Mô hình, biến môi trường, sự cố
+### 📝 Tóm tắt
+- REPL: claude; in: claude -p (pipe được, JSON được); phiên: -c, -r, --fork-session.
+- Điều khiển: --model, --effort, --system-prompt*, --tools/--allowedTools/--disallowedTools, --permission-mode.
+- Tự động hóa: --output-format json + --json-schema + jq, --max-turns, --max-budget-usd.
+- --bare cho chế độ tối thiểu; --remote đã thay bằng --cloud.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>

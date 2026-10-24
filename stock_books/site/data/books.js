@@ -251,7 +251,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "claudehowto",
+    id: "claudehowto", "mindmap": "claudehowto-mindmap.html",
     title: "Claude Code How-To (bản tiếng Việt)",
     subtitle: "Từ lệnh slash đến hooks, MCP, plugins và tự động hóa CI",
     author: "Cộng đồng claude-howto (bản dịch tiếng Việt, Claude Code 2.1.302)",
