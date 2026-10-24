@@ -1194,7 +1194,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "aospinput",
+  "id": "aospinput", "mindmap": "aospinput-mindmap.html",
   "title": "Android Interaction: Input, Haptics, Sensors (AOSP)",
   "subtitle": "Input, Haptics, NNAPI, Peripherals, Sensors, CHRE",
   "author": "source.android.com/docs/core/interaction",

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Android Interaction: Input, Haptics, Sensors (AOSP)</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 🖐️ Android Interaction: Input, Haptics, Sensors (AOSP)
+## 🔀 1. Input: pipeline, key layout, key character map, IDC, touch và bàn phím
+### 🔀 Pipeline input
+### 🗺️ Key layout files (.kl)
+### 🔤 Key character map files (.kcm)
+### ⚙️ Input device configuration files (.idc)
+### 👆 Thiết bị cảm ứng
+### ⌨️ Bàn phím vật lý
+### 📝 Tóm tắt
+- Pipeline: thiết bị → kernel driver (evdev) → EventHub → InputReader → InputDispatcher → cửa sổ.
+- Key layout (.kl): Linux code → Android code + cờ FUNCTION/GESTURE/VIRTUAL; key character map (.kcm): key code → ký tự; IDC (.idc): thuộc tính riêng thiết bị (device.internal, touch.deviceType…).
+- Touch: multi-touch Protocol B, không clamp toạ độ, empty sync khi nhấc hết; palm rejection từ Android 13.
+- Bàn phím: phân loại theo key code Linux, layout theo ngôn ngữ, meta state, IME nhận sự kiện sau pre-IME.
+## 📋 2. Haptics (phản hồi xúc giác)
+### 📋 Checklist triển khai
+### 🔔 Hằng số và primitive
+### 📈 Hiệu ứng PWLE (Android 16+)
+### 🔬 Đánh giá phần cứng haptic
+### 📝 Tóm tắt
+- Checklist 5 bước: constants, primitives, mapping HAL↔API, PWLE, đánh giá phần cứng.
+- Primitive ngắn (CLICK/TICK/LOW_TICK) và chirp (SLOW_RISE/QUICK_RISE/QUICK_FALL/THUD/SPIN) với mục tiêu thời lượng, gia tốc, tần số.
+- PWLE (Android 16+): Basic (intensity/sharpness) và Advanced (amplitude/frequency); FOAM, tối thiểu 20 ms/16 điểm.
+- Đánh giá phần cứng: 3 hiệu ứng mục tiêu → performance map để so sánh.
+## 🧠 3. Neural Networks (NNAPI): driver, burst, cache, QoS
+### 🧠 Kiến trúc driver và vòng đời
+### 🔎 Device discovery và assignment (Android 10+)
+### ⚡ Burst executions và FMQ (HAL 1.2+)
+### 💾 Compilation caching (Android 10+)
+### 🚦 Quality of service (Android 11+)
+### 📝 Tóm tắt
+- NNAPI (NDK) deprecated từ Android 15; NN HAL vẫn được hỗ trợ.
+- HAL 1.0 (8.1) → 1.1 (9) → 1.2 (10: extension, burst FMQ, device discovery) → 1.3 (11: fenced, control flow, QoS).
+- Loại thiết bị: OTHER, CPU, GPU, ACCELERATOR; chuỗi phiên bản phải đổi mỗi bản driver.
+- Burst + FMQ giảm overhead; compilation cache cần token ít va chạm, khoá file, phòng TOCTOU; QoS: priority, deadline, mã lỗi TRANSIENT/PERSISTENT.
+## 🎧 4. Peripherals: phụ kiện âm thanh, Android Open Accessory, stylus
+### 🎧 Phụ kiện âm thanh
+### 🔌 Android Open Accessory (AOA)
+### 🖊️ Stylus
+### 📝 Tóm tắt
+- Audio accessories: 3.5 mm, USB (host mode cho audio đầy đủ), Bluetooth A2DP.
+- Headset: nút play/pause, volume theo bước, rút tai nghe nên pause, kích thước nút > 5 mm.
+- AOA: phụ kiện làm USB host, cấp 500 mA @ 5 V; AOAv2 thêm HID (Android 4.1+).
+- Stylus (Android 6.0+): Bluetooth cổ điển bắt buộc, HID descriptor, nút bút tạo KeyEvent từ Android 14.
+## 🧱 5. Sensors: stack, loại cảm biến, batching, reporting mode, HAL AIDL
+### 🧱 Sensor stack
+### 🧭 Các loại cảm biến
+### 📣 Reporting modes và wake-up
+### 🗃️ Batching
+### 🔌 Sensors AIDL HAL (Android 13+)
+### 📝 Tóm tắt
+- Stack: SDK → framework (ghép kênh, HAL single-client) → HAL (sensors.h/AIDL) → driver → sensor hub → MEMS.
+- Loại: base (accelerometer, gyroscope, magnetometer, light, pressure, proximity…) và composite (activity, attitude, interaction, uncalibrated).
+- Reporting mode: continuous, on-change, one-shot (tự tắt), special; wake-up khác non-wake-up.
+- Batching dùng FIFO để giảm ngắt và điện năng; Sensors AIDL HAL (Android 13+) dùng Event FMQ + Wake Lock FMQ và đẩy sự kiện chủ động.
+## 🧩 6. Context Hub Runtime Environment (CHRE)
+### 🧩 Kiến trúc
+### 🧰 Nanoapp API
+### 🔋 Trường hợp dùng và công suất
+### 📝 Tóm tắt
+- CHRE chạy nanoapp native trên bộ xử lý công suất thấp để AP ngủ; chỉ app hệ thống tin cậy truy cập qua ContextHubManager.
+- Hướng sự kiện: nanoappStart/HandleEvent/End; một luồng tại một thời điểm.
+- Context Hub HAL: getHubs() nhanh, nanoapp nạp động khởi động ở trạng thái tắt, sự kiện RESTARTED.
+- API C99 + C++11 hạn chế; bắt buộc timer, messaging, logging; tuỳ chọn sensors, GNSS, Wi-Fi, WWAN, audio, BLE.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>
