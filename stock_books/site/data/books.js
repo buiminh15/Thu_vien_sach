@@ -518,7 +518,7 @@ window.BOOKS = [
     ]
   },
 {
-  "id": "marks",
+  "id": "marks", "mindmap": "marks-mindmap.html",
   "title": "Điều quan trọng nhất được làm sáng tỏ",
   "subtitle": "The Most Important Thing Illuminated – Uncommon Sense for the Thoughtful Investor",
   "author": "Howard Marks (có chú giải của Davis, Greenblatt, Klarman, Johnson)",
