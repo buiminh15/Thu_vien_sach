@@ -2143,7 +2143,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "dien",
+  "id": "dien", "mindmap": "dien-mindmap.html",
   "title": "Giáo trình Điện cơ bản",
   "subtitle": "Thiết bị điện, động cơ và mạch điều khiển (Cao đẳng Điện lực miền Bắc)",
   "author": "Trường Cao đẳng Điện lực miền Bắc (2020)",
