@@ -1609,7 +1609,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "fearch",
+  "id": "fearch", "mindmap": "fearch-mindmap.html",
   "title": "Frontend Architecture for Design Systems",
   "subtitle": "Bốn trụ cột: Code – Process – Testing – Documentation",
   "author": "Micah Godbolt – O'Reilly, 2016 (soạn từ bản tóm tắt)",

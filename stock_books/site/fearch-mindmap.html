@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Frontend Architecture for Design Systems</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 🧱 Frontend Architecture for Design Systems
+## 🕸️ 1. Nguồn gốc: vì sao cần kiến trúc frontend
+### 🕸️ Từ webmaster đến các vai trò chuyên biệt
+### ✍️ Nội dung và Responsive Web Design
+### 🏗️ Cần một kiến trúc cho frontend
+### 📝 Tóm tắt
+- Web phát triển từ webmaster “làm tất cả” sang nhiều vai trò chuyên biệt.
+- Content strategy (2008) và RWD (Marcotte, 2010) thay đổi cách làm web.
+- Frontend lâu nay bị động, gây nợ kỹ thuật → cần frontend architect, được tuyên bố năm 2014.
+## 📐 2. Kỷ luật kiến trúc frontend và dự án Alpha
+### 📐 Kiến trúc frontend là gì?
+### 🚀 Dự án Alpha (Red Hat)
+### 🏛️ Bốn trụ cột
+### 📝 Tóm tắt
+- Kiến trúc sư frontend thiết kế, lập kế hoạch, giám sát; xây công cụ và quy trình.
+- Nên quyết định kiến trúc sớm; khó bán vì thiếu bằng chứng (catch-22).
+- Dự án Alpha của Red Hat: hệ thống thiết kế dùng chung, module, kiểm thử.
+- Bốn trụ cột: Code, Process, Testing, Documentation.
+## 🧱 3. Trụ cột Code (1): HTML và phương pháp CSS
+### 🧱 Nguyên tắc code tốt
+### 🏷️ HTML: markup thủ tục và markup tĩnh
+### 🧩 Từ trang sang hệ thống thiết kế
+### 📝 Tóm tắt
+- Code tốt cần cách tiếp cận có cấu trúc; giảm bất nhất khi đóng góp vào hệ thống thiết kế.
+- Markup thủ tục → div soup; markup tĩnh → khó bảo trì; đích đến là markup module.
+- OOCSS, SMACSS, BEM là các phương pháp CSS chính; chọn/pha trộn theo dự án.
+## 🎨 4. Trụ cột Code (2): CSS và JavaScript
+### 🎨 CSS: cộng đồng và xu hướng
+### ⚙️ JavaScript: chọn công cụ theo nhu cầu
+### 📝 Tóm tắt
+- Kiến trúc sư cần nắm xu hướng CSS; học từ cộng đồng.
+- CSS truyền thống gặp vấn đề specificity và kế thừa.
+- JS: chọn công cụ theo nhu cầu, dùng linter, viết hàm nhỏ tái dùng.
+## 🧶 5. Red Hat Code: tái cấu trúc thành hệ thống module
+### 🧶 Vấn đề: phụ thuộc phình to và style gắn vị trí
+### 🔨 Cách làm lại
+### 📝 Tóm tắt
+- Bản redhat.com 2014 không module: nặng Bootstrap, style gắn vị trí.
+- Cách sửa: bóc tách thành component và layout pattern, lập danh mục, đặt quy tắc (Road Runner Rules).
+- Component phải độc lập ngữ cảnh.
+## 📜 6. Trụ cột Process: quy trình làm việc (workflow)
+### 📜 Từ email và FTP đến quy trình hiện đại
+### 🔄 Workflow cũ và mới
+### 🧑‍💻 Workflow của dev frontend
+### 📝 Tóm tắt
+- Quy trình hiện đại: issue/story, môi trường dev, build, phản hồi, repo trung tâm, deploy có rollback.
+- Workflow mới là cộng tác và dựa trên prototype thay vì chuyền tay tuyến tính.
+- Dev frontend: onboarding → story theo component → feature branch → CI → package manager.
+## 🪜 7. Task runner: Sass, Compass, Grunt và Gulp
+### 🪜 Hành trình từ Sass đến task runner
+### 🛠️ Task runner làm được gì?
+### 📝 Tóm tắt
+- Sass → Compass → Grunt/Gulp là hành trình quen thuộc.
+- Task runner tự động hóa biên dịch, ảnh, kiểm thử, ép chuẩn code.
+- Chuyển sang Node.js giúp mở rộng khả năng và giải quyết hạn chế Ruby.
+## 🧪 8. Trụ cột Testing (1): vì sao test và unit testing
+### 🧪 Vai trò của test
+### 🔬 Unit testing
+### 📝 Tóm tắt
+- Test tạo hệ thống bảo đảm chất lượng thay cho việc giám sát từng dòng.
+- Test viết cùng/ trước code, nằm trong repo, phải qua hết mới merge.
+- Unit test + Single Responsibility + TDD làm code dễ test và tái dùng.
+## 💰 9. Trụ cột Testing (2): kiểm thử hiệu năng
+### 💰 Ngân sách hiệu năng
+### 📏 Các chỉ số cần đo
+### 🤖 Tự động hóa
+### 📝 Tóm tắt
+- Performance budget: mục tiêu số liệu, test trước merge; vượt thì bỏ/sửa tính năng.
+- Baseline đối thủ (tốt hơn ≥20%) hoặc trung bình (HTTP Archive).
+- Đo page weight, số request, TTFB, start render, document complete; PageSpeed và Speed Index là chỉ số tổng hợp.
+- Tự động hóa bằng grunt-pagespeed và grunt-perfbudget.
+## 🕵️ 10. Trụ cột Testing (3): visual regression testing
+### 🕵️ Những “thủ phạm” quen thuộc
+### 📸 Giải pháp: baseline và so sánh
+### 🧰 Các loại công cụ
+### 📝 Tóm tắt
+- Nguyên nhân lệch giao diện: dev khác sửa style chung, thiết kế phân tán, quyết định thay đổi liên tục.
+- Visual regression: chụp baseline đã duyệt và so sánh trước khi merge.
+- Bảy nhóm công cụ: Wraith, BackstopJS, Quixote, Gemini, CasperJS, Diffux, PhantomCSS.
+## 📚 11. Trụ cột Documentation: style guide và pattern library
+### 📚 Tại sao cần tài liệu?
+### 📘 Style guide: Hologram và SassDoc
+### ⚛️ Atomic Design và Pattern Lab
+### 📝 Tóm tắt
+- Không có tài liệu = nợ kỹ thuật; tài liệu là bản thiết kế hệ thống.
+- Hologram (tự do) và SassDoc (có cấu trúc, riêng Sass) cho style guide.
+- Atomic Design: atoms → molecules → organisms → templates; Pattern Lab hiện thực thư viện mẫu.
+## 🪜 12. Red Hat Documentation và lời kết
+### 🪜 Các giai đoạn của tài liệu Red Hat
+### 🏁 Lời kết của tác giả
+### 📝 Tóm tắt
+- Tài liệu Red Hat tiến hóa: Hologram → Twig → Pattern Lab tự dựng → tách repo.
+- Bài học: lặp lại, thích nghi, học liên tục, hợp tác.
+- Mục tiêu: đường ống hiệu quả để dev xây hệ thống thiết kế bền vững.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>
