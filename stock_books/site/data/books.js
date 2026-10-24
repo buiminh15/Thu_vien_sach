@@ -1835,7 +1835,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "fcf",
+  "id": "fcf", "mindmap": "fcf-mindmap.html",
   "title": "Fundamentals of Corporate Finance",
   "subtitle": "Nền tảng tài chính doanh nghiệp",
   "author": "Brealey, Myers, Marcus (McGraw-Hill)",
