@@ -2827,3 +2827,232 @@ WIDGETS['dp-culture'] = host => dlDiag(host, [
   ['Không ai làm việc nhỏ về hiệu năng', ['Việc quá mơ hồ / quá lớn'], 'Lập danh sách trái chín thấp, ticket nhỏ vài giờ, đủ chi tiết.'],
   ['Cần động lực lâu dài', ['Thiếu ghi nhận'], 'Vinh danh công khai (performance heroes), công bố báo cáo hiệu năng định kỳ.']
 ], 'Tình huống');
+// ===== Crash Profits (cp-*) =====
+const cpF = (n, d) => (isFinite(n) ? n.toLocaleString('vi-VN', { maximumFractionDigits: d === undefined ? 2 : d }) : '—');
+const cpP = n => cpF(n, 1) + '%';
+function cpScore(host, items, bands, ttl) {
+  host.innerHTML = '<div class="calc" id="l"></div><div class="info" id="m" style="margin-top:8px"></div>';
+  const l = host.querySelector('#l'), m = host.querySelector('#m');
+  l.innerHTML = (ttl ? '<div style="margin-bottom:6px"><b>' + ttl + '</b></div>' : '') + items.map((s, i) => '<label style="display:block;margin:4px 0"><input type="checkbox" data-i="' + i + '"> ' + s + '</label>').join('');
+  const draw = () => { const n = l.querySelectorAll('input:checked').length; let b = bands[0]; bands.forEach(x => { if (n >= x[0]) b = x; }); m.innerHTML = '<b>' + n + '/' + items.length + ' dấu hiệu.</b> ' + b[1]; };
+  l.onchange = draw; draw();
+}
+const cpBond = (face, cpn, r, yrs) => { let p = 0; for (let t = 1; t <= yrs; t++) p += face * cpn / 100 / Math.pow(1 + r / 100, t); return p + face / Math.pow(1 + r / 100, yrs); };
+
+WIDGETS['cp-pe'] = host => dlCalc(host, [
+  { id: 'e', label: 'Lợi nhuận/cp công bố', v: 5, step: 0.1 }, { id: 'x', label: 'Phóng đại (%)', v: 40, min: 0, max: 90 }, { id: 'pe', label: 'P/E hợp lý', v: 16.5, step: 0.5 }
+], v => { const real = v.e * (1 - v.x / 100); return 'Lợi nhuận thật: <b>' + cpF(real) + '</b><br>Giá theo số công bố: <b>' + cpF(v.e * v.pe) + '</b><br>Giá theo số thật: <b>' + cpF(real * v.pe) + '</b><br>Giá "đáng giá" thấp hơn <b>' + cpP(v.x) + '</b>.'; });
+
+WIDGETS['cp-avgdown'] = host => dlCalc(host, [
+  { id: 'p1', label: 'Giá mua đầu', v: 100 }, { id: 'p2', label: 'Giá mua thêm', v: 50 }, { id: 'n1', label: 'Số cp đầu', v: 100 }, { id: 'n2', label: 'Số cp mua thêm', v: 100 }
+], v => { const tot = v.p1 * v.n1 + v.p2 * v.n2, n = v.n1 + v.n2, avg = n ? tot / n : 0; return 'Giá bình quân: <b>' + cpF(avg) + '</b><br>Từ giá mua thêm cần tăng <b>' + cpP((avg / v.p2 - 1) * 100) + '</b> để hòa vốn.'; });
+
+WIDGETS['cp-options'] = host => dlCalc(host, [
+  { id: 'k', label: 'Giá thực hiện', v: 5 }, { id: 's', label: 'Giá cổ phiếu lúc bán', v: 10 }, { id: 'n', label: 'Số quyền', v: 10000, step: 100 }
+], v => { const g = Math.max(0, v.s - v.k) * v.n; return 'Lãi nếu thực hiện rồi bán: <b>' + cpF(g, 0) + ' USD</b> (chi phí gần như bằng 0 với người được cấp).<br>' + (v.s <= v.k ? 'Ngoài tiền: quyền vô giá trị.' : 'Trong tiền: ' + cpF(v.s - v.k) + '/cp.') + '<br><i>Nhà đầu tư thường phải trả phí để mua quyền chọn tương tự.</i>'; });
+
+WIDGETS['cp-pension'] = host => dlCalc(host, [
+  { id: 'l', label: 'Lỗ quỹ hưu trí (tỷ USD)', v: 10 }, { id: 'y', label: 'Dàn trải trong (năm)', v: 5, min: 1, max: 30 }
+], v => 'Mỗi năm ghi nhận: <b>' + cpF(v.l / v.y) + ' tỷ USD</b> thay vì <b>' + cpF(v.l) + ' tỷ</b> ngay.<br>Năm đầu "lợi nhuận" cao hơn thực tế tương ứng <b>' + cpF(v.l - v.l / v.y) + ' tỷ</b>.');
+
+WIDGETS['cp-vip'] = host => dlCalc(host, [
+  { id: 'ip', label: 'Giá IPO', v: 20 }, { id: 'd1', label: 'Giá ngày đầu', v: 80 }, { id: 'ex', label: 'Giá sau này', v: 2 }, { id: 'n', label: 'Số cp', v: 1000, step: 100 }
+], v => 'VIP (mua IPO, bán ngày đầu): <b>' + cpF((v.d1 - v.ip) * v.n, 0) + ' USD</b>.<br>Nhà đầu tư nhỏ (mua ngày đầu, giữ): <b>' + cpF((v.ex - v.d1) * v.n, 0) + ' USD</b> (' + cpP((v.ex / v.d1 - 1) * 100) + ').');
+
+WIDGETS['cp-loss'] = host => dlCalc(host, [{ id: 'l', label: 'Mức lỗ (%)', v: 98, min: 0, max: 99.9, step: 0.5 }],
+  v => 'Cần tăng <b>' + cpP((1 / (1 - v.l / 100) - 1) * 100) + '</b> để hòa vốn.<br>Tức gấp <b>' + cpF(1 / (1 - v.l / 100)) + '</b> lần giá hiện tại.');
+
+WIDGETS['cp-conflict'] = host => cpScore(host, [
+  'Hãng môi giới từng thu phí bảo lãnh/tư vấn từ công ty này', 'Hãng có cho công ty này vay hoặc muốn lấy việc kinh doanh sắp tới', 'Bonus của nhà phân tích gắn với doanh thu ngân hàng đầu tư', 'Chưa bao giờ có khuyến nghị "bán" trên công ty này', 'Báo cáo không nêu quan hệ kinh doanh của hãng với công ty'
+], [[0, '✅ Chưa thấy xung đột rõ.'], [1, '🟡 Có một dấu hiệu: cần thêm nguồn độc lập.'], [3, '🔴 Nhiều dấu hiệu: khuyến nghị có thể thiên lệch, đừng hành động dựa trên nó.']], 'Đánh dấu điều đúng:');
+
+WIDGETS['cp-fundratio'] = host => dlCalc(host, [{ id: 'a', label: 'Tài sản quỹ', v: 80 }, { id: 'l', label: 'Nghĩa vụ phải trả', v: 100 }],
+  v => 'Tỷ lệ đủ vốn: <b>' + cpP(v.l ? v.a / v.l * 100 : 0) + '</b><br>' + (v.a >= v.l ? 'Đủ vốn (thặng dư ' + cpF(v.a - v.l) + ').' : 'Thiếu hụt <b>' + cpF(v.l - v.a) + '</b>: công ty phải bù, ảnh hưởng lợi nhuận.'));
+
+WIDGETS['cp-vise'] = host => dlCalc(host, [{ id: 'd', label: 'Nợ đến hạn', v: 100 }, { id: 'c', label: 'Tiền mặt', v: 20 }, { id: 'r', label: 'Doanh thu kỳ này', v: 100 }, { id: 'f', label: 'Doanh thu giảm (%)', v: 30, min: 0, max: 100 }],
+  v => { const rev = v.r * (1 - v.f / 100), cov = v.c + rev; return 'Nguồn tiền: <b>' + cpF(cov) + '</b> vs nợ <b>' + cpF(v.d) + '</b><br>' + (cov >= v.d ? '✅ Vẫn trả được (chưa tính chi phí hoạt động).' : '🔴 Thiếu <b>' + cpF(v.d - cov) + '</b>: phải vay thêm hoặc bán tài sản.'); });
+
+WIDGETS['cp-advisor'] = host => cpScore(host, [
+  'Hưởng hoa hồng khi bạn mua bán', 'Có chỉ tiêu doanh số hoặc thưởng bán sản phẩm của hãng', 'Gợi ý sản phẩm nội bộ của hãng nhiều hơn sản phẩm khác', 'Không cho bạn biết các khoản phí', 'Tránh trả lời câu hỏi về hồ sơ pháp lý của họ'
+], [[0, '✅ Có vẻ nghiêng về vai trò cố vấn.'], [2, '🟡 Lẫn lộn giữa tư vấn và bán hàng.'], [4, '🔴 Giống người bán hàng hơn: dùng họ để thực hiện lệnh, lấy lời khuyên từ nguồn độc lập.']], 'Đánh dấu điều đúng với người tư vấn của bạn:');
+
+WIDGETS['cp-breakeven'] = host => dlCalc(host, [{ id: 'l', label: 'Lỗ (%)', v: 50, min: 1, max: 99 }, { id: 'r', label: 'Sinh lời/năm (%)', v: 8, min: 0.1 }],
+  v => 'Cần <b>' + cpF(Math.log(1 / (1 - v.l / 100)) / Math.log(1 + v.r / 100), 1) + ' năm</b> để gỡ lỗ.<br>Mức tăng cần có tổng cộng: <b>' + cpP((1 / (1 - v.l / 100) - 1) * 100) + '</b>.');
+
+WIDGETS['cp-payoff'] = host => dlCalc(host, [{ id: 'b', label: 'Dư nợ', v: 100000, step: 1000 }, { id: 'rd', label: 'Lãi suất nợ (%)', v: 7 }, { id: 'ri', label: 'Lợi suất kỳ vọng (%)', v: 4 }, { id: 't', label: 'Thuế lợi suất (%)', v: 15 }],
+  v => { const net = v.ri * (1 - v.t / 100); return 'Lợi suất sau thuế: <b>' + cpP(net) + '</b> so với lãi nợ <b>' + cpP(v.rd) + '</b>.<br>Mỗi năm ' + (v.rd > net ? 'trả nợ tiết kiệm hơn khoảng <b>' + cpF(v.b * (v.rd - net) / 100, 0) + '</b>.' : 'đầu tư có lợi hơn khoảng <b>' + cpF(v.b * (net - v.rd) / 100, 0) + '</b> (chưa tính rủi ro).'); });
+
+WIDGETS['cp-ma'] = host => dlCalc(host, [{ id: 'p', label: 'Giá chỉ số', v: 1000 }, { id: 'a20', label: 'TB 20 ngày', v: 1020 }, { id: 'a50', label: 'TB 50 ngày', v: 1060 }, { id: 'a200', label: 'TB 200 ngày', v: 1150 }],
+  v => { const below = [v.a20, v.a50, v.a200].filter(a => v.p < a).length; return 'Giá nằm dưới <b>' + below + '/3</b> đường trung bình.<br>' + ['✅ Xu hướng tăng rõ.', '🟡 Bắt đầu yếu: xem xét giảm bớt.', '🟠 Yếu: bán dần phần dễ tổn thương.', '🔴 Cả ba đường đều bị thủng: xu hướng giảm rõ.'][below]; });
+
+WIDGETS['cp-fdic'] = host => dlCalc(host, [{ id: 'd', label: 'Số tiền gửi (USD)', v: 250000, step: 1000 }, { id: 'lim', label: 'Hạn mức bảo hiểm', v: 100000, step: 1000 }],
+  v => { const ins = Math.min(v.d, v.lim); return 'Được bảo hiểm: <b>' + cpF(ins, 0) + '</b><br>Rủi ro: <b>' + cpF(v.d - ins, 0) + '</b> (' + cpP(v.d ? (v.d - ins) / v.d * 100 : 0) + ').<br><i>Hạn mức khác nhau theo nước và thời điểm.</i>'; });
+
+WIDGETS['cp-bond'] = host => dlCalc(host, [{ id: 'c', label: 'Lãi coupon (%)', v: 5 }, { id: 'y', label: 'Kỳ hạn (năm)', v: 10, min: 1, max: 40 }, { id: 'r', label: 'Lãi suất thị trường (%)', v: 7, min: 0.1 }],
+  v => { const p = cpBond(100, v.c, v.r, v.y); return 'Giá trái phiếu mệnh giá 100: <b>' + cpF(p) + '</b> (' + cpP(p - 100) + ').<br>' + (v.r > v.c ? 'Lãi thị trường cao hơn coupon → giá dưới mệnh giá.' : 'Lãi thị trường thấp hơn coupon → giá trên mệnh giá.'); });
+
+WIDGETS['cp-deficit'] = host => dlCalc(host, [{ id: 'a', label: 'Thặng dư công bố', v: 120 }, { id: 'ss', label: 'Quỹ an sinh xã hội đã dùng', v: 160 }],
+  v => { const real = v.a - v.ss; return 'Thực tế: <b>' + (real >= 0 ? '+' : '') + cpF(real, 0) + '</b>.<br>' + (real < 0 ? 'Bạn đang vay thực tế <b>' + cpF(-real, 0) + '</b> dù báo cáo là thặng dư.' : 'Vẫn thặng dư sau khi trừ.'); });
+
+WIDGETS['cp-cash-squeeze'] = host => dlCalc(host, [{ id: 's', label: 'Tiền tiết kiệm sẵn cho vay', v: 100 }, { id: 'g', label: 'Chính phủ cần vay', v: 60 }, { id: 'c', label: 'Doanh nghiệp cần vay', v: 80 }, { id: 'h', label: 'Hộ gia đình cần vay', v: 40 }],
+  v => { const d = v.g + v.c + v.h, gap = d - v.s; return 'Cầu vay <b>' + cpF(d, 0) + '</b> vs cung <b>' + cpF(v.s, 0) + '</b>.<br>' + (gap > 0 ? '🔴 Thiếu <b>' + cpF(gap, 0) + '</b>: lãi suất bị đẩy lên, bên yếu nhất bị loại.' : '✅ Cung đủ.'); });
+
+WIDGETS['cp-bond-crash'] = host => dlCalc(host, [{ id: 'c', label: 'Coupon (%)', v: 5 }, { id: 'r0', label: 'Lãi suất ban đầu (%)', v: 5 }, { id: 'r1', label: 'Lãi suất mới (%)', v: 12 }],
+  v => { const p0 = cpBond(100, v.c, v.r0, 30), p1 = cpBond(100, v.c, v.r1, 30); return 'Giá trái phiếu 30 năm: <b>' + cpF(p0) + '</b> → <b>' + cpF(p1) + '</b> (<b>' + cpP((p1 / p0 - 1) * 100) + '</b>).'; });
+
+WIDGETS['cp-equity'] = host => dlCalc(host, [{ id: 'v', label: 'Giá trị nhà', v: 100000, step: 1000 }, { id: 'd', label: 'Dư nợ', v: 70000, step: 1000 }, { id: 'ch', label: 'Giá nhà đổi (%)', v: -20, min: -80, max: 100 }],
+  v => { const nv = v.v * (1 + v.ch / 100), eq = nv - v.d; return 'Giá mới <b>' + cpF(nv, 0) + '</b>; vốn chủ sở hữu <b>' + cpF(eq, 0) + '</b> (' + cpP(nv ? eq / nv * 100 : 0) + ').<br>' + (eq < 0 ? '🔴 Nợ lớn hơn giá trị nhà.' : 'Mức giảm làm hết vốn: ' + cpP(v.d / v.v * 100 > 100 ? 0 : 100 - v.d / v.v * 100) + '.'); });
+
+WIDGETS['cp-housing-check'] = host => dlDiag(host, [
+  ['Đây là nhà duy nhất tôi muốn ở lâu dài', ['Mục tiêu là ở, không phải đầu cơ giá'], 'Thường không cần bán; giữ khả năng trả nợ và quỹ dự phòng.'],
+  ['Tôi sắp chuyển đi trong vài năm', ['Rủi ro giá giảm trước khi bán'], 'Cân nhắc bán khi giá còn gần đỉnh theo quan điểm sách.'],
+  ['Tôi sắp/đã nghỉ hưu và trông cậy vào nhà', ['Không có thời gian chờ giá phục hồi'], 'Cân nhắc bán một phần hoặc đảm bảo nguồn thu khác.'],
+  ['Tôi có nhà thứ hai hoặc nhà cho thuê', ['Thu nhập thuê có thể mất; nhà thứ hai thường giảm giá sớm'], 'Cân nhắc bán trước khi bị bán tháo.'],
+  ['Giá nhà khu vực tăng ≥ 25% trong 5 năm', ['Dấu hiệu "vùng bong bóng"'], 'Rủi ro giảm mạnh cao hơn trung bình: đánh giá lại.']
+], 'Tình huống của bạn');
+
+WIDGETS['cp-multiple'] = host => dlCalc(host, [{ id: 'm', label: 'Gấp bao nhiêu lần', v: 5, min: 0, step: 0.1 }],
+  v => 'Gấp ' + cpF(v.m) + ' lần = lãi <b>' + cpP((v.m - 1) * 100) + '</b>.<br>Lãi X% = gấp (1 + X/100) lần.');
+
+WIDGETS['cp-short'] = host => dlCalc(host, [{ id: 'n', label: 'Số cp bán khống', v: 1000, step: 100 }, { id: 'p', label: 'Giá bán', v: 35 }, { id: 'c', label: 'Giá mua lại', v: 15 }],
+  v => { const pl = (v.p - v.c) * v.n; return 'Lãi/lỗ: <b>' + cpF(pl, 0) + ' USD</b>.<br>' + (v.c > v.p * 2 ? '🔴 Giá tăng hơn gấp đôi: lỗ vượt vốn ban đầu, có thể bị gọi ký quỹ.' : 'Lỗ tối đa lý thuyết không giới hạn vì giá có thể tăng vô hạn.'); });
+
+WIDGETS['cp-hedge'] = host => dlCalc(host, [{ id: 'v', label: 'Danh mục cổ phiếu', v: 100000, step: 1000 }, { id: 'r', label: 'Rủi ro giảm (%)', v: 50 }, { id: 'p', label: 'Mức bảo vệ (%)', v: 50 }],
+  v => { const risk = v.v * v.r / 100, fund = risk * v.p / 100; return 'Rủi ro: <b>' + cpF(risk, 0) + '</b><br>Cần quỹ đảo ngược: <b>' + cpF(fund, 0) + '</b> (' + cpP(fund / v.v * 100) + ' danh mục).<br>Bán bớt cổ phiếu để lấy tiền: khoảng <b>' + cpF(fund, 0) + '</b>.'; });
+
+WIDGETS['cp-debt-income'] = host => dlCalc(host, [{ id: 'd', label: 'Tổng nợ', v: 115 }, { id: 'i', label: 'Thu nhập khả dụng/năm', v: 100 }, { id: 's', label: 'Tiết kiệm/năm', v: 2 }],
+  v => 'Nợ trên 100 thu nhập: <b>' + cpF(v.i ? v.d / v.i * 100 : 0, 0) + '</b>.<br>Tỷ lệ tiết kiệm: <b>' + cpP(v.i ? v.s / v.i * 100 : 0) + '</b>.<br>Cần khoảng <b>' + cpF(v.s ? (v.d - v.i) / v.s : 0, 1) + ' năm</b> tiết kiệm để hạ nợ về bằng thu nhập (chưa tính lãi).');
+
+WIDGETS['cp-crash87'] = host => dlCalc(host, [{ id: 'e', label: 'Sự kiện', v: '87', opts: [['29', '29/10/1929 (−12,8%)'], ['87', '19/10/1987 (−22,6%)']] }, { id: 'lv', label: 'Mức Dow trước ngày đó', v: 2250 }],
+  v => { const pct = v.e === '29' ? 12.8 : 22.6; return 'Giảm <b>' + cpP(pct) + '</b> ≈ <b>' + cpF(v.lv * pct / 100, 0) + ' điểm</b> với mức ' + cpF(v.lv, 0) + '.<br>Một ngày 1987 gần gấp đôi ngày tệ nhất 1929.'; });
+
+WIDGETS['cp-ltcm'] = host => dlCalc(host, [{ id: 'cap', label: 'Vốn', v: 4 }, { id: 'lev', label: 'Đòn bẩy (x vốn)', v: 25, min: 1, max: 100 }, { id: 'w', label: 'Giá trị biến động bất lợi (%)', v: 4, step: 0.5 }],
+  v => { const pos = v.cap * v.lev, loss = pos * v.w / 100; return 'Vị thế: <b>' + cpF(pos, 0) + '</b>; lỗ: <b>' + cpF(loss) + '</b> = <b>' + cpP(loss / v.cap * 100) + '</b> vốn.<br>' + (loss >= v.cap ? '🔴 Vốn bị xóa sạch.' : 'Ngưỡng làm mất hết vốn: ' + cpP(100 / v.lev) + '.'); });
+
+WIDGETS['cp-capital-risk'] = host => dlCalc(host, [{ id: 'r', label: 'Rủi ro phái sinh / vốn (%)', v: 589, min: 1 }],
+  v => 'Chỉ cần mất <b>' + cpP(10000 / v.r) + '</b> giá trị các vị thế để xóa toàn bộ vốn.<br>Gấp <b>' + cpF(v.r / 100, 1) + '</b> lần vốn.');
+
+WIDGETS['cp-pe-floor'] = host => dlCalc(host, [{ id: 'i', label: 'Chỉ số hiện tại', v: 8000, step: 100 }, { id: 'p0', label: 'P/E hiện tại', v: 20 }, { id: 'p1', label: 'P/E đáy', v: 7 }, { id: 'e', label: 'Lợi nhuận đổi (%)', v: 0, min: -90, max: 100 }],
+  v => { const t = v.i * (v.p1 / v.p0) * (1 + v.e / 100); return 'Chỉ số ngụ ý: <b>' + cpF(t, 0) + '</b> (' + cpP((t / v.i - 1) * 100) + ').'; });
+
+WIDGETS['cp-deflation'] = host => dlCalc(host, [{ id: 'u', label: 'Số máy/tháng', v: 1000, step: 50 }, { id: 'p', label: 'Giá bán', v: 4000 }, { id: 'c', label: 'Giá thành', v: 3500 }, { id: 'dp', label: 'Giá bán giảm (%)', v: 50 }, { id: 'dc', label: 'Chi phí giảm (%)', v: 15 }, { id: 'du', label: 'Số máy giảm (%)', v: 30 }],
+  v => { const p1 = v.p * (1 - v.dp / 100), c1 = v.c * (1 - v.dc / 100), u1 = v.u * (1 - v.du / 100); return 'Doanh thu: <b>' + cpF(v.u * v.p / 1e6) + ' triệu</b> → <b>' + cpF(u1 * p1 / 1e6) + ' triệu</b><br>Lợi nhuận/máy: <b>' + cpF(v.p - v.c, 0) + '</b> → <b>' + cpF(p1 - c1, 0) + '</b><br>Tổng lợi nhuận: <b>' + cpF((v.p - v.c) * v.u / 1e6) + ' triệu</b> → <b>' + cpF((p1 - c1) * u1 / 1e6) + ' triệu</b>.'; });
+
+WIDGETS['cp-bond-ladder'] = host => dlDiag(host, [
+  ['Trái phiếu rác (BB trở xuống)', ['Vỡ nợ đầu tiên khi phá sản lan rộng', 'Niềm tin thị trường rác sụt cả với bên chưa vỡ nợ'], '<b>Bán đầu tiên</b> theo sách (cấp bách nhất).'],
+  ['Trái phiếu doanh nghiệp BBB', ['Chỉ cách rác một bậc', 'Hạ hạng nhanh khi khủng hoảng'], 'Bán (cấp bách) nếu muốn có đệm an toàn.'],
+  ['Trái phiếu doanh nghiệp A trở lên, kỳ hạn dài', ['Kỳ hạn dài nhạy với lãi suất', 'Bán tháo tổ chức lớn làm giá sụt'], 'Cân nhắc bán phần từ 5 năm trở lên (ít cấp bách hơn).'],
+  ['Kho bạc Mỹ ngắn hạn', ['Rủi ro tín dụng thấp nhất', 'Kỳ hạn ngắn ít biến động giá'], 'Nơi trú ẩn theo sách (dù sau này tác giả cảnh báo cả rủi ro với trái phiếu Kho bạc).']
+], 'Loại trái phiếu');
+
+WIDGETS['cp-put-payoff'] = host => dlCalc(host, [{ id: 'k', label: 'Giá thực hiện', v: 90 }, { id: 'pr', label: 'Phí (USD/cp)', v: 5 }, { id: 's', label: 'Giá lúc đáo hạn', v: 80 }, { id: 'n', label: 'Số cp/hợp đồng', v: 100, step: 100 }],
+  v => { const val = Math.max(0, v.k - v.s) * v.n, cost = v.pr * v.n; return 'Chi phí <b>' + cpF(cost, 0) + '</b>; giá trị <b>' + cpF(val, 0) + '</b>; lãi/lỗ <b>' + cpF(val - cost, 0) + '</b> (' + cpP((val / cost - 1) * 100) + ').<br>Hòa vốn tại giá ' + cpF(v.k - v.pr) + '. Lỗ tối đa = phí.'; });
+
+WIDGETS['cp-pe-gap'] = host => dlCalc(host, [{ id: 'a', label: 'P/E hiện tại', v: 45 }, { id: 'b', label: 'P/E lịch sử', v: 16.5, step: 0.5 }, { id: 'e', label: 'Lợi nhuận tăng (%)', v: 0, min: -50, max: 300 }],
+  v => { const t = v.b / v.a / (1 + v.e / 100); return 'Chỉ số về giá trị hợp lý: <b>' + cpP((t - 1) * 100) + '</b> (còn ' + cpP(t * 100) + ').<br>Hoặc lợi nhuận phải tăng <b>' + cpP((v.a / v.b - 1) * 100) + '</b> nếu chỉ số đứng yên.'; });
+
+WIDGETS['cp-rollover'] = host => dlCalc(host, [{ id: 'd', label: 'Vay mỗi ngày (triệu USD)', v: 18 }, { id: 'n', label: 'Số ngày nguồn vốn bị chặn', v: 5, min: 1, max: 60 }],
+  v => 'Thiếu hụt: <b>' + cpF(v.d * v.n, 0) + ' triệu USD</b> (~<b>' + cpF(v.d / 24, 2) + ' triệu/giờ</b>).<br>Không đủ tiền → không tái tục → vỡ nợ.');
+
+WIDGETS['cp-inventory'] = host => dlCalc(host, [{ id: 'rv', label: 'Doanh thu (cũ)', v: 100 }, { id: 'f', label: 'Doanh thu giảm (%)', v: 30 }, { id: 'db', label: 'Nợ đến hạn kỳ này', v: 80 }, { id: 'iv', label: 'Tồn kho tăng thêm', v: 20 }],
+  v => { const rv = v.rv * (1 - v.f / 100); return 'Doanh thu mới <b>' + cpF(rv) + '</b>, nợ <b>' + cpF(v.db) + '</b>, tồn kho +<b>' + cpF(v.iv) + '</b> (tiền bị đóng băng).<br>Thiếu tiền: <b>' + cpF(Math.max(0, v.db - rv)) + '</b> ' + (v.db > rv ? '→ nhu cầu tiền "phi thanh khoản".' : '(còn dư).'); });
+
+WIDGETS['cp-broker-rate'] = host => dlCalc(host, [{ id: 'c', label: 'Số vụ việc', v: 150 }, { id: 'a', label: 'Số tài khoản (triệu)', v: 2.2, step: 0.1 }],
+  v => { const r = v.a ? v.c / v.a : 0; return 'Tỷ lệ: <b>' + cpF(r) + '</b> vụ / triệu tài khoản.<br>So với trung bình 29,28: <b>' + cpP((r / 29.28 - 1) * 100) + '</b>' + (r > 29.28 * 1.5 ? ' 🔴 cao hơn nhiều.' : r < 29.28 * 0.7 ? ' ✅ thấp hơn nhiều.' : ' (gần trung bình).'); });
+
+WIDGETS['cp-weiss-grade'] = host => dlDiag(host, [
+  ['A / A− / B+', ['Xếp hạng tốt'], 'Ưu tiên theo sách (ví dụ A.G. Edwards, Edward Jones, Fidelity).'],
+  ['B / B−', ['Khá tốt'], 'Theo dõi định kỳ.'],
+  ['C+ / C / C−', ['"Cờ vàng": ổn nhưng dễ tổn thương nếu vụ kiện tăng và thị trường giảm mạnh'], 'Theo dõi sát; cân nhắc giữ ít tài sản ở đó.'],
+  ['D+ trở xuống', ['Yếu / rất yếu'], '<b>Cân nhắc nghiêm túc chuyển tài khoản</b> sang công ty an toàn hơn.']
+], 'Xếp hạng an toàn');
+
+WIDGETS['cp-signal'] = host => dlCalc(host, [
+  { id: 'a', label: 'Giá quỹ trên SMA 20?', v: 'y', opts: [['y', 'Có'], ['n', 'Không']] },
+  { id: 'b', label: 'MACD trên đường tín hiệu?', v: 'y', opts: [['y', 'Có'], ['n', 'Không']] },
+  { id: 'h', label: 'Bạn đang', v: 'out', opts: [['out', 'Đứng ngoài'], ['in', 'Đang giữ quỹ']] }
+], v => v.a === 'y' && v.b === 'y' ? (v.h === 'out' ? '🟢 <b>Mua</b> (nếu có tiền chấp nhận rủi ro).' : '🟢 Giữ.') : v.a === 'n' && v.b === 'n' ? (v.h === 'in' ? '🔴 <b>Bán hết.</b>' : '⚪ Đứng ngoài.') : '🟡 Tín hiệu lệch: <b>không làm gì</b> (giữ nguyên trạng thái).');
+
+WIDGETS['cp-arbitration'] = host => dlCalc(host, [{ id: 'a', label: 'Phán quyết (USD)', v: 100000, step: 1000 }, { id: 'p', label: 'Tỷ lệ thực trả (%)', v: 25, min: 0, max: 100 }],
+  v => 'Nhận thực tế: <b>' + cpF(v.a * v.p / 100, 0) + '</b>; mất <b>' + cpF(v.a * (1 - v.p / 100), 0) + '</b>.<br>Sách: chưa đến 1/4 phán quyết được trả.');
+
+WIDGETS['cp-japan-bond'] = host => dlDiag(host, [
+  ['Giữa tháng 9/2002', ['BOJ công bố sẽ mua cổ phiếu'], 'Nikkei hồi.'],
+  ['Thứ Sáu 20/9', ['Phiên đấu giá trái phiếu chính phủ thiếu người mua lần đầu'], 'Nhà đầu tư trái phiếu "đình công".'],
+  ['26/9', ['Mất sạch mức tăng của cổ phiếu'], 'Cổ phiếu quay về mức cũ, trái phiếu vẫn bị hoài nghi.']
+], 'Mốc thời gian');
+
+WIDGETS['cp-dollar-exposure'] = host => dlCalc(host, [{ id: 'f', label: 'Nước ngoài bán (%) tài sản Mỹ', v: 10, min: 0, max: 100 }],
+  v => { const t = 1 + 2.9 + 8; return 'Tài sản Mỹ do nước ngoài giữ: Kho bạc/đại lý ≈ 1, cổ phiếu 2,9, khác 8 → <b>' + cpF(t, 1) + ' nghìn tỷ USD</b>.<br>Bán ' + cpP(v.f) + ' = <b>' + cpF(t * v.f / 100, 2) + ' nghìn tỷ USD</b> áp lực bán/đổi sang tiền khác.'; });
+
+WIDGETS['cp-bailout-plan'] = host => dlDiag(host, [
+  ['1. Hạ ký quỹ mua / tăng ký quỹ bán khống', ['Tăng cầu cổ phiếu', 'Phạt người bán khống'], 'Tăng đòn bẩy mua → rủi ro dây chuyền khi giá giảm.'],
+  ['2. Fed mua trái phiếu doanh nghiệp', ['Đẩy giá trái phiếu lên', 'Cấp tiền cho doanh nghiệp'], 'Phải vay thêm từ nhà đầu tư trái phiếu chính phủ.'],
+  ['3. Lớp vỏ chính trị: kế toán sạch/an ninh', ['Che giấu mục đích hỗ trợ cổ phiếu'], 'Tiêu chí quá co giãn, tiếng xấu chọn lọc.'],
+  ['4. 75% tiền dùng mua lại cổ phiếu', ['Tăng cầu cổ phiếu trực tiếp'], 'Giống LBO, nhưng nguồn là chính phủ.'],
+  ['5. Kiểm soát ngoại hối', ['Ngăn dòng vốn ngoại rút'], 'Làm nhà đầu tư nước ngoài sợ thêm.'],
+  ['6. Bỏ dự trữ bắt buộc', ['Ngân hàng có thêm tiền cho vay'], 'Giảm đệm an toàn.'],
+  ['7. Ngân hàng cắt lãi vay ưu đãi', ['Biểu tượng trấn an'], 'Vô tác dụng khi ngân hàng hết tiền cho vay.']
+], 'Điểm trong kế hoạch');
+
+WIDGETS['cp-quality-spread'] = host => dlCalc(host, [{ id: 'ph', label: 'Giai đoạn', v: '1', opts: [['0', 'Bình thường'], ['1', '1: Khủng hoảng trái phiếu DN'], ['2', '2: Chính phủ cứu DN']] }, { id: 'g', label: 'Lãi trái phiếu chính phủ (%)', v: 4 }],
+  v => { const p = +v.ph, gy = v.g + (p === 2 ? 1.5 : p === 1 ? 0.25 : 0), cy = v.g + (p === 0 ? 1 : p === 1 ? 3.25 : 1.25 + 0.2); return 'Lãi DN <b>' + cpF(cy) + '%</b>; lãi chính phủ <b>' + cpF(gy) + '%</b>; chênh lệch <b>' + cpF(cy - gy) + ' điểm</b>.<br>' + ['Bình thường: ~1 điểm.', 'Chênh lệch nới rộng: mất niềm tin vào doanh nghiệp.', 'Chênh lệch gần như biến mất vì chính phủ bị kéo xuống: dấu hiệu xấu.'][p]; });
+
+WIDGETS['cp-cash-credit'] = host => dlCalc(host, [{ id: 'c', label: 'Tiền bơm (tỷ USD)', v: 100 }, { id: 'k', label: 'Niềm tin (0–100%)', v: 20, min: 0, max: 100 }, { id: 'm', label: 'Hệ số nhân tối đa', v: 5, min: 1 }],
+  v => { const mult = 1 + (v.m - 1) * v.k / 100; return 'Tín dụng thực tạo ra: <b>' + cpF(v.c * mult, 0) + ' tỷ</b> (hệ số <b>' + cpF(mult) + '</b>).<br>Niềm tin thấp: tiền bơm vào nhưng không biến thành cho vay.'; });
+
+WIDGETS['cp-put-portfolio'] = host => dlCalc(host, [{ id: 't', label: 'Tổng tài sản', v: 100000, step: 1000 }, { id: 'o', label: 'Quyền chọn (%)', v: 5, max: 20 }, { id: 'r', label: 'Quỹ đảo ngược (%)', v: 10, max: 40 }],
+  v => { const o = v.t * v.o / 100, r = v.t * v.r / 100; return 'Quyền chọn: <b>' + cpF(o, 0) + '</b> (có thể mất hết); quỹ đảo ngược: <b>' + cpF(r, 0) + '</b>; an toàn: <b>' + cpF(v.t - o - r, 0) + '</b> (' + cpP(100 - v.o - v.r) + ').<br>' + (v.o > 5 ? '🟠 Vượt giới hạn 5% của sách.' : '✅ Trong giới hạn.'); });
+
+WIDGETS['cp-moratorium'] = host => dlCalc(host, [{ id: 'd', label: 'Tổng nợ phải trả', v: 100 }, { id: 'f', label: 'Hoãn nợ (%)', v: 30, max: 100 }, { id: 'c', label: 'Số mắt xích trong chuỗi', v: 3, min: 1, max: 6 }],
+  v => { const hit = v.d * v.f / 100; return 'Mỗi mắt xích không nhận <b>' + cpF(hit) + '</b>; trong chuỗi ' + v.c + ' mắt xích, mỗi bên vừa là con nợ vừa là chủ nợ.<br>Nếu mỗi bên giảm trả theo, tổng trả giảm tới khoảng <b>' + cpF(v.d * (1 - Math.pow(1 - v.f / 100, v.c))) + '</b> (thiếu) cuối chuỗi.'; });
+
+WIDGETS['cp-rational-selling'] = host => dlDiag(host, [
+  ['Bán cổ phiếu công ty nợ nhiều, kế toán đáng ngờ', ['Bán hợp lý'], 'Chuyển tiền sang công ty tốt.'],
+  ['Bán mọi thứ vì sợ', ['Bán phi lý'], 'Có thể bán cả tài sản tốt giá rẻ.'],
+  ['Đóng tài khoản ngân hàng an toàn vì hoảng', ['Phi lý'], 'Kiểm tra xếp hạng an toàn trước.'],
+  ['Rút khỏi môi giới có hồ sơ xấu và chuyển sang môi giới tốt', ['Hợp lý'], 'Hành động có lý do.']
+], 'Tình huống');
+
+WIDGETS['cp-minimum-pay'] = host => dlCalc(host, [{ id: 'b', label: 'Dư nợ', v: 2000, step: 100 }, { id: 'a', label: 'Lãi suất năm (%)', v: 17 }, { id: 'm', label: 'Mức trả tối thiểu (% dư nợ, tối thiểu 20 USD)', v: 3 }],
+  v => { let bal = v.b, n = 0, int = 0; while (bal > 0.5 && n < 600) { const i = bal * v.a / 1200, pay = Math.max(20, bal * v.m / 100); int += i; bal = bal + i - Math.min(pay, bal + i); n++; } return 'Mất <b>' + cpF(n / 12, 1) + ' năm</b> (' + n + ' tháng); tổng lãi <b>' + cpF(int, 0) + ' USD</b> trên gốc ' + cpF(v.b, 0) + '.'; });
+
+WIDGETS['cp-job-matrix'] = host => dlCalc(host, [{ id: 'e', label: 'Kinh tế', v: 's', opts: [['s', 'Mạnh'], ['w', 'Yếu']] }, { id: 'r', label: 'Rủi ro công ty', v: 'l', opts: [['l', 'Thấp'], ['h', 'Cao']] }],
+  v => v.e === 's' && v.r === 'l' ? 'Chủ yếu <b>A</b> (nâng giá trị bản thân), vẫn theo dõi thị trường.' : v.e === 'w' && v.r === 'h' ? 'Ưu tiên <b>B</b> (theo dõi và chuẩn bị tìm việc), không bỏ A.' : 'Làm <b>A và B ngang nhau</b>.');
+
+WIDGETS['cp-save-grow'] = host => dlCalc(host, [{ id: 'm', label: 'Tiết kiệm mỗi tháng', v: 200 }, { id: 'y', label: 'Số năm', v: 10, min: 1, max: 50 }, { id: 'r', label: 'Lãi suất năm (%)', v: 3 }],
+  v => { const n = v.y * 12, i = v.r / 1200; const fv = i ? v.m * ((Math.pow(1 + i, n) - 1) / i) : v.m * n; return 'Tổng bỏ vào: <b>' + cpF(v.m * n, 0) + '</b>; giá trị cuối: <b>' + cpF(fv, 0) + '</b>; phần lãi: <b>' + cpF(fv - v.m * n, 0) + '</b>.'; });
+
+WIDGETS['cp-div-yield'] = host => dlCalc(host, [{ id: 'd', label: 'Cổ tức/năm', v: 1 }, { id: 'p', label: 'Giá cổ phiếu', v: 10 }, { id: 'c', label: 'Cắt cổ tức (%)', v: 0, max: 100 }],
+  v => { const dd = v.d * (1 - v.c / 100); return 'Tỷ suất cổ tức: <b>' + cpP(v.p ? dd / v.p * 100 : 0) + '</b>.<br>Khi giá 100 USD cùng cổ tức ' + cpF(v.d) + ': ' + cpP(v.d / 100 * 100) + '.'; });
+
+WIDGETS['cp-price-sales'] = host => dlCalc(host, [{ id: 'p', label: 'Giá cổ phiếu', v: 10 }, { id: 's', label: 'Doanh thu/cp', v: 20 }],
+  v => { const r = v.s ? v.p / v.s : 0; return 'Giá/doanh thu: <b>' + cpF(r) + '</b> ' + (r <= 0.5 ? '✅ rất rẻ theo ngưỡng hoảng loạn (≤ 0,5).' : r <= 0.7 ? '🟡 rẻ theo ngưỡng đáy thông thường (≤ 0,7).' : '🔴 chưa rẻ.'); });
+
+WIDGETS['cp-rate-phases'] = host => dlCalc(host, [{ id: 'c', label: 'Coupon bạn khóa (%)', v: 5 }, { id: 'r', label: 'Lãi suất thị trường hiện tại (%)', v: 3 }],
+  v => { const p = cpBond(100, v.c, v.r, 20); return 'Giá trái phiếu 20 năm: <b>' + cpF(p) + '</b> (' + cpP(p - 100) + ' so với mệnh giá).<br>Khóa coupon cao ở cuối pha 2 rồi lãi suất giảm ở pha 3 → giá tăng.'; });
+
+WIDGETS['cp-stage-buy'] = host => dlCalc(host, [{ id: 'c', label: 'Vốn dự định đầu tư', v: 100000, step: 1000 }, { id: 'n', label: 'Số đợt', v: 4, min: 1, max: 12 }],
+  v => 'Mỗi đợt <b>' + cpF(v.c / v.n, 0) + '</b>.<br>Ví dụ sách: bắt đầu 10–20% rồi tăng dần khi có xác nhận.');
+
+WIDGETS['cp-creditor-debtor'] = host => dlCalc(host, [{ id: 'dep', label: 'Tiền gửi + quỹ tiền tệ của bạn', v: 50000, step: 1000 }, { id: 'debt', label: 'Nợ của bạn', v: 80000, step: 1000 }, { id: 'f', label: 'Moratorium (%)', v: 30, max: 100 }],
+  v => 'Bạn không trả nợ: giữ lại <b>' + cpF(v.debt * v.f / 100, 0) + '</b>.<br>Nhưng khoản gửi của bạn cũng bị chặn: mất <b>' + cpF(v.dep * v.f / 100, 0) + '</b>.<br>Ròng: <b>' + cpF((v.debt - v.dep) * v.f / 100, 0) + '</b>.');
+
+WIDGETS['cp-quick-ratio'] = host => dlCalc(host, [{ id: 'c', label: 'Tiền mặt và tương đương', v: 30 }, { id: 'd', label: 'Nợ hiện hành', v: 60 }],
+  v => { const r = v.d ? v.c / v.d : 0; return 'Tỷ lệ thanh khoản nhanh: <b>' + cpF(r) + '</b> ' + (r >= 1 ? '✅ đủ trả nợ ngắn hạn.' : r >= 0.5 ? '🟡 nửa đủ.' : '🔴 yếu.'); });
+
+WIDGETS['cp-bad-debt'] = host => dlCalc(host, [{ id: 't', label: 'Tổng nợ xấu (nghìn tỷ USD)', v: 10 }, { id: 'p', label: 'Đã thanh lý (%)', v: 25, max: 100 }],
+  v => 'Còn lại: <b>' + cpF(v.t * (1 - v.p / 100)) + ' nghìn tỷ USD</b> (' + cpP(100 - v.p) + ').');
+
+WIDGETS['cp-real-rate'] = host => dlCalc(host, [{ id: 'n', label: 'Lãi suất danh nghĩa (%)', v: 4 }, { id: 'i', label: 'Lạm phát (−: giảm phát) (%)', v: -3 }],
+  v => 'Lãi suất thực xấp xỉ: <b>' + cpP(v.n - v.i) + '</b>.<br>' + (v.i < 0 ? 'Giảm phát: vay nặng hơn, tiền gửi lời hơn.' : 'Lạm phát dương: lãi thực thấp hơn danh nghĩa.'));
+
+WIDGETS['cp-crash-checklist'] = host => dlCheck(host, [
+  ['Bán cổ phiếu dễ tổn thương', 'Bán có kế hoạch, không hoảng loạn.'],
+  ['Đưa tiền về nơi an toàn', 'Quỹ tiền tệ Kho bạc, ngân hàng được kiểm tra xếp hạng.'],
+  ['Kiểm tra môi giới/ngân hàng/bảo hiểm', 'Xem hồ sơ pháp lý và xếp hạng an toàn.'],
+  ['Giảm nợ, tăng tiết kiệm, bảo vệ việc làm', 'Nợ lãi cao trả trước.'],
+  ['Chỉ dùng ≤ 5% cho quyền chọn/quỹ đảo ngược', 'Có quy tắc vào/ra rõ ràng.'],
+  ['Chờ dấu hiệu đáy trước khi mua lại', 'Cổ tức, giá/doanh thu, tâm lý.'],
+  ['Mua theo đợt, giữ phần tiền an toàn', 'Không dồn hết khi chưa xác nhận phục hồi.']
+], '✅ Bạn đã hoàn thành cả ba giai đoạn: phòng thủ, kiếm lời, tái đầu tư.');

@@ -1686,5 +1686,152 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "crashp",
+  "title": "Crash Profits",
+  "subtitle": "Kiếm tiền khi cổ phiếu sụp đổ và hồi phục",
+  "author": "Martin D. Weiss (Wiley, 2003)",
+  "cat": "Tài chính",
+  "tags": [
+    "Đầu tư",
+    "Thị trường gấu",
+    "Quản trị rủi ro",
+    "Giảm phát",
+    "Nợ",
+    "Quyền chọn"
+  ],
+  "level": "Cơ bản → Trung cấp",
+  "emoji": "📉",
+  "color": "#dc2626",
+  "desc": "25 chương dạng truyện-hướng dẫn về một cuộc sụp đổ giả định của thị trường: cạm bẫy của môi giới, bong bóng cổ phiếu/trái phiếu/bất động sản, giảm phát, cứu trợ và hồi phục. Bản tóm lược tiếng Việt có máy tính, mô phỏng, thẻ ghi nhớ và câu hỏi. Lưu ý: sách xuất bản 2003, mang quan điểm bi quan của tác giả, không phải lời khuyên đầu tư.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Chương trình ngầm của người môi giới",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Bong bóng",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Cơn sốt quảng bá của Phố Wall",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Bong bóng vỡ",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Bộ đồ vệ sinh du lịch 17.000 USD",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Bán ngay những cổ phiếu này!",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Đưa tiền về nơi an toàn",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Thâm hụt ngân sách phình to",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Bong bóng thị trường trái phiếu",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Bong bóng bất động sản",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Thiểu số chiến thắng",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Đội bảo vệ thị trường",
+      "ready": true
+    },
+    {
+      "n": 13,
+      "title": "Những rủi ro ẩn",
+      "ready": true
+    },
+    {
+      "n": 14,
+      "title": "Giảm phát!",
+      "ready": true
+    },
+    {
+      "n": 15,
+      "title": "Sự sụp đổ của các blue-chip",
+      "ready": true
+    },
+    {
+      "n": 16,
+      "title": "Hãy chuyển tài khoản của bạn!",
+      "ready": true
+    },
+    {
+      "n": 17,
+      "title": "Lời kêu gọi hành động",
+      "ready": true
+    },
+    {
+      "n": 18,
+      "title": "Chóng mặt trên đỉnh cao",
+      "ready": true
+    },
+    {
+      "n": 19,
+      "title": "Gói cứu trợ lớn",
+      "ready": true
+    },
+    {
+      "n": 20,
+      "title": "Đợt hồi phục vĩ đại",
+      "ready": true
+    },
+    {
+      "n": 21,
+      "title": "Khoảng trống (The Gap)",
+      "ready": true
+    },
+    {
+      "n": 22,
+      "title": "Trò chơi đổ lỗi",
+      "ready": true
+    },
+    {
+      "n": 23,
+      "title": "Chạm đáy",
+      "ready": true
+    },
+    {
+      "n": 24,
+      "title": "Ngày đen tối nhất",
+      "ready": true
+    },
+    {
+      "n": 25,
+      "title": "Phục hồi thực sự",
+      "ready": true
+    }
+  ]
 }
 ];
+
