@@ -748,7 +748,7 @@ window.BOOKS = [
 }
 ,
 {
-  "id": "streetsmart",
+  "id": "streetsmart", "mindmap": "streetsmart-mindmap.html",
   "title": "Hướng dẫn định giá cổ phiếu (Streetsmart Guide to Valuing a Stock)",
   "subtitle": "The Savvy Investor’s Key to Beating the Market – ấn bản 2",
   "author": "Gary Gray, Patrick J. Cusatis, J. Randall Woolridge (McGraw-Hill)",
