@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Android Connectivity (AOSP)</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 📡 Android Connectivity (AOSP)
+## 📶 1. Bluetooth: stack, BLE, ASHA và HCI
+### 📶 Kiến trúc stack Bluetooth
+### 🔋 Bluetooth Low Energy (BLE)
+### 🦻 ASHA: âm thanh máy trợ thính qua BLE
+### 🧪 HCI requirements (vendor-specific)
+### 📝 Tóm tắt
+- Stack Bluetooth gồm 5 lớp: app framework → Bluetooth app → JNI → stack → vendor implementation.
+- BLE xây trên GATT; central/peripheral; lọc và batch scan ngay trên controller giúp tiết kiệm điện.
+- ASHA: G.722 16 kHz/64 kbit/s qua L2CAP CoC, service 0xFDF0, bộ đệm 8 frame, đồng bộ bằng sequence number.
+- HCI vendor commands (OCF 0x153–0x15F, 0xFD65/66): capabilities, batch scan, APCF, A2DP offload, quality report…
+## 🈳 2. NFC: FeliCa, Secure NFC, Quick Access Wallet, NCI
+### 🈳 Host card emulation của FeliCa
+### 💳 Đồng bộ thanh toán off-host
+### 🔐 Secure NFC (Android 10)
+### 👛 Quick Access Wallet (Android 11+)
+### 🧬 Lệnh NCI độc quyền của Android
+### 📝 Tóm tắt
+- HCE FeliCa cần NFC-F; thành phần HostNfcFService; CTS Verifier kiểm feature nfc.hcef.
+- Off-host payment sync (Android 11) đồng bộ Tap & pay, routing CLF và app-selected state trong SE; cần NCI 2.0 + OMAPI.
+- Secure NFC (Android 10): chỉ cho phép off-host emulation khi đã mở khoá.
+- Quick Access Wallet (Android 11+) qua QuickAccessWalletService; NCI Android proprietary: GID 0xF, Opcode 0x0C, OID 0x00–0x0D.
+## 📞 3. Calling and messaging: IMS, khẩn cấp, RTT, app gọi bên thứ ba
+### 📞 Implement IMS (ImsService)
+### 🚨 Số khẩn cấp và gọi khẩn cấp
+### 🧭 Domain selection service (Android 15+)
+### ⌨️ RTT: Real-Time Text
+### 📲 App gọi bên thứ ba
+### 📝 Tóm tắt
+- ImsService (Android 9): MMTel, Emergency MMTel, RCS; bind carrier override trước, device default sau; chỉ system app priv-app.
+- Số khẩn cấp lấy từ 5 nguồn; 112 và 911 luôn có; Radio HAL 1.4 có emergencyDial.
+- Domain selection (Android 15+) chọn IMS hay CS; cần quyền BIND_DOMAIN_SELECTION_SERVICE và AIDL IRadioNetwork.
+- RTT gửi từng ký tự; app gọi bên thứ ba dùng self-managed ConnectionService/Core-Telecom và hold cuộc gọi nhà mạng.
+## 🏷️ 4. Carrier: CarrierConfig, APN, eSIM, vệ tinh, UICC privileges
+### 🏷️ Carrier configuration
+### 🔑 UICC carrier privileges
+### 📟 eSIM (eUICC)
+### 🛰️ Kết nối vệ tinh (Android 15+)
+### 📝 Tóm tắt
+- CarrierConfig: carrier app > platform config app > mặc định framework; cache cần notifyConfigChangedForSubId.
+- UICC carrier privileges: rule ARA-M (hash chứng chỉ + tên gói) trên SIM → app ký đúng chứng chỉ được gọi API nhà mạng.
+- eSIM: LPA + EuiccService + EuiccManager, GSMA RSP v2.0/2.2; ba luồng activation, LPA không nhận mã từ result intent.
+- Vệ tinh (Android 15+): SatelliteManager + ISatellite HAL; khẩn cấp, nhắn tin, vị trí, dữ liệu constrained/unconstrained.
+## 🕒 5. Time (thời gian, múi giờ) và Ultra-wideband
+### 🕒 Phát hiện thời gian tự động
+### 🌍 Phát hiện múi giờ tự động
+### 📡 Ultra-wideband (UWB)
+### 📝 Tóm tắt
+- time_detector (Android 10+) và time_zone_detector (Android 11+); origin: network, telephony, GNSS, external; mặc định NTP ưu tiên hơn NITZ từ Android 12.
+- Múi giờ: telephony hoặc location (Android 12+); LTZP primary/secondary; telephony fallback (Android 13); vị trí không đưa cho nền tảng.
+- Thông báo thay đổi quy tắc múi giờ cho Android ít nhất 6 tháng trước.
+- UWB (Android 13+): module com.google.android.uwb, HAL AIDL dựa trên FiRa UCI, mã quốc gia xác định theo thứ tự ưu tiên 6 nguồn.
+## 🏛️ 6. Wi-Fi: kiến trúc, HAL, MAC randomization, chọn mạng, WPA3
+### 🏛️ Kiến trúc Wi-Fi
+### 🔌 Wi-Fi HAL
+### 🎭 MAC randomization
+### 🧭 Chọn mạng Wi-Fi (Android 12)
+### 🔒 WPA3 và Wi-Fi Enhanced Open (Android 10+)
+### 📝 Tóm tắt
+- Wi-Fi service (packages/modules/Wifi) + wificond (nl80211) + ba HAL: Vendor, Supplicant, Hostapd (AIDL từ Android 14 / 13).
+- Vendor HAL tuỳ chọn cho STA/SAP, bắt buộc cho Aware/RTT; tổ hợp interface qua WIFI_HAL_INTERFACE_COMBINATIONS.
+- MAC randomization bật mặc định từ Android 10; persistent theo profile, non-persistent từ Android 12.
+- Chọn mạng: ThroughputScorer, saved unmetered > suggested unmetered > saved metered > suggested metered; WPA3 (SAE), OWE cần kernel + wpa_supplicant + driver.
+## ⌚ 7. Companion device, Connectivity Diagnostics, signal strength, chọn mạng
+### ⌚ Companion device profiles (Android 12+)
+### 🩺 Connectivity Diagnostics API
+### 📶 Signal strength reporting (Android 11+)
+### 🥇 Network selection (NetworkScore)
+### 📝 Tóm tắt
+- Companion device profiles: một prompt cấp cả bộ quyền theo role (watch Android 12, glasses Android 14).
+- Connectivity Diagnostics API: 3 callback (validation, data stall, connectivity reported) cho app sở hữu/quản lý mạng, cần ACCESS_FINE_LOCATION.
+- Signal strength: ngưỡng và phép đo tuỳ biến qua CarrierConfig, modem cài setSignalStrengthReportingCriteria_1_5.
+- Network selection Android 12+: cờ NetworkScore (POLICY_TRANSPORT_PRIMARY, POLICY_EXITING, KEEP_CONNECTED_FOR_HANDOVER) thay điểm số nguyên.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>

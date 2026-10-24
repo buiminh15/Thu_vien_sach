@@ -1137,7 +1137,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "aospconn",
+  "id": "aospconn", "mindmap": "aospconn-mindmap.html",
   "title": "Android Connectivity (AOSP)",
   "subtitle": "Bluetooth, NFC, Calling, Carrier, Time, UWB, Wi-Fi",
   "author": "source.android.com/docs/core/connect",
