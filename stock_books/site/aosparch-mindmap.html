@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Android Architecture (AOSP)</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 🤖 Android Architecture (AOSP)
+## 📦 1. Tổng quan kiến trúc AOSP
+### 📦 AOSP là gì và không gồm gì
+### 🧱 Software stack: từ ứng dụng đến kernel
+### 📝 Tóm tắt
+- AOSP là nền tảng hoàn chỉnh nhưng không có dịch vụ backend và nhiều app người dùng cuối.
+- AOSP-compatible = CDD; Android-compatible = CDD + VSR + VTS + CTS.
+- Stack 10 tầng: apps, privileged apps, OEM apps, API, framework, system services, ART, HAL, native daemons/libs, kernel.
+- HAL tách vendor khỏi framework; kernel tách phần chung khỏi phần của vendor.
+## 🔌 2. Hardware Abstraction Layer (HAL) và HIDL
+### 🔌 HAL: khái niệm và các loại
+### 📜 HIDL
+### 📝 Tóm tắt
+- HAL = giao diện chuẩn do vendor cài đặt; Android 8 chuẩn hoá giao diện từng HAL.
+- HAL mới nên dùng AIDL; HIDL deprecated nhưng HAL hiện có vẫn được hỗ trợ.
+- Binderized HAL chạy tiến trình riêng qua binder IPC; Android 8+ dùng binderized; SP HAL là ngoại lệ do Google kiểm soát.
+- HIDL: interface/package/version, oneway/generates, FMQ, passthrough (dlopen) → binderized (-impl, -service).
+## 🐧 3. Kernel: ACK, GKI và KMI
+### 🐧 Từ Linux LTS đến ACK
+### 🧩 GKI: Generic Kernel Image
+### 🔒 Giữ KMI ổn định
+### 📚 Phần còn lại của menu Kernel
+### 📝 Tóm tắt
+- ACK = Linux LTS + patch Android; đặt tên androidNN-X.Y; LTS hỗ trợ 2–6 năm.
+- GKI (ACK ≥ 5.10, aarch64) = lõi chung + GKI modules; bắt buộc từ Android 12 với kernel 5.10+.
+- KMI là biên giới ổn định kernel ↔ vendor module, xác định bằng symbol list và file ABI.
+- Giữ KMI: chỉ gki_defconfig, toolchain AOSP, build hermetic, không phá KMI sau khi frozen.
+## ⚙️ 4. Configuration và Device Tree Overlays
+### ⚙️ Năm cách lưu cấu hình
+### 🌲 Device Tree Overlays
+### 📝 Tóm tắt
+- Cấu hình: system properties (dùng cẩn thận), init_dev_config, HAL properties, XML + xsd_config, resource overlays/RRO.
+- ConfigStore HAL đã deprecated.
+- DTO: DTS → dtc → DTB; DTBO overlay lên cây chung của SoC; Android 9+ bootloader không sửa property trong DTO.
+- DTB lưu ở boot image hoặc partition DTB riêng, bootloader nạp rồi truyền địa chỉ cho kernel.
+## 📚 5. VNDK, VINTF và Vendor API level
+### 📚 VNDK (Vendor NDK, ≤ AOSP 14)
+### 📜 VINTF: Vendor Interface Object
+### 🔢 Vendor API level
+### 📝 Tóm tắt
+- VNDK cho phép cập nhật chỉ framework nhưng đã deprecated từ Android 15; LL-NDK vẫn còn.
+- Thư viện framework chia LL-NDK / eligible VNDK (VNDK-SP) / FWK-ONLY; SP-HAL chỉ phụ thuộc LL-NDK + VNDK-SP.
+- VINTF: manifest = cung cấp, compatibility matrix = đòi hỏi; đối chiếu lúc OTA; Target FCM Version.
+- Vendor API level: tách khỏi SDK từ Android 14 QPR3, định dạng YYYYMM; vendor freeze cố định VSR.
+## 🔁 6. AIDL và Binder (IPC)
+### 🔁 Binder: giao tiếp liên tiến trình
+### 🥶 App cached và frozen
+### 📝 AIDL
+### 📝 Tóm tắt
+- Binder: proxy → transaction (node ID, method ID, buffer) → driver → thread pool server; AIDL là cách định nghĩa giao diện.
+- Thread pool mặc định 15; tránh giữ khoá khi gọi binder; oneway tuần tự hoá theo node.
+- App frozen: sync call → kill; oneway → đệm; RemoteCallbackList có 3 frozen callee policy.
+- Stable AIDL: structured, aidl_interface, freeze/hash, chỉ thêm ở cuối; APEX (10+) và HAL (11+) phải dùng.
+## 🥾 7. Bootloader
+### 🥾 Luồng boot và các tính năng
+### 🖼️ Boot image header (v0–v4)
+### 🔓 Khoá và mở khoá bootloader
+### ⚡ fastbootd và Generic Bootloader
+### 📝 Tóm tắt
+- Bootloader: bảo vệ trạng thái, khởi tạo TEE, xác minh boot/dtbo/init_boot/recovery, chọn slot, nạp kernel + ramdisk.
+- Header v1 (9) → v2 (10) → v3 (11, bỏ recovery/DTB/second) → v4 (12, boot_signature, vendor ramdisk fragment).
+- Mở khoá cần OEM unlocking + factory reset; critical sections cần nút vật lý.
+- fastbootd (userspace) cho dynamic partitions; GBL là bootloader chuẩn hoá, khuyến nghị cho ARM-64 từ Android 16.
+## 🗂️ 8. Partitions (phân vùng)
+### 🗂️ Ba nhóm partition
+### 🔄 Quy tắc cập nhật và biến thể build
+### 🏗️ Partition layout: system-as-root
+### 🧰 vendor_boot
+### 📝 Tóm tắt
+- Ba nhóm: system (cập nhật cùng OS), vendor (mã riêng phần cứng), nonupdatable (cache, userdata, metadata).
+- init_boot (Android 13+) chứa generic ramdisk; vendor_boot (Android 11+) chứa mã boot riêng vendor.
+- Cập nhật nhóm system cùng nhau, nhóm vendor cùng nhau; dynamic partitions từ Android 11.
+- Android 10 system-as-root; vendor_boot v3/v4 với ramdisk fragment và bootconfig.
+## 📏 9. 16 KB page size
+### 📏 Tổng quan và yêu cầu
+### 🛠️ Tác động tới ứng dụng và native code
+### ✅ Kiểm chứng
+### 📝 Tóm tắt
+- Page 16 KB chỉ cho arm64; tốn bộ nhớ hơn nhưng nhanh hơn; mặc định tắt ở Android 15.
+- Userspace: PRODUCT_NO_BIONIC_PAGE_SIZE_MACRO và PRODUCT_MAX_PAGE_SIZE_SUPPORTED := 16384; ngoài cây: -Wl,-z,max-page-size=16384.
+- Native code: mmap theo bội của page size, gộp vùng nhỏ.
+- Kiểm: get_build_var, elf_alignment_test, PRODUCT_CHECK_PREBUILT_MAX_PAGE_SIZE (Android 16+), chạy thật trên kernel 16 KB.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>

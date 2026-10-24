@@ -1071,7 +1071,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "aosparch",
+  "id": "aosparch", "mindmap": "aosparch-mindmap.html",
   "title": "Android Architecture (AOSP)",
   "subtitle": "HAL, Kernel/GKI, Treble, AIDL/Binder, Bootloader, Partitions",
   "author": "source.android.com/docs/core/architecture",
