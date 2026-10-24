@@ -3453,3 +3453,96 @@ WIDGETS['dt-timeframe'] = host => dlDiag(host, [
   ['Vài ngày đến vài tuần', ['Dao động 5–20 điểm', 'Ít bị ràng buộc màn hình'], 'Wyckoff thấy "thoải mái" hơn.'],
   ['Vài tháng đến vài năm', ['Theo chu kỳ chuẩn bị lớn'], 'Phù hợp nhà đầu tư kiên nhẫn.']
 ], 'Khung thời gian');
+// ===== Giáo trình Điện cơ bản (de-*) — dùng cpF, cpP, cpScore từ w-cp =====
+function deSim(host, o) {
+  host.innerHTML = '<div class="row" id="b" style="gap:6px;flex-wrap:wrap"></div><div class="calc" id="o" style="margin-top:8px"></div><div class="info" id="log" style="margin-top:6px;min-height:34px"></div>';
+  let st = o.init(); const b = host.querySelector('#b'), out = host.querySelector('#o'), lg = host.querySelector('#log');
+  const draw = (msg) => { out.innerHTML = o.show(st); lg.innerHTML = msg || ''; };
+  o.buttons.forEach(x => { const bt = document.createElement('button'); bt.textContent = x[1]; bt.onclick = () => { const r = o.step(st, x[0]); st = r.s; draw(r.m); }; b.appendChild(bt); });
+  const rs = document.createElement('button'); rs.textContent = '↺ Đặt lại'; rs.onclick = () => { st = o.init(); draw(''); }; b.appendChild(rs);
+  draw('');
+}
+const deLamp = (on, c) => '<span style="color:' + (on ? c : '#94a3b8') + '">' + (on ? '●' : '○') + '</span>';
+const deIdm = (P, U, cos, eta, ph) => ph === 3 ? P * 1000 / (Math.sqrt(3) * U * cos * eta) : P * 1000 / (U * cos * eta);
+
+WIDGETS['de-meter-read'] = host => dlCalc(host, [{ id: 'g', label: 'Giới hạn đo (V)', v: 250 }, { id: 'amax', label: 'Vạch chia lớn nhất', v: 50 }, { id: 'ad', label: 'Số chỉ của kim', v: 30, step: 0.5 }],
+  v => 'U = ' + cpF(v.g) + ' × ' + cpF(v.ad) + ' / ' + cpF(v.amax) + ' = <b>' + cpF(v.amax ? v.g * v.ad / v.amax : 0) + ' V</b>' + (v.ad > v.amax ? '<br>⚠️ Số chỉ vượt vạch lớn nhất.' : ''));
+
+WIDGETS['de-range'] = host => dlCalc(host, [{ id: 'u', label: 'Điện áp dự kiến (V)', v: 220 }, { id: 'known', label: 'Bạn đã biết trị số?', v: 'y', opts: [['y', 'Có'], ['n', 'Chưa biết']] }],
+  v => { const ranges = [10, 50, 250, 500, 1000]; const r = ranges.find(x => x >= v.u * 1.0) || 1000; return v.known === 'n' ? 'Chưa biết trị số: <b>đặt thang lớn nhất</b> (1000 V) rồi giảm dần.' : 'Chọn thang nhỏ nhất vẫn lớn hơn giá trị: <b>' + r + ' V</b>' + (v.u > 1000 ? ' (⚠️ vượt giới hạn 1000 V của đồng hồ)' : '') + '. Tránh thang quá lớn vì kim chỉ gần 0, sai số tăng.'; });
+
+WIDGETS['de-insulation'] = host => dlCalc(host, [{ id: 'r', label: 'Điện trở cách điện đo được (MΩ)', v: 5, step: 0.1 }],
+  v => v.r > 0.5 ? '🟢 R > 0,5 MΩ: <b>cách điện tốt</b>.' : v.r > 0 ? '🟠 0 < R < 0,5 MΩ: <b>cuộn dây bị ẩm</b> → sấy khô, tẩm sơn.' : '🔴 R = 0: <b>cuộn dây chạm vỏ / hỏng cách điện</b>.');
+
+WIDGETS['de-fuse-motor'] = host => dlCalc(host, [{ id: 'i', label: 'Iđm (A)', v: 10 }, { id: 'k', label: 'Kmm', v: 6, min: 5, max: 7, step: 0.5 }, { id: 'a', label: 'Mở máy', v: 1.6, opts: [[1.6, 'Có tải (α = 1,6)'], [2.5, 'Không tải (α = 2,5)']] }, { id: 'icp', label: 'Dòng cho phép của dây (A)', v: 40 }],
+  v => { const imm = v.k * v.i, itt = imm / v.a, max = 0.8 * v.icp; return 'Imm = ' + cpF(imm) + ' A → Itt = Imm/α = <b>' + cpF(itt) + ' A</b><br>Giới hạn bảo vệ dây: Idc ≤ 0,8 × ' + cpF(v.icp) + ' = <b>' + cpF(max) + ' A</b><br>' + (itt <= max ? '✅ Chọn dây chảy từ ' + cpF(itt) + ' A đến ' + cpF(max) + ' A (tra cỡ chuẩn).' : '🔴 Itt vượt giới hạn dây: tăng tiết diện dây hoặc đổi cách mở máy.'); });
+
+WIDGETS['de-breaker'] = host => dlCalc(host, [{ id: 'p', label: 'Tổng công suất phụ tải (W)', v: 3000, step: 100 }, { id: 'u', label: 'Điện áp (V)', v: 220 }, { id: 'cos', label: 'cosφ', v: 0.9, step: 0.05, max: 1 }],
+  v => { const i = v.p / (v.u * v.cos); const std = [6, 10, 16, 20, 25, 32, 40, 50, 63].find(x => x >= i * 1.2) || '>63'; return 'Dòng làm việc ≈ <b>' + cpF(i) + ' A</b><br>Chọn áptômát có Iđm ≥ dòng lớn nhất và nhỏ hơn dòng cho phép của dây: gợi ý cấp chuẩn <b>' + std + ' A</b> (cộng dự trữ ~20%).<br><i>Luôn kiểm tra tiết diện dây phù hợp.</i>'; });
+
+WIDGETS['de-cb-trip'] = host => dlDiag(host, [
+  ['Thay áptômát mới vẫn nhảy', ['Lỗi không nằm ở áptômát'], 'Chuyển bước 2: tháo hết thiết bị đang cắm.'],
+  ['Tháo hết thiết bị, bật lại thì hết nhảy', ['Một thiết bị bị chập/rò'], 'Cắm lại từng thiết bị để tìm cái hỏng.'],
+  ['Tháo hết thiết bị vẫn nhảy', ['Ổ cắm, công tắc hoặc dây âm tường'], 'Chuyển bước 3: tháo ổ cắm, công tắc, bịt đầu dây.'],
+  ['Tháo ổ cắm, công tắc vẫn nhảy', ['Dây điện âm tường rò/chạm'], 'Đo thông mạch loại trừ từng nhánh hoặc dùng áptômát chống giật khoanh vùng.']
+], 'Hiện tượng');
+
+WIDGETS['de-lighting'] = host => dlCalc(host, [{ id: 'lamp', label: 'Công suất đèn (W)', v: 20 }, { id: 'n', label: 'Số đèn', v: 2 }, { id: 'sock', label: 'Công suất ổ cắm (W)', v: 1200 }, { id: 'u', label: 'Điện áp (V)', v: 220 }],
+  v => { const p = v.lamp * v.n + v.sock, i = p / v.u; return 'Tổng công suất: <b>' + cpF(p) + ' W</b> → I ≈ <b>' + cpF(i) + ' A</b><br>' + (i < 10 ? '✅ ATM 10 A–250 V (như bài mẫu) là đủ.' : '🟠 Cần ATM lớn hơn 10 A, kiểm tra tiết diện dây.'); });
+
+WIDGETS['de-sync'] = host => dlCalc(host, [{ id: 'f', label: 'Tần số (Hz)', v: 50 }, { id: 'p', label: 'Số đôi cực p', v: 2, min: 1, max: 8 }, { id: 'n2', label: 'Tốc độ rôto (vòng/phút)', v: 1440, step: 10 }],
+  v => { const n1 = 60 * v.f / v.p, s = (n1 - v.n2) / n1 * 100; return 'n₁ = 60×' + v.f + '/' + v.p + ' = <b>' + cpF(n1, 0) + ' v/p</b> · độ trượt S = <b>' + cpP(s) + '</b>' + (v.n2 >= n1 ? '<br>⚠️ n₂ ≥ n₁: động cơ không sinh mômen.' : ''); });
+
+WIDGETS['de-motor-eff'] = host => dlCalc(host, [{ id: 'p1', label: 'Công suất điện vào P₁ (W)', v: 1450 }, { id: 'pd', label: 'Tổn hao đồng (W)', v: 120 }, { id: 'pt', label: 'Tổn hao sắt (W)', v: 60 }, { id: 'pm', label: 'Tổn hao ma sát (W)', v: 30 }],
+  v => { const d = v.pd + v.pt + v.pm, p2 = v.p1 - d; return 'ΔP = <b>' + cpF(d) + ' W</b> · P₂ = <b>' + cpF(p2) + ' W</b> · η = <b>' + cpP(v.p1 ? p2 / v.p1 * 100 : 0) + '</b>'; });
+
+WIDGETS['de-fan-check'] = host => dlCalc(host, [{ id: 'r', label: 'Rcđ (MΩ)', v: 2, step: 0.1 }, { id: 'c', label: 'Tụ ghi trên nhãn (µF)', v: 2 }, { id: 'cm', label: 'Tụ đo được (µF)', v: 1.95, step: 0.01 }],
+  v => { const dev = Math.abs(v.cm - v.c) / v.c * 100; return 'Cách điện: ' + (v.r > 0.5 ? '🟢 tốt' : v.r > 0 ? '🟠 ẩm' : '🔴 chạm vỏ') + '<br>Tụ lệch <b>' + cpP(dev) + '</b>: ' + (dev <= 5 ? '🟢 tốt (≤ ±5%)' : '🔴 nên thay'); });
+
+WIDGETS['de-slip'] = host => dlCalc(host, [{ id: 'n1', label: 'Tốc độ từ trường n₁', v: 1500 }, { id: 'n2', label: 'Tốc độ rôto n₂', v: 1470 }],
+  v => { const s = (v.n1 - v.n2) / v.n1 * 100; return 'S = <b>' + cpP(s) + '</b> ' + (s <= 0 ? '(không có mômen)' : s < 1 ? '(gần không tải)' : s <= 6 ? '(làm việc bình thường 1–6%)' : s < 100 ? '(trượt lớn: quá tải hoặc đang mở máy)' : '(mở máy, rôto đứng yên)'); });
+
+WIDGETS['de-starting'] = host => dlCalc(host, [{ id: 'i', label: 'Iđm (A)', v: 20 }, { id: 'k', label: 'Kmm trực tiếp', v: 6, min: 5, max: 7, step: 0.5 }],
+  v => { const d = v.k * v.i; return 'Trực tiếp: <b>' + cpF(d) + ' A</b><br>Sao–tam giác: <b>' + cpF(d / 3) + ' A</b> (giảm 3 lần, mômen cũng giảm 3 lần)<br>Tự ngẫu/cuộn kháng: tùy tỉ số điện áp; rôto dây quấn: nhỏ hơn nhờ biến trở.'; });
+
+WIDGETS['de-torque-v'] = host => dlCalc(host, [{ id: 'drop', label: 'Điện áp giảm (%)', v: 20, max: 90 }],
+  v => { const f = Math.pow(1 - v.drop / 100, 2); return 'Mômen tỷ lệ U²: còn <b>' + cpP(f * 100) + '</b> mômen định mức (giảm ' + cpP((1 - f) * 100) + ').<br>' + (f < 0.6 ? '🔴 Mômen quá yếu để khởi động tải nặng.' : '🟡 Cần kiểm tra khả năng mở máy.'); });
+
+WIDGETS['de-polarity'] = host => dlCalc(host, [{ id: 'lamp', label: 'Đèn khi nối tiếp hai cuộn rồi cấp nguồn', v: 'on', opts: [['on', 'Sáng'], ['off', 'Không sáng']] }],
+  v => v.lamp === 'on' ? 'Hai đầu nối với nhau là <b>khác cực tính</b> (cuối của cuộn này nối đầu của cuộn kia sẽ không triệt tiêu). Ví dụ: 1 = A, 1′ = X → 2′ = B, 2 = Y.' : 'Hai đầu nối với nhau là <b>cùng cực tính</b>. Ví dụ: 1 = A, 1′ = X → 2′ = Y, 2 = B.');
+
+WIDGETS['de-contactor'] = host => deSim(host, {
+  buttons: [['on', '⚡ Cấp điện cuộn dây'], ['off', '⛔ Cắt điện cuộn dây']], init: () => false,
+  step: (s, a) => ({ s: a === 'on', m: a === 'on' ? 'Mạch từ hút → tiếp điểm chính đóng, phụ thường mở đóng, phụ thường đóng mở.' : 'Lò xo kéo nắp ra → tiếp điểm trở về trạng thái ban đầu.' }),
+  show: s => 'Cuộn dây: ' + deLamp(s, '#16a34a') + ' · Tiếp điểm chính: <b>' + (s ? 'ĐÓNG' : 'mở') + '</b> · Phụ thường mở: <b>' + (s ? 'ĐÓNG' : 'mở') + '</b> · Phụ thường đóng: <b>' + (s ? 'MỞ' : 'đóng') + '</b>' });
+
+WIDGETS['de-start-stop'] = host => deSim(host, {
+  buttons: [['M', '▶ Ấn M (mở máy)'], ['D', '■ Ấn D (dừng)'], ['RN', '🔥 Quá tải (RN tác động)'], ['rs', '↩ Phục hồi RN']], init: () => ({ K: false, rn: false }),
+  step: (s, a) => { if (a === 'M') { if (s.rn) return { s, m: 'RN đang hở nên cuộn K không có điện.' }; return { s: { ...s, K: true }, m: 'K có điện → K2 tự duy trì, K1 đóng cấp điện động cơ.' }; } if (a === 'D') return { s: { ...s, K: false }, m: 'K mất điện → K1 mở → động cơ dừng.' }; if (a === 'RN') return { s: { K: false, rn: true }, m: 'Rơ le nhiệt mở tiếp điểm thường đóng → cắt K.' }; return { s: { ...s, rn: false }, m: 'Đã ấn nút phục hồi, RN thường đóng trở lại.' }; },
+  show: s => 'Động cơ: <b>' + (s.K ? 'CHẠY' : 'DỪNG') + '</b> ' + deLamp(s.K, '#16a34a') + ' xanh · ' + deLamp(!s.K, '#dc2626') + ' đỏ · RN: ' + (s.rn ? '🔥 đã tác động' : 'bình thường') });
+
+WIDGETS['de-select'] = host => dlCalc(host, [{ id: 'p', label: 'Công suất P (kW)', v: 1.1, step: 0.1 }, { id: 'ph', label: 'Số pha', v: 3, opts: [[3, 'Ba pha'], [1, 'Một pha']] }, { id: 'u', label: 'Điện áp (V)', v: 380 }, { id: 'cos', label: 'cosφ', v: 0.87, step: 0.01 }, { id: 'eta', label: 'Hiệu suất η', v: 0.76, step: 0.01 }, { id: 'k', label: 'Hệ số mở máy', v: 5, min: 3, max: 7 }, { id: 'rcd', label: 'R cuộn dây công tắc tơ (Ω)', v: 1000 }],
+  v => { const i = deIdm(v.p, v.u, v.cos, v.eta, +v.ph), imm = v.k * i, iqt = 3 * i, icd = v.u / v.rcd; return 'Iđm = <b>' + cpF(i, 2) + ' A</b><br>ATM động lực chọn theo Imm = ' + v.k + ' × Iđm = <b>' + cpF(imm) + ' A</b> (lấy cấp chuẩn lớn hơn)<br>Dòng đặt trên rơ le nhiệt ≈ 3 × Iđm = <b>' + cpF(iqt) + ' A</b> (giáo trình dùng 2,5–3)<br>Dòng cuộn dây công tắc tơ = ' + cpF(icd, 2) + ' A → ATM mạch điều khiển 10 A.'; });
+
+WIDGETS['de-fwd-rev'] = host => deSim(host, {
+  buttons: [['MT', '▶ Ấn MT (thuận)'], ['MN', '◀ Ấn MN (ngược)'], ['D', '■ Ấn D']], init: () => ({ T: false, N: false }),
+  step: (s, a) => { if (a === 'D') return { s: { T: false, N: false }, m: 'Dừng: cả KT và KN mất điện.' }; if (a === 'MT') return { s: { T: true, N: false }, m: 'DT mở cắt KN (liên động cơ); KT3 mở khóa KN (liên động điện).' }; return { s: { T: false, N: true }, m: 'DN mở cắt KT; KN3 mở khóa KT.' }; },
+  show: s => 'KT (thuận): ' + deLamp(s.T, '#16a34a') + ' · KN (ngược): ' + deLamp(s.N, '#eab308') + ' · Động cơ: <b>' + (s.T ? 'QUAY THUẬN' : s.N ? 'QUAY NGƯỢC' : 'DỪNG') + '</b> · Đèn đỏ: ' + deLamp(!s.T && !s.N, '#dc2626') + '<br><i>Không bao giờ KT và KN cùng có điện.</i>' });
+
+WIDGETS['de-pump'] = host => deSim(host, {
+  buttons: [['use', '🚿 Dùng nước (mực hạ)'], ['fill', '⬆ Bơm đầy (mực lên)'], ['hand', '✋ Bật/tắt chế độ tay']], init: () => ({ level: 60, hand: false }),
+  step: (s, a) => { let l = s.level, h = s.hand; if (a === 'use') l = Math.max(0, l - 30); if (a === 'fill') l = Math.min(100, l + 30); if (a === 'hand') h = !h; return { s: { level: l, hand: h }, m: h ? 'Chế độ tay: người vận hành điều khiển công tắc hai cực.' : (l <= 30 ? 'Mực thấp → phao đóng → bơm chạy.' : l >= 90 ? 'Mực cao → phao mở → bơm dừng.' : 'Vùng giữa: giữ trạng thái trước đó (theo phao).') }; },
+  show: s => { const run = s.hand || s.level <= 30; return 'Mực nước: <b>' + s.level + '%</b> · Bơm: <b>' + (run ? 'CHẠY' : 'DỪNG') + '</b> ' + deLamp(run, '#16a34a') + ' xanh ' + deLamp(!run, '#dc2626') + ' đỏ' + (s.hand ? ' · (tay)' : ' · (phao)'); } });
+
+WIDGETS['de-door'] = host => deSim(host, {
+  buttons: [['MT', '⬆ Mở cửa (MT)'], ['MN', '⬇ Đóng cửa (MN)'], ['D', '■ Dừng']], init: () => ({ pos: 0, mv: 0 }),
+  step: (s, a) => { if (a === 'D') return { s: { pos: s.pos, mv: 0 }, m: 'Dừng giữa chừng.' }; if (a === 'MT') return { s: { pos: 100, mv: 0 }, m: 'Cửa mở đến HTT → HTT mở cắt KT → tự dừng.' }; return { s: { pos: 0, mv: 0 }, m: 'Cửa đóng đến HTN → HTN mở cắt KN → tự dừng.' }; },
+  show: s => 'Vị trí cửa: <b>' + (s.pos === 100 ? 'MỞ HOÀN TOÀN (HTT tác động)' : s.pos === 0 ? 'ĐÓNG HOÀN TOÀN (HTN tác động)' : s.pos + '%') + '</b> ' + deLamp(s.pos === 100, '#16a34a') + ' xanh ' + deLamp(s.pos === 0, '#dc2626') + ' đỏ' });
+
+WIDGETS['de-phase-loss'] = host => dlCalc(host, [{ id: 'state', label: 'Tình huống', v: 'run', opts: [['run', 'Đang chạy, mất 1 pha'], ['start', 'Chuẩn bị khởi động, mất 1 pha']] }, { id: 'ru', label: 'Có thiết bị bảo vệ mất pha RU0?', v: 'y', opts: [['y', 'Có'], ['n', 'Không']] }],
+  v => v.ru === 'y' ? '🟢 RU0 mở tiếp điểm điều khiển → công tắc tơ nhả → động cơ được cắt khỏi nguồn.' : (v.state === 'run' ? '🔴 Dòng hai pha còn lại tăng mạnh, động cơ nóng rất nhanh; chỉ rơ le nhiệt (chậm) bảo vệ.' : '🔴 Động cơ không tự khởi động được, kêu ù, cuộn dây có thể cháy.'));
+
+WIDGETS['de-brake'] = host => deSim(host, {
+  buttons: [['M', '▶ Ấn M'], ['D', '■ Ấn D (hãm)'], ['t', '⏱ Hết thời gian RT']], init: () => ({ st: 'stop' }),
+  step: (s, a) => { if (a === 'M' && s.st !== 'brake') return { s: { st: 'run' }, m: 'K1 có điện: xoay chiều vào động cơ; K1(9–11) mở không cho RT, K2 có điện.' }; if (a === 'D' && s.st === 'run') return { s: { st: 'brake' }, m: 'K1 mất điện → K1(9–11) đóng → RT và K2 có điện: DC vào stator hãm động cơ.' }; if (a === 't' && s.st === 'brake') return { s: { st: 'stop' }, m: 'RT(7–9) mở → K2 mất điện → cắt nguồn DC. Đèn đỏ sáng.' }; return { s, m: 'Thao tác này không có tác dụng ở trạng thái hiện tại.' }; },
+  show: s => 'Trạng thái: <b>' + { run: 'ĐANG CHẠY (xoay chiều)', brake: 'ĐANG HÃM (một chiều)', stop: 'ĐÃ DỪNG' }[s.st] + '</b> · K1 ' + deLamp(s.st === 'run', '#16a34a') + ' · K2 ' + deLamp(s.st === 'brake', '#eab308') + ' · đèn đỏ ' + deLamp(s.st === 'stop', '#dc2626') });
