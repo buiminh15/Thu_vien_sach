@@ -3056,3 +3056,179 @@ WIDGETS['cp-crash-checklist'] = host => dlCheck(host, [
   ['Chờ dấu hiệu đáy trước khi mua lại', 'Cổ tức, giá/doanh thu, tâm lý.'],
   ['Mua theo đợt, giữ phần tiền an toàn', 'Không dồn hết khi chưa xác nhận phục hồi.']
 ], '✅ Bạn đã hoàn thành cả ba giai đoạn: phòng thủ, kiếm lời, tái đầu tư.');
+// ===== Fundamentals of Corporate Finance (fc-*) — dùng cpF, cpP, cpBond, cpScore từ w-cp =====
+const fcPV = (c, r, n) => r ? c * (1 - Math.pow(1 + r, -n)) / r : c * n;
+const fcNPV = (r, cfs) => cfs.reduce((s, c, t) => s + c / Math.pow(1 + r, t), 0);
+const fcIRR = cfs => { let lo = -0.99, hi = 10; const f = r => fcNPV(r, cfs); if (f(lo) * f(hi) > 0) return NaN; for (let i = 0; i < 200; i++) { const m = (lo + hi) / 2; if (f(lo) * f(m) <= 0) hi = m; else lo = m; } return (lo + hi) / 2; };
+const fcList = s => String(s).split(/[,;\s]+/).filter(x => x !== '').map(Number).filter(x => isFinite(x));
+
+WIDGETS['fc-balance-split'] = host => dlCalc(host, [{ id: 'fa', label: 'Tài sản cố định', v: 600 }, { id: 'ca', label: 'Tài sản lưu động', v: 400 }, { id: 'd', label: 'Nợ (tài trợ vay)', v: 450 }],
+  v => { const A = v.fa + v.ca, E = A - v.d; return 'Tổng tài sản (<b>đầu tư</b>): <b>' + cpF(A, 0) + '</b><br>Nợ: ' + cpF(v.d, 0) + ' (' + cpP(A ? v.d / A * 100 : 0) + ') · Vốn chủ (<b>tài trợ</b>): <b>' + cpF(E, 0) + '</b> (' + cpP(A ? E / A * 100 : 0) + ')<br>' + (E < 0 ? '🔴 Nợ vượt tài sản.' : 'Hai phía luôn bằng nhau: quyết định đầu tư và quyết định tài trợ.'); });
+
+WIDGETS['fc-agency'] = host => cpScore(host, [
+  'Quyết định làm tăng thù lao của giám đốc nhưng không rõ lợi ích cho cổ đông', 'Mua công ty khác chỉ để mở rộng quy mô, không có NPV dương', 'Tránh dự án có NPV dương vì sợ rủi ro cho vị trí của giám đốc', 'Chi tiêu đặc quyền (máy bay riêng, văn phòng xa hoa) với số tiền lớn', 'Hội đồng quản trị không giám sát hoặc phụ thuộc vào giám đốc'
+], [[0, '✅ Không thấy dấu hiệu xung đột lợi ích.'], [1, '🟡 Có dấu hiệu: cần cơ chế giám sát và thù lao gắn với giá trị cổ phiếu.'], [3, '🔴 Nhiều dấu hiệu vấn đề đại diện: tăng giám sát, thay đổi thù lao hoặc đối mặt nguy cơ thâu tóm.']], 'Đánh dấu điều đúng:');
+
+WIDGETS['fc-fvpv'] = host => dlCalc(host, [{ id: 'pv', label: 'Số tiền hiện tại', v: 1000, step: 100 }, { id: 'r', label: 'Lãi suất (%)', v: 8, step: 0.5 }, { id: 't', label: 'Số năm', v: 10, min: 0, max: 60 }],
+  v => { const r = v.r / 100, fv = v.pv * Math.pow(1 + r, v.t), simple = v.pv * (1 + r * v.t); return 'Giá trị tương lai (lãi kép): <b>' + cpF(fv, 0) + '</b><br>Lãi đơn: ' + cpF(simple, 0) + ' → lãi trên lãi: <b>' + cpF(fv - simple, 0) + '</b><br>Nếu bạn cần ' + cpF(v.pv, 0) + ' sau ' + v.t + ' năm, hôm nay chỉ cần <b>' + cpF(v.pv / Math.pow(1 + r, v.t), 0) + '</b>.'; });
+
+WIDGETS['fc-annuity'] = host => dlCalc(host, [{ id: 'c', label: 'Khoản mỗi kỳ', v: 1000, step: 100 }, { id: 'r', label: 'Lãi mỗi kỳ (%)', v: 1, step: 0.1 }, { id: 'n', label: 'Số kỳ', v: 36, min: 1, max: 600 }, { id: 'due', label: 'Thời điểm trả', v: '0', opts: [['0', 'Cuối kỳ'], ['1', 'Đầu kỳ']] }],
+  v => { const r = v.r / 100, k = v.due === '1' ? 1 + r : 1, pv = fcPV(v.c, r, v.n) * k, fv = (r ? v.c * (Math.pow(1 + r, v.n) - 1) / r : v.c * v.n) * k; return 'PV niên kim: <b>' + cpF(pv, 0) + '</b><br>FV niên kim: <b>' + cpF(fv, 0) + '</b><br>Tổng trả: ' + cpF(v.c * v.n, 0) + '.'; });
+
+WIDGETS['fc-perpetuity'] = host => dlCalc(host, [{ id: 'c', label: 'Dòng tiền kỳ 1', v: 100 }, { id: 'r', label: 'Lãi suất (%)', v: 8, step: 0.5 }, { id: 'g', label: 'Tăng trưởng g (%)', v: 0, step: 0.5 }],
+  v => v.r <= v.g ? '⚠️ Cần r > g.' : 'PV = C/(r − g) = <b>' + cpF(v.c / ((v.r - v.g) / 100), 0) + '</b>' + (v.g === 0 ? ' (vĩnh viễn thường).' : '.'));
+
+WIDGETS['fc-real'] = host => dlCalc(host, [{ id: 'n', label: 'Lãi danh nghĩa (%)', v: 8, step: 0.1 }, { id: 'i', label: 'Lạm phát (%)', v: 3, step: 0.1 }],
+  v => { const real = ((1 + v.n / 100) / (1 + v.i / 100) - 1) * 100; return 'Lãi thực chính xác: <b>' + cpP(real) + '</b> (xấp xỉ: ' + cpP(v.n - v.i) + ').<br>Nghìn đồng hôm nay sau 1 năm đủ mua <b>' + cpF(1000 / (1 + v.i / 100), 0) + '</b> hàng hóa cũ.'; });
+
+WIDGETS['fc-ear'] = host => dlCalc(host, [{ id: 'a', label: 'APR (%)', v: 12, step: 0.5 }, { id: 'm', label: 'Số lần ghép lãi/năm', v: 12, opts: [[1, 'Năm'], [2, 'Nửa năm'], [4, 'Quý'], [12, 'Tháng'], [365, 'Ngày']] }],
+  v => { const m = +v.m, ear = (Math.pow(1 + v.a / 100 / m, m) - 1) * 100; return 'EAR: <b>' + cpP(ear) + '</b> (APR ' + cpP(v.a) + ').<br>Chênh: <b>' + cpF(ear - v.a, 2) + ' điểm</b>.'; });
+
+WIDGETS['fc-efn'] = host => dlCalc(host, [{ id: 's0', label: 'Doanh thu hiện tại', v: 1000 }, { id: 'g', label: 'Tăng doanh thu (%)', v: 20 }, { id: 'ast', label: 'Tài sản/doanh thu (%)', v: 60 }, { id: 'liab', label: 'Nợ phải trả tự phát sinh/doanh thu (%)', v: 15 }, { id: 'm', label: 'Biên lợi nhuận ròng (%)', v: 8 }, { id: 'pay', label: 'Tỷ lệ chia cổ tức (%)', v: 40 }],
+  v => { const s1 = v.s0 * (1 + v.g / 100), assets = s1 * v.ast / 100, lia = s1 * v.liab / 100, ni = s1 * v.m / 100, re = ni * (1 - v.pay / 100); const base = v.s0 * (v.ast - v.liab) / 100, newEq = base; const efn = assets - lia - (newEq + re) + 0; return 'Doanh thu mới: <b>' + cpF(s1, 0) + '</b>, tài sản cần: <b>' + cpF(assets, 0) + '</b><br>Nợ tự phát sinh: ' + cpF(lia, 0) + ', lợi nhuận giữ lại: ' + cpF(re, 0) + '<br>EFN (xấp xỉ, giả định vốn hiện tại = tài sản ròng ban đầu): <b>' + cpF(efn, 0) + '</b> ' + (efn > 0 ? '→ cần huy động thêm.' : '→ dư nguồn.'); });
+
+WIDGETS['fc-growth'] = host => dlCalc(host, [{ id: 'roa', label: 'ROA (%)', v: 8 }, { id: 'roe', label: 'ROE (%)', v: 15 }, { id: 'b', label: 'Tỷ lệ giữ lại (%)', v: 60, max: 100 }],
+  v => { const b = v.b / 100, ig = v.roa / 100 * b / (1 - v.roa / 100 * b), sg = v.roe / 100 * b / (1 - v.roe / 100 * b); return 'Tăng trưởng nội bộ: <b>' + cpP(ig * 100) + '</b><br>Tăng trưởng bền vững: <b>' + cpP(sg * 100) + '</b>.'; });
+
+WIDGETS['fc-balance'] = host => dlCalc(host, [{ id: 'ca', label: 'Tài sản lưu động', v: 300 }, { id: 'fa', label: 'Tài sản cố định', v: 700 }, { id: 'cl', label: 'Nợ ngắn hạn', v: 200 }, { id: 'ld', label: 'Nợ dài hạn', v: 400 }],
+  v => { const eq = v.ca + v.fa - v.cl - v.ld; return 'Vốn chủ sở hữu = <b>' + cpF(eq, 0) + '</b><br>Vốn lưu động ròng = <b>' + cpF(v.ca - v.cl, 0) + '</b><br>Tỷ số hiện hành = <b>' + cpF(v.cl ? v.ca / v.cl : 0) + '</b>.'; });
+
+WIDGETS['fc-cf'] = host => dlCalc(host, [{ id: 'ni', label: 'Lợi nhuận ròng', v: 100 }, { id: 'dep', label: 'Khấu hao', v: 40 }, { id: 'ar', label: 'Tăng phải thu + tồn kho', v: 30 }, { id: 'ap', label: 'Tăng phải trả', v: 10 }],
+  v => 'Dòng tiền hoạt động ≈ ' + cpF(v.ni, 0) + ' + ' + cpF(v.dep, 0) + ' − ' + cpF(v.ar, 0) + ' + ' + cpF(v.ap, 0) + ' = <b>' + cpF(v.ni + v.dep - v.ar + v.ap, 0) + '</b><br>Khác lợi nhuận ròng: <b>' + cpF(v.ni + v.dep - v.ar + v.ap - v.ni, 0) + '</b>.');
+
+WIDGETS['fc-tax'] = host => dlCalc(host, [{ id: 'inc', label: 'Thu nhập chịu thuế', v: 500000, step: 10000 }, { id: 't', label: 'Thuế suất biên (%)', v: 35 }, { id: 'extra', label: 'Thu nhập tăng thêm', v: 100000, step: 10000 }],
+  v => 'Thuế (đơn giản): <b>' + cpF(v.inc * v.t / 100, 0) + '</b> · Thuế trên khoản thêm: <b>' + cpF(v.extra * v.t / 100, 0) + '</b><br>Thu nhập thêm sau thuế: <b>' + cpF(v.extra * (1 - v.t / 100), 0) + '</b>.');
+
+WIDGETS['fc-ratios'] = host => dlCalc(host, [{ id: 'sales', label: 'Doanh thu', v: 1000 }, { id: 'ni', label: 'Lợi nhuận ròng', v: 60 }, { id: 'ta', label: 'Tổng tài sản', v: 800 }, { id: 'eq', label: 'Vốn chủ', v: 400 }, { id: 'ca', label: 'Tài sản lưu động', v: 300 }, { id: 'cl', label: 'Nợ ngắn hạn', v: 200 }, { id: 'inv', label: 'Tồn kho', v: 100 }],
+  v => 'Biên lợi nhuận: <b>' + cpP(v.sales ? v.ni / v.sales * 100 : 0) + '</b> · ROA: <b>' + cpP(v.ta ? v.ni / v.ta * 100 : 0) + '</b> · ROE: <b>' + cpP(v.eq ? v.ni / v.eq * 100 : 0) + '</b><br>Vòng quay tài sản: <b>' + cpF(v.ta ? v.sales / v.ta : 0) + '</b> · Hiện hành: <b>' + cpF(v.cl ? v.ca / v.cl : 0) + '</b> · Nhanh: <b>' + cpF(v.cl ? (v.ca - v.inv) / v.cl : 0) + '</b><br>Nợ/Tài sản: <b>' + cpP(v.ta ? (v.ta - v.eq) / v.ta * 100 : 0) + '</b>.');
+
+WIDGETS['fc-dupont'] = host => dlCalc(host, [{ id: 'm', label: 'Biên lợi nhuận (%)', v: 6, step: 0.5 }, { id: 't', label: 'Vòng quay tài sản', v: 1.5, step: 0.1 }, { id: 'l', label: 'Đòn bẩy (Tài sản/Vốn chủ)', v: 2, step: 0.1 }],
+  v => { const roa = v.m * v.t, roe = roa * v.l; return 'ROA = ' + cpF(v.m) + '% × ' + cpF(v.t) + ' = <b>' + cpP(roa) + '</b><br>ROE = ROA × ' + cpF(v.l) + ' = <b>' + cpP(roe) + '</b>.'; });
+
+WIDGETS['fc-benchmark'] = host => dlCalc(host, [{ id: 'x', label: 'Tỷ số của bạn', v: 1.5, step: 0.1 }, { id: 'b', label: 'Trung bình ngành', v: 2, step: 0.1 }, { id: 'k', label: 'Loại tỷ số', v: 'hi', opts: [['hi', 'Cao hơn là tốt (thanh khoản, sinh lời)'], ['lo', 'Thấp hơn là tốt (đòn bẩy, chu kỳ thu tiền)']] }],
+  v => { const d = (v.x / v.b - 1) * 100, good = v.k === 'hi' ? d >= 0 : d <= 0; return 'Lệch so với ngành: <b>' + cpP(d) + '</b> → ' + (good ? '✅ tốt hơn' : '🟠 kém hơn') + ' ngành. Hãy xem thêm xu hướng nhiều năm.'; });
+
+WIDGETS['fc-ccc'] = host => dlCalc(host, [{ id: 'inv', label: 'Tồn kho', v: 100 }, { id: 'cogs', label: 'Giá vốn hàng bán/năm', v: 1200 }, { id: 'ar', label: 'Phải thu', v: 150 }, { id: 'sales', label: 'Doanh thu/năm', v: 1800 }, { id: 'ap', label: 'Phải trả', v: 80 }],
+  v => { const di = v.cogs ? v.inv / v.cogs * 365 : 0, dr = v.sales ? v.ar / v.sales * 365 : 0, dp = v.cogs ? v.ap / v.cogs * 365 : 0; return 'Kỳ tồn kho: <b>' + cpF(di, 0) + '</b> ngày; kỳ thu: <b>' + cpF(dr, 0) + '</b>; kỳ trả: <b>' + cpF(dp, 0) + '</b><br>CCC = <b>' + cpF(di + dr - dp, 0) + ' ngày</b>.'; });
+
+WIDGETS['fc-cashbudget'] = host => dlCalc(host, [{ id: 'open', label: 'Số dư đầu kỳ', v: 20 }, { id: 'in', label: 'Thu mỗi quý', v: 100 }, { id: 'out1', label: 'Chi quý 1', v: 90 }, { id: 'out2', label: 'Chi quý 2', v: 130 }, { id: 'out3', label: 'Chi quý 3', v: 150 }, { id: 'out4', label: 'Chi quý 4', v: 80 }, { id: 'min', label: 'Số dư tối thiểu', v: 15 }],
+  v => { let bal = v.open, borrow = 0, out = ''; [v.out1, v.out2, v.out3, v.out4].forEach((o, i) => { bal += v.in - o; const need = Math.max(0, v.min - bal); out += 'Q' + (i + 1) + ': số dư ' + cpF(bal, 0) + (need ? ', 🔴 cần vay ' + cpF(need, 0) : ', ✅') + '<br>'; borrow += need; bal += need; }); return out + 'Tổng vay thêm (không tính lãi): <b>' + cpF(borrow, 0) + '</b>.'; });
+
+WIDGETS['fc-bankloan'] = host => dlCalc(host, [{ id: 'a', label: 'Khoản vay', v: 100000, step: 1000 }, { id: 'r', label: 'Lãi suất (%)', v: 8 }, { id: 'cb', label: 'Số dư bù đắp (% khoản vay)', v: 10 }, { id: 'pre', label: 'Lãi trả trước?', v: '1', opts: [['0', 'Không'], ['1', 'Có']] }, { id: 'mo', label: 'Kỳ hạn (tháng)', v: 12, min: 1, max: 60 }],
+  v => { const int = v.a * v.r / 100 * v.mo / 12, cb = v.a * v.cb / 100, net = v.a - cb - (v.pre === '1' ? int : 0), eff = int / net * 12 / v.mo * 100; return 'Tiền thực dùng: <b>' + cpF(net, 0) + '</b>; lãi: ' + cpF(int, 0) + '<br>Lãi suất hiệu dụng (quy năm, đơn giản): <b>' + cpP(eff) + '</b> so với niêm yết ' + cpP(v.r) + '.'; });
+
+WIDGETS['fc-float'] = host => dlCalc(host, [{ id: 'pay', label: 'Séc chi/ngày', v: 200000, step: 10000 }, { id: 'pd', label: 'Ngày đến khi séc chi bị trừ', v: 5, min: 0 }, { id: 'rec', label: 'Séc thu/ngày', v: 150000, step: 10000 }, { id: 'rd', label: 'Ngày đến khi tiền thu có hiệu lực', v: 3, min: 0 }, { id: 'r', label: 'Lãi suất năm (%)', v: 5 }],
+  v => { const net = v.pay * v.pd - v.rec * v.rd; return 'Float ròng: <b>' + cpF(net, 0) + '</b><br>Lãi kiếm được/năm nếu đầu tư: <b>' + cpF(net * v.r / 100, 0) + '</b>.'; });
+
+WIDGETS['fc-eoq'] = host => dlCalc(host, [{ id: 'q', label: 'Nhu cầu năm (đơn vị)', v: 10000, step: 100 }, { id: 'f', label: 'Chi phí mỗi lần đặt', v: 50 }, { id: 'c', label: 'Chi phí giữ 1 đơn vị/năm', v: 2, step: 0.1 }],
+  v => { const e = Math.sqrt(2 * v.q * v.f / v.c), orders = v.q / e, cost = orders * v.f + e / 2 * v.c; return 'EOQ: <b>' + cpF(e, 0) + '</b> đơn vị; số lần đặt/năm: <b>' + cpF(orders, 1) + '</b><br>Tổng chi phí: <b>' + cpF(cost, 0) + '</b> (đặt ' + cpF(orders * v.f, 0) + ' + giữ ' + cpF(e / 2 * v.c, 0) + ').'; });
+
+WIDGETS['fc-baumol'] = host => dlCalc(host, [{ id: 'f', label: 'Chi phí mỗi lần bán chứng khoán', v: 30 }, { id: 't', label: 'Nhu cầu tiền mặt/năm', v: 1200000, step: 10000 }, { id: 'r', label: 'Lãi chứng khoán (%)', v: 5 }],
+  v => { const c = Math.sqrt(2 * v.f * v.t / (v.r / 100)); return 'Mỗi lần bán: <b>' + cpF(c, 0) + '</b>; số lần/năm: <b>' + cpF(v.t / c, 1) + '</b>; tiền mặt bình quân: ' + cpF(c / 2, 0) + '.'; });
+
+WIDGETS['fc-discount'] = host => dlCalc(host, [{ id: 'd', label: 'Chiết khấu (%)', v: 2 }, { id: 'a', label: 'Số ngày trả sớm', v: 10 }, { id: 'b', label: 'Số ngày trả đủ', v: 30 }],
+  v => { const x = v.d / (100 - v.d), ex = v.b - v.a, eff = (Math.pow(1 + x, 365 / ex) - 1) * 100; return 'Lãi mỗi ' + ex + ' ngày: ' + cpP(x * 100) + ' → hiệu dụng năm: <b>' + cpP(eff) + '</b>.<br>' + (eff > 15 ? 'Nên trả sớm để lấy chiết khấu nếu rẻ hơn vay ngân hàng.' : 'Vay ở đây không đắt.'); });
+
+WIDGETS['fc-credit'] = host => dlCalc(host, [{ id: 'p', label: 'Giá bán', v: 100 }, { id: 'c', label: 'Chi phí hàng', v: 60 }, { id: 'pr', label: 'Xác suất khách trả (%)', v: 80, max: 100 }, { id: 'rep', label: 'Giá trị mua lặp lại (nếu trả)', v: 0 }],
+  v => { const ev = v.pr / 100 * (v.p + v.rep) - v.c, be = v.c / (v.p + v.rep) * 100; return 'Giá trị kỳ vọng: <b>' + cpF(ev) + '</b>; xác suất hòa vốn: <b>' + cpP(be) + '</b> → ' + (ev > 0 ? '✅ nên cấp tín dụng.' : '🔴 không nên.'); });
+
+WIDGETS['fc-aging'] = host => dlCalc(host, [{ id: 'a', label: '0–30 ngày', v: 500 }, { id: 'b', label: '31–60', v: 200 }, { id: 'c', label: '61–90', v: 100 }, { id: 'd', label: 'Trên 90', v: 60 }],
+  v => { const t = v.a + v.b + v.c + v.d, late = v.c + v.d; return 'Tổng phải thu: <b>' + cpF(t, 0) + '</b>; quá 60 ngày: <b>' + cpP(t ? late / t * 100 : 0) + '</b>; quá 90 ngày: ' + cpP(t ? v.d / t * 100 : 0) + '<br>' + ((late / t) > 0.2 ? '🔴 Nợ quá hạn cao.' : '✅ Trong tầm kiểm soát.'); });
+
+WIDGETS['fc-bond-price'] = host => dlCalc(host, [{ id: 'c', label: 'Coupon (%)', v: 8 }, { id: 'y', label: 'Lợi suất thị trường (%)', v: 10, step: 0.25 }, { id: 'n', label: 'Số năm', v: 10, min: 1, max: 40 }],
+  v => { const p = cpBond(1000, v.c, v.y, v.n); return 'Giá (mệnh giá 1.000): <b>' + cpF(p, 0) + '</b> (' + (p < 1000 ? 'chiết khấu' : p > 1000 ? 'phụ trội' : 'bằng mệnh giá') + ').<br>Lợi suất hiện hành: <b>' + cpP(80 / p * 100 * v.c / 8) + '</b>.'; });
+
+WIDGETS['fc-ytm'] = host => dlCalc(host, [{ id: 'p', label: 'Giá thị trường', v: 900 }, { id: 'c', label: 'Coupon (%)', v: 8 }, { id: 'n', label: 'Số năm', v: 10 }],
+  v => { let lo = 0.0001, hi = 1; for (let i = 0; i < 100; i++) { const m = (lo + hi) / 2; if (cpBond(1000, v.c, m * 100, v.n) > v.p) lo = m; else hi = m; } return 'YTM ≈ <b>' + cpP((lo + hi) / 2 * 100) + '</b><br>Lợi suất hiện hành: ' + cpP(v.c * 10 / v.p * 100) + '.'; });
+
+WIDGETS['fc-bond-risk'] = host => dlCalc(host, [{ id: 'c', label: 'Coupon (%)', v: 6 }, { id: 'y', label: 'Lợi suất ban đầu (%)', v: 6 }, { id: 'dy', label: 'Lãi suất tăng (điểm)', v: 1, step: 0.25 }],
+  v => [2, 5, 10, 30].map(n => { const a = cpBond(1000, v.c, v.y, n), b = cpBond(1000, v.c, v.y + v.dy, n); return 'Kỳ hạn ' + n + ' năm: ' + cpF(a, 0) + ' → ' + cpF(b, 0) + ' (<b>' + cpP((b / a - 1) * 100) + '</b>)'; }).join('<br>'));
+
+WIDGETS['fc-gordon'] = host => dlCalc(host, [{ id: 'd', label: 'Cổ tức kỳ 1', v: 2, step: 0.1 }, { id: 'r', label: 'Lợi suất đòi hỏi (%)', v: 10, step: 0.25 }, { id: 'g', label: 'Tăng trưởng g (%)', v: 4, step: 0.25 }, { id: 'p', label: 'Giá thị trường (để tính r ngụ ý)', v: 40 }],
+  v => v.r <= v.g ? '⚠️ Cần r > g.' : 'Giá hợp lý: <b>' + cpF(v.d / ((v.r - v.g) / 100)) + '</b><br>Lợi suất ngụ ý từ giá ' + cpF(v.p) + ': <b>' + cpP(v.d / v.p * 100 + v.g) + '</b>.');
+
+WIDGETS['fc-pvgo'] = host => dlCalc(host, [{ id: 'p', label: 'Giá cổ phiếu', v: 50 }, { id: 'e', label: 'EPS kỳ 1', v: 4 }, { id: 'r', label: 'Chi phí vốn (%)', v: 10 }],
+  v => { const base = v.e / (v.r / 100), pvgo = v.p - base; return 'Giá trị tài sản hiện có: <b>' + cpF(base) + '</b>; PVGO: <b>' + cpF(pvgo) + '</b> (' + cpP(v.p ? pvgo / v.p * 100 : 0) + ' giá)<br>P/E = <b>' + cpF(v.e ? v.p / v.e : 0, 1) + '</b>.'; });
+
+WIDGETS['fc-capm-simple'] = host => dlCalc(host, [{ id: 'rf', label: 'Lãi phi rủi ro (%)', v: 4, step: 0.25 }, { id: 'p', label: 'Phần bù rủi ro (%)', v: 7, step: 0.25 }],
+  v => 'Lợi suất đòi hỏi trung bình: <b>' + cpP(v.rf + v.p) + '</b> = ' + cpP(v.rf) + ' + ' + cpP(v.p) + '.');
+
+WIDGETS['fc-stdev'] = host => { host.innerHTML = '<div class="row"><label>Lợi suất các năm (%) <input id="s" value="10, -5, 20, 8, 15" style="width:240px"></label></div><div class="calc" id="o"></div>'; const draw = () => { const a = fcList(host.querySelector('#s').value); if (a.length < 2) { host.querySelector('#o').innerHTML = 'Nhập ít nhất 2 giá trị.'; return; } const m = a.reduce((s, x) => s + x, 0) / a.length, v = a.reduce((s, x) => s + (x - m) ** 2, 0) / (a.length - 1); host.querySelector('#o').innerHTML = 'Trung bình: <b>' + cpP(m) + '</b><br>Phương sai: <b>' + cpF(v) + '</b> · Độ lệch chuẩn: <b>' + cpP(Math.sqrt(v)) + '</b>'; }; host.querySelector('#s').oninput = draw; draw(); };
+
+WIDGETS['fc-diversify'] = host => dlCalc(host, [{ id: 's', label: 'Độ lệch chuẩn mỗi cổ phiếu (%)', v: 40 }, { id: 'rho', label: 'Tương quan trung bình (0–1)', v: 0.3, min: 0, max: 1, step: 0.05 }, { id: 'n', label: 'Số cổ phiếu', v: 20, min: 1, max: 500 }],
+  v => { const sd = Math.sqrt(v.s ** 2 * (1 / v.n + (1 - 1 / v.n) * v.rho)); return 'Độ lệch chuẩn danh mục: <b>' + cpP(sd) + '</b><br>Rủi ro thị trường còn lại (n → ∞): <b>' + cpP(v.s * Math.sqrt(v.rho)) + '</b>.'; });
+
+WIDGETS['fc-npv'] = host => dlCalc(host, [{ id: 'i', label: 'Vốn đầu tư ban đầu', v: 1000 }, { id: 'c', label: 'Dòng tiền mỗi năm', v: 300 }, { id: 'n', label: 'Số năm', v: 5, min: 1, max: 40 }, { id: 'r', label: 'Chi phí vốn (%)', v: 10, step: 0.25 }],
+  v => { const npv = fcPV(v.c, v.r / 100, v.n) - v.i; return 'PV dòng tiền: <b>' + cpF(fcPV(v.c, v.r / 100, v.n), 0) + '</b><br>NPV: <b>' + cpF(npv, 0) + '</b> → ' + (npv > 0 ? '✅ nhận dự án.' : '🔴 bỏ dự án.'); });
+
+WIDGETS['fc-irr'] = host => { host.innerHTML = '<div class="row"><label>Dòng tiền (năm 0, 1, 2…) <input id="s" value="-1000, 300, 400, 500, 300" style="width:260px"></label><label>Chi phí vốn (%) <input id="r" type="number" value="10" style="width:70px"></label></div><div class="calc" id="o"></div>'; const draw = () => { const a = fcList(host.querySelector('#s').value), r = parseFloat(host.querySelector('#r').value) || 0; if (a.length < 2) { host.querySelector('#o').innerHTML = 'Nhập ít nhất 2 dòng tiền.'; return; } const irr = fcIRR(a), npv = fcNPV(r / 100, a); host.querySelector('#o').innerHTML = 'NPV tại ' + cpP(r) + ': <b>' + cpF(npv, 1) + '</b><br>IRR: <b>' + (isNaN(irr) ? 'không xác định' : cpP(irr * 100)) + '</b><br>' + (isNaN(irr) ? '' : (irr * 100 > r ? '✅ IRR > chi phí vốn.' : '🔴 IRR < chi phí vốn.')); }; host.querySelectorAll('input').forEach(i => i.oninput = draw); draw(); };
+
+WIDGETS['fc-eac'] = host => dlCalc(host, [{ id: 'c1', label: 'Chi phí máy A (PV)', v: 1000 }, { id: 'n1', label: 'Tuổi thọ A (năm)', v: 3, min: 1 }, { id: 'c2', label: 'Chi phí máy B (PV)', v: 1400 }, { id: 'n2', label: 'Tuổi thọ B (năm)', v: 5, min: 1 }, { id: 'r', label: 'Lãi suất (%)', v: 10 }],
+  v => { const f = (c, n) => c / fcPV(1, v.r / 100, n), a = f(v.c1, v.n1), b = f(v.c2, v.n2); return 'EAC A: <b>' + cpF(a) + '</b>/năm · EAC B: <b>' + cpF(b) + '</b>/năm<br>Chọn <b>' + (a < b ? 'A' : 'B') + '</b> (chi phí hằng năm thấp hơn).'; });
+
+WIDGETS['fc-incremental'] = host => cpScore(host, [
+  'Chi phí nghiên cứu đã chi, không thể thu hồi', 'Doanh số sản phẩm cũ giảm vì dự án mới', 'Miếng đất công ty có thể bán nếu không dùng', 'Phân bổ chi phí quản lý chung cố định', 'Vốn lưu động phải tăng khi doanh thu tăng'
+], [[0, 'Chọn các mục bạn cho là phải tính vào dòng tiền tăng thêm.'], [1, 'Gợi ý: <b>tính</b> doanh số cũ giảm, chi phí cơ hội, vốn lưu động; <b>bỏ</b> chi phí chìm và chi phí chung cố định không đổi.']], 'Đánh dấu mục bạn sẽ TÍNH vào dòng tiền:');
+
+WIDGETS['fc-project-cf'] = host => dlCalc(host, [{ id: 'rev', label: 'Doanh thu', v: 500 }, { id: 'cost', label: 'Chi phí tiền mặt', v: 300 }, { id: 'dep', label: 'Khấu hao', v: 100 }, { id: 't', label: 'Thuế suất (%)', v: 35 }],
+  v => { const ebit = v.rev - v.cost - v.dep, tax = Math.max(0, ebit) * v.t / 100, cf = ebit - tax + v.dep; return 'Lợi nhuận hoạt động: ' + cpF(ebit, 0) + ' · Thuế: ' + cpF(tax, 0) + '<br>Dòng tiền hoạt động = <b>' + cpF(cf, 0) + '</b><br>Lá chắn thuế khấu hao: <b>' + cpF(v.dep * v.t / 100, 0) + '</b>.'; });
+
+WIDGETS['fc-project-npv'] = host => dlCalc(host, [{ id: 'i', label: 'Đầu tư thiết bị', v: 1000 }, { id: 'wc', label: 'Vốn lưu động (thu hồi cuối)', v: 100 }, { id: 'cf', label: 'Dòng tiền vận hành/năm', v: 350 }, { id: 'n', label: 'Số năm', v: 5, min: 1, max: 30 }, { id: 'sal', label: 'Giá trị thanh lý sau thuế', v: 100 }, { id: 'r', label: 'Chi phí vốn (%)', v: 12 }],
+  v => { const r = v.r / 100, npv = -v.i - v.wc + fcPV(v.cf, r, v.n) + (v.wc + v.sal) / Math.pow(1 + r, v.n); return 'NPV = <b>' + cpF(npv, 0) + '</b> ' + (npv > 0 ? '✅' : '🔴'); });
+
+WIDGETS['fc-beta'] = host => dlCalc(host, [{ id: 'w1', label: 'Tỷ trọng CP 1 (%)', v: 40 }, { id: 'b1', label: 'Beta 1', v: 1.4, step: 0.1 }, { id: 'w2', label: 'Tỷ trọng CP 2 (%)', v: 35 }, { id: 'b2', label: 'Beta 2', v: 0.9, step: 0.1 }, { id: 'b3', label: 'Beta phần còn lại', v: 0.5, step: 0.1 }],
+  v => { const w3 = Math.max(0, 100 - v.w1 - v.w2), b = (v.w1 * v.b1 + v.w2 * v.b2 + w3 * v.b3) / 100; return 'Tỷ trọng còn lại: ' + cpF(w3, 0) + '% · Beta danh mục: <b>' + cpF(b) + '</b> ' + (b > 1 ? '(tấn công)' : '(phòng thủ)') + '.'; });
+
+WIDGETS['fc-capm'] = host => dlCalc(host, [{ id: 'rf', label: 'Lãi phi rủi ro (%)', v: 4 }, { id: 'rm', label: 'Lợi suất thị trường (%)', v: 10 }, { id: 'b', label: 'Beta', v: 1.2, step: 0.1 }],
+  v => 'Lợi suất đòi hỏi = ' + cpP(v.rf) + ' + ' + cpF(v.b) + ' × ' + cpP(v.rm - v.rf) + ' = <b>' + cpP(v.rf + v.b * (v.rm - v.rf)) + '</b>.');
+
+WIDGETS['fc-project-rate'] = host => dlCalc(host, [{ id: 'rf', label: 'Lãi phi rủi ro (%)', v: 4 }, { id: 'p', label: 'Phần bù thị trường (%)', v: 6 }, { id: 'ba', label: 'Beta tài sản ngành', v: 0.8, step: 0.1 }],
+  v => 'Chi phí vốn dự án ngành này: <b>' + cpP(v.rf + v.ba * v.p) + '</b>.<br>(Giả định tài trợ toàn vốn chủ; điều chỉnh khi có nợ.)');
+
+WIDGETS['fc-wacc'] = host => dlCalc(host, [{ id: 'd', label: 'Nợ D', v: 400 }, { id: 'e', label: 'Vốn chủ E (thị trường)', v: 600 }, { id: 'rd', label: 'Lãi suất nợ (%)', v: 7 }, { id: 're', label: 'Chi phí vốn chủ (%)', v: 12 }, { id: 't', label: 'Thuế suất (%)', v: 30 }],
+  v => { const V = v.d + v.e, w = V ? v.d / V * v.rd * (1 - v.t / 100) + v.e / V * v.re : 0; return 'D/V = ' + cpP(V ? v.d / V * 100 : 0) + ' · E/V = ' + cpP(V ? v.e / V * 100 : 0) + '<br>WACC = <b>' + cpP(w) + '</b> (chi phí nợ sau thuế: ' + cpP(v.rd * (1 - v.t / 100)) + ').'; });
+
+WIDGETS['fc-equity-cost'] = host => dlCalc(host, [{ id: 'rf', label: 'Lãi phi rủi ro (%)', v: 4 }, { id: 'p', label: 'Phần bù (%)', v: 6 }, { id: 'b', label: 'Beta', v: 1.1, step: 0.1 }, { id: 'd', label: 'Cổ tức kỳ 1', v: 2 }, { id: 'px', label: 'Giá', v: 40 }, { id: 'g', label: 'Tăng trưởng g (%)', v: 5 }],
+  v => 'CAPM: <b>' + cpP(v.rf + v.b * v.p) + '</b> · DDM: <b>' + cpP(v.d / v.px * 100 + v.g) + '</b><br>Chênh: ' + cpF(v.rf + v.b * v.p - (v.d / v.px * 100 + v.g), 1) + ' điểm → nên kiểm tra lại giả định.');
+
+WIDGETS['fc-hurdle'] = host => dlCalc(host, [{ id: 'w', label: 'WACC (%)', v: 9 }, { id: 'adj', label: 'Điều chỉnh rủi ro (điểm)', v: 2, step: 0.5 }, { id: 'irr', label: 'IRR dự án (%)', v: 10.5, step: 0.25 }],
+  v => { const h = v.w + v.adj; return 'Tỷ lệ chiết khấu dự án: <b>' + cpP(h) + '</b>.<br>IRR ' + cpP(v.irr) + ' ' + (v.irr > h ? '> hàng rào ✅ nhận' : '< hàng rào 🔴 từ chối') + '.'; });
+
+WIDGETS['fc-sensitivity'] = host => dlCalc(host, [{ id: 'p', label: 'Giá bán/đơn vị', v: 100 }, { id: 'q', label: 'Sản lượng/năm', v: 1000 }, { id: 'vc', label: 'Biến phí/đơn vị', v: 60 }, { id: 'fc', label: 'Chi phí cố định/năm', v: 20000 }, { id: 'i', label: 'Vốn đầu tư', v: 100000 }, { id: 'n', label: 'Số năm', v: 5 }, { id: 'r', label: 'Chi phí vốn (%)', v: 10 }, { id: 'sh', label: 'Mức thử (±%)', v: 10 }],
+  v => { const f = (p, q, vc) => fcPV((p - vc) * q - v.fc, v.r / 100, v.n) - v.i, base = f(v.p, v.q, v.vc), s = 1 + v.sh / 100; return 'NPV cơ sở: <b>' + cpF(base, 0) + '</b><br>Giá −' + v.sh + '%: ' + cpF(f(v.p / s, v.q, v.vc), 0) + ' · Sản lượng −' + v.sh + '%: ' + cpF(f(v.p, v.q / s, v.vc), 0) + ' · Biến phí +' + v.sh + '%: ' + cpF(f(v.p, v.q, v.vc * s), 0); });
+
+WIDGETS['fc-breakeven'] = host => dlCalc(host, [{ id: 'p', label: 'Giá bán', v: 100 }, { id: 'vc', label: 'Biến phí/đơn vị', v: 60 }, { id: 'fc', label: 'Chi phí cố định/năm', v: 20000 }, { id: 'q', label: 'Sản lượng dự kiến', v: 1000 }],
+  v => { const be = v.fc / (v.p - v.vc), ebit = (v.p - v.vc) * v.q - v.fc, dol = ebit ? (v.p - v.vc) * v.q / ebit : NaN; return 'Hòa vốn kế toán: <b>' + cpF(be, 0) + '</b> đơn vị<br>Lợi nhuận ở sản lượng dự kiến: <b>' + cpF(ebit, 0) + '</b>; DOL: <b>' + cpF(dol, 1) + '</b> (doanh số +1% → lợi nhuận +' + cpF(dol, 1) + '%).'; });
+
+WIDGETS['fc-debt-shield'] = host => dlCalc(host, [{ id: 'd', label: 'Nợ', v: 1000000, step: 10000 }, { id: 'r', label: 'Lãi suất (%)', v: 8 }, { id: 't', label: 'Thuế suất (%)', v: 30 }],
+  v => { const int = v.d * v.r / 100; return 'Lãi vay/năm: ' + cpF(int, 0) + ' → thuế tiết kiệm: <b>' + cpF(int * v.t / 100, 0) + '</b><br>Chi phí thực sau thuế: <b>' + cpF(int * (1 - v.t / 100), 0) + '</b> (' + cpP(v.r * (1 - v.t / 100)) + ').<br>Với cổ phiếu ưu đãi cùng số tiền, cổ tức không được trừ thuế.'; });
+
+WIDGETS['fc-convertible'] = host => dlCalc(host, [{ id: 'cr', label: 'Tỷ lệ chuyển đổi (cổ phiếu/trái phiếu)', v: 20 }, { id: 'px', label: 'Giá cổ phiếu', v: 60 }, { id: 'bp', label: 'Giá trị trái phiếu thường', v: 900 }],
+  v => { const cv = v.cr * v.px; return 'Giá trị chuyển đổi: <b>' + cpF(cv, 0) + '</b> vs giá trị trái phiếu thường: ' + cpF(v.bp, 0) + '<br>Giá trái phiếu ≥ <b>' + cpF(Math.max(cv, v.bp), 0) + '</b>. ' + (cv > v.bp ? 'Đổi sang cổ phiếu có lợi.' : 'Giữ như trái phiếu.') + ' Giá cổ phiếu hòa vốn chuyển đổi: <b>' + cpF(v.bp / v.cr) + '</b>.'; });
+
+WIDGETS['fc-ipo'] = host => dlCalc(host, [{ id: 'n', label: 'Số cổ phiếu (triệu)', v: 10 }, { id: 'p', label: 'Giá chào bán', v: 20 }, { id: 'sp', label: 'Spread bảo lãnh (%)', v: 7 }, { id: 'ex', label: 'Chi phí khác (triệu)', v: 1.5, step: 0.1 }, { id: 'd1', label: 'Giá đóng cửa ngày đầu', v: 26 }],
+  v => { const gross = v.n * v.p, fee = gross * v.sp / 100, left = v.n * (v.d1 - v.p); return 'Huy động gộp: <b>' + cpF(gross) + ' triệu</b>; spread: ' + cpF(fee) + '; chi phí khác: ' + cpF(v.ex) + '<br>Thu ròng: <b>' + cpF(gross - fee - v.ex) + '</b><br>Underpricing ("để trên bàn"): <b>' + cpF(left) + ' triệu</b> (' + cpP((v.d1 / v.p - 1) * 100) + ').'; });
+
+WIDGETS['fc-rights'] = host => dlCalc(host, [{ id: 'p', label: 'Giá cổ phiếu hiện tại', v: 50 }, { id: 'k', label: 'Giá quyền mua', v: 40 }, { id: 'n', label: 'Số quyền cần để mua 1 cổ phiếu', v: 4, min: 1 }],
+  v => { const ex = (v.n * v.p + v.k) / (v.n + 1), right = v.p - ex; return 'Giá sau phát hành (ex-rights): <b>' + cpF(ex) + '</b><br>Giá trị 1 quyền (cần ' + v.n + ' quyền để mua 1 cp mới): <b>' + cpF((v.p - v.k) / (v.n + 1)) + '</b>; mỗi cổ phiếu cũ mất ' + cpF(right) + '.'; });
+
+WIDGETS['fc-lease'] = host => dlCalc(host, [{ id: 'cost', label: 'Giá mua thiết bị', v: 100000 }, { id: 'lp', label: 'Tiền thuê/năm (cuối năm)', v: 28000 }, { id: 'n', label: 'Số năm', v: 5 }, { id: 't', label: 'Thuế suất (%)', v: 30 }, { id: 'rb', label: 'Lãi vay sau thuế (%)', v: 5 }],
+  v => { const t = v.t / 100, r = v.rb / 100, dep = v.cost / v.n; const pvLease = fcPV(v.lp * (1 - t), r, v.n), pvDepShield = fcPV(dep * t, r, v.n); const npv = v.cost - pvLease - pvDepShield; return 'PV tiền thuê sau thuế: ' + cpF(pvLease, 0) + ' · PV lá chắn thuế khấu hao mất: ' + cpF(pvDepShield, 0) + '<br>NPV thuê = <b>' + cpF(npv, 0) + '</b> → ' + (npv > 0 ? '✅ thuê có lợi.' : '🔴 mua có lợi.') + ' (khấu hao đường thẳng, không thanh lý)'; });
+
+WIDGETS['fc-leverage'] = host => dlCalc(host, [{ id: 'a', label: 'Tài sản', v: 1000 }, { id: 'de', label: 'Nợ/Vốn chủ (D/E)', v: 1, step: 0.25, min: 0 }, { id: 'ebit', label: 'EBIT', v: 120 }, { id: 'rd', label: 'Lãi nợ (%)', v: 6 }, { id: 't', label: 'Thuế (%)', v: 30 }],
+  v => { const D = v.a * v.de / (1 + v.de), E = v.a - D, ni = (v.ebit - D * v.rd / 100) * (1 - v.t / 100), roe = ni / E * 100, roe0 = v.ebit * (1 - v.t / 100) / v.a * 100; return 'Nợ ' + cpF(D, 0) + ', vốn chủ ' + cpF(E, 0) + '<br>Lợi nhuận ròng: ' + cpF(ni, 1) + ' → ROE <b>' + cpP(roe) + '</b> (không nợ: ' + cpP(roe0) + ').<br>' + (roe > roe0 ? 'Đòn bẩy khuếch đại lợi suất.' : 'Đòn bẩy đang làm giảm ROE vì lãi vay cao hơn lợi suất tài sản.'); });
+
+WIDGETS['fc-indifference'] = host => dlCalc(host, [{ id: 'sh', label: 'Số cổ phiếu hiện có (triệu)', v: 10 }, { id: 'need', label: 'Cần huy động (triệu USD)', v: 20 }, { id: 'px', label: 'Giá cổ phiếu', v: 20 }, { id: 'r', label: 'Lãi nợ (%)', v: 8 }, { id: 'int0', label: 'Lãi nợ hiện có (triệu)', v: 2 }],
+  v => { const newSh = v.need / v.px, intNew = v.need * v.r / 100; const indiff = (intNew * (v.sh + newSh) / newSh) + v.int0; return 'Phương án cổ phiếu: thêm ' + cpF(newSh) + ' triệu cp; phương án nợ: thêm lãi ' + cpF(intNew) + ' triệu.<br>EBIT hòa vốn (EPS bằng nhau): <b>' + cpF(indiff) + ' triệu</b>.<br>EBIT lớn hơn mức này → nợ cho EPS cao hơn; thấp hơn → cổ phiếu có lợi.'; });
+
+WIDGETS['fc-merger'] = host => dlCalc(host, [{ id: 'va', label: 'Giá trị A (bên mua)', v: 100 }, { id: 'vb', label: 'Giá trị B (mục tiêu)', v: 50 }, { id: 'vab', label: 'Giá trị sau sáp nhập', v: 165 }, { id: 'pay', label: 'Tiền trả cho B', v: 60 }],
+  v => { const gain = v.vab - v.va - v.vb, cost = v.pay - v.vb; return 'Lợi ích: <b>' + cpF(gain) + '</b> · Chi phí (phần bù): <b>' + cpF(cost) + '</b><br>NPV bên mua = <b>' + cpF(gain - cost) + '</b> ' + (gain - cost > 0 ? '✅ nên làm' : '🔴 không nên') + '.<br>Phần của B: ' + cpF(cost) + '; phần của A: ' + cpF(gain - cost) + '.'; });
+
+WIDGETS['fc-fx'] = host => dlCalc(host, [{ id: 'amt', label: 'Số tiền (USD)', v: 1000 }, { id: 'spot', label: 'Spot (đơn vị ngoại tệ/USD)', v: 0.92, step: 0.01 }, { id: 'fwd', label: 'Forward (đơn vị ngoại tệ/USD)', v: 0.90, step: 0.01 }],
+  v => 'Đổi ngay: <b>' + cpF(v.amt * v.spot) + '</b> ngoại tệ; theo forward: <b>' + cpF(v.amt * v.fwd) + '</b><br>Chênh forward/spot: ' + cpP((v.fwd / v.spot - 1) * 100) + (v.fwd < v.spot ? ' (USD kỳ hạn rẻ hơn: ngoại tệ có lãi thấp hơn Mỹ).' : '.'));
+
+WIDGETS['fc-irp'] = host => dlCalc(host, [{ id: 's', label: 'Spot (nội tệ/ngoại tệ)', v: 1.10, step: 0.01 }, { id: 'rh', label: 'Lãi nội địa (%)', v: 5 }, { id: 'rf', label: 'Lãi nước ngoài (%)', v: 3 }, { id: 'inf', label: 'Chênh lạm phát (nội − ngoại, %)', v: 2 }],
+  v => 'Forward 1 năm theo IRP: <b>' + cpF(v.s * (1 + v.rh / 100) / (1 + v.rf / 100), 4) + '</b><br>Spot kỳ vọng theo PPP: <b>' + cpF(v.s * (1 + v.inf / 100), 4) + '</b> (gần nhau khi lãi chênh = lạm phát chênh).');
+
+WIDGETS['fc-hedge'] = host => dlCalc(host, [{ id: 'amt', label: 'Phải thu (ngoại tệ)', v: 100000 }, { id: 'spot', label: 'Spot hiện tại (USD/ngoại tệ)', v: 1.10, step: 0.01 }, { id: 'fwd', label: 'Forward (USD/ngoại tệ)', v: 1.12, step: 0.01 }, { id: 'fut', label: 'Spot thực tế khi thu tiền', v: 1.05, step: 0.01 }],
+  v => 'Không hedge: <b>' + cpF(v.amt * v.fut, 0) + ' USD</b><br>Hedge bằng forward: <b>' + cpF(v.amt * v.fwd, 0) + ' USD</b><br>Hedge ' + (v.fwd >= v.fut ? 'có lợi' : 'bất lợi') + ' hơn: <b>' + cpF(v.amt * (v.fwd - v.fut), 0) + ' USD</b>.');
