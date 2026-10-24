@@ -36,7 +36,8 @@ function renderMain() {
     main.innerHTML = `<div class="sec"><h2>🚧 Chương này đang được soạn</h2><p>Nội dung sẽ được bổ sung ở lượt tiếp theo. Hãy chọn chương khác ở thanh bên.</p></div>`;
     return;
   }
-  const tabs = [['learn', '📖 Bài học'], ['cards', '🃏 Flashcard (' + ch.cards.length + ')'], ['quiz', '✅ Trắc nghiệm (' + ch.quiz.length + ')'], ['match', '🔗 Ghép cặp']];
+  const dueN = SRS.dueInChapter(book.id, ch).length;
+  const tabs = [['learn', '📖 Bài học'], ['cards', dueN ? `🃏 Flashcard (${dueN} đến hạn)` : `🃏 Flashcard (${ch.cards.length})`], ['quiz', '✅ Trắc nghiệm (' + ch.quiz.length + ')'], ['match', '🔗 Ghép cặp']];
   main.innerHTML = `
     <div class="chhead"><small>Chương ${ch.n} · ${esc(book.title)}</small><h1>${esc(ch.title)}</h1><p>${ch.intro}</p></div>
     <div class="tabs">${tabs.map(t => `<button class="tab ${t[0] === mode ? 'on' : ''}" data-m="${t[0]}">${t[1]}</button>`).join('')}</div>
@@ -85,44 +86,54 @@ function learn(ch, pane) {
   };
 }
 
-/* ---------- FLASHCARD ---------- */
+/* ---------- FLASHCARD (ôn ngắt khoảng - xem js/srs.js) ---------- */
 function cards(ch, pane) {
-  const key = `fc:${book.id}:${ch.n}`;
-  let known = Store.get(key, []);
-  let onlyNew = false, deck = [], i = 0, flip = false;
+  let showAll = false, deck = [], i = 0, flip = false;
   function build() {
-    deck = ch.cards.map((c, k) => k).filter(k => !onlyNew || !known.includes(k));
-    if (i >= deck.length) i = 0; flip = false;
+    deck = showAll ? ch.cards.map((c, k) => k) : SRS.dueInChapter(book.id, ch);
+    if (i >= deck.length) i = 0;
   }
   function draw() {
     build();
     const total = ch.cards.length;
     if (!deck.length) {
-      pane.innerHTML = `<div class="fc-wrap score"><div class="big">🎉</div><h2>Bạn đã thuộc cả ${total} thẻ!</h2><button class="btn primary" id="rs">Học lại từ đầu</button> <button class="btn" id="all">Xem tất cả thẻ</button></div>`;
-      $('#rs').onclick = () => { known = []; Store.set(key, known); onlyNew = false; i = 0; draw(); };
-      $('#all').onclick = () => { onlyNew = false; draw(); };
+      pane.innerHTML = `<div class="fc-wrap score"><div class="big">🎉</div><h2>Đã ôn hết thẻ đến hạn của chương này!</h2>
+        <p class="small">Thẻ sẽ tự xuất hiện lại đúng ngày cần ôn tiếp theo — hoặc xem tại <a href="review.html">Ôn tập hôm nay</a> (gộp mọi sách).</p>
+        <button class="btn" id="all">Xem/ôn lại toàn bộ ${total} thẻ ngay</button></div>`;
+      $('#all').onclick = () => { showAll = true; i = 0; draw(); };
       return;
     }
-    const c = ch.cards[deck[i]];
+    const idx = deck[i], c = ch.cards[idx], s = SRS.get(book.id, ch.n, idx);
+    const dueN = SRS.dueInChapter(book.id, ch).length;
     pane.innerHTML = `<div class="fc-wrap">
-      <div class="fc-top"><span class="pill">Thẻ ${i + 1}/${deck.length}</span><span class="small">Đã thuộc ${known.length}/${total}</span>
-        <label class="small"><input type="checkbox" id="nw" ${onlyNew ? 'checked' : ''}> Chỉ thẻ chưa thuộc</label></div>
-      <div class="fc ${flip ? 'flip' : ''}" id="card"><div class="in"><div class="face">${c[0]}<span class="hint">chạm để lật</span></div><div class="face back">${c[1]}</div></div></div>
-      <div class="fc-bar"><button class="btn" id="pv">← Trước</button><button class="btn bad" id="no">Chưa thuộc</button><button class="btn ok" id="yes">Đã thuộc ✓</button><button class="btn" id="nx">Sau →</button><button class="btn" id="sh">🔀 Xáo</button></div>
-      <p class="small" style="text-align:center">Phím tắt: Space = lật · ←/→ = chuyển thẻ</p></div>`;
-    $('#card').onclick = () => { flip = !flip; $('#card').classList.toggle('flip', flip); };
-    $('#pv').onclick = () => { i = (i - 1 + deck.length) % deck.length; flip = false; draw(); };
-    $('#nx').onclick = () => { i = (i + 1) % deck.length; flip = false; draw(); };
-    $('#yes').onclick = () => { if (!known.includes(deck[i])) known.push(deck[i]); Store.set(key, known); flip = false; if (onlyNew) { draw(); } else { i = (i + 1) % deck.length; draw(); } };
-    $('#no').onclick = () => { known = known.filter(x => x !== deck[i]); Store.set(key, known); flip = false; i = (i + 1) % deck.length; draw(); };
-    $('#sh').onclick = () => { ch.cards = shuffle(ch.cards); known = []; Store.set(key, known); i = 0; draw(); };
-    $('#nw').onchange = e => { onlyNew = e.target.checked; i = 0; draw(); };
+      <div class="fc-top"><span class="pill">Thẻ ${i + 1}/${deck.length}</span><span class="small">${showAll ? `Tổng ${total} thẻ` : `Đến hạn hôm nay: ${dueN}/${total}`}</span>
+        <label class="small"><input type="checkbox" id="all" ${showAll ? 'checked' : ''}> Xem toàn bộ (bỏ lịch ôn)</label></div>
+      <div class="fc ${flip ? 'flip' : ''}" id="card"><div class="in">
+        <div class="face">${s.reps > 1 ? `<span class="hint" style="top:10px;bottom:auto">🔥 đã nhớ ${s.reps} lần</span>` : ''}${c[0]}<span class="hint">chạm để lật</span></div>
+        <div class="face back">${c[1]}</div></div></div>
+      <div class="fc-bar">${flip
+        ? `<button class="btn bad" id="g0">😵 Quên</button><button class="btn" id="g1">🙂 Ổn</button><button class="btn ok" id="g2">🤩 Dễ</button>`
+        : `<button class="btn" id="sk">Bỏ qua →</button><button class="btn primary" id="fp">Lật thẻ (Space)</button>`}</div>
+      <p class="small" style="text-align:center">${flip ? 'Phím tắt: 1 Quên · 2 Ổn · 3 Dễ' : 'Phím tắt: Space = lật'}</p></div>`;
+    $('#card').onclick = () => { flip = !flip; draw(); };
+    if ($('#fp')) $('#fp').onclick = () => { flip = true; draw(); };
+    if ($('#sk')) $('#sk').onclick = () => { i = (i + 1) % deck.length; draw(); };
+    $('#all').onchange = e => { showAll = e.target.checked; i = 0; draw(); };
+    const grade = g => {
+      SRS.grade(book.id, ch.n, idx, g);
+      if (g !== 0) i++; // "Quên" (0) để build() tự xếp thẻ xuất hiện lại trong buổi ôn này
+      flip = false; draw();
+    };
+    if ($('#g0')) { $('#g0').onclick = () => grade(0); $('#g1').onclick = () => grade(1); $('#g2').onclick = () => grade(2); }
   }
   window.onkeydown = e => {
     if (mode !== 'cards' || !$('#card')) return;
     if (e.code === 'Space') { e.preventDefault(); $('#card').click(); }
-    if (e.code === 'ArrowRight') $('#nx').click();
-    if (e.code === 'ArrowLeft') $('#pv').click();
+    if (flip) {
+      if (e.key === '1' && $('#g0')) $('#g0').click();
+      if (e.key === '2' && $('#g1')) $('#g1').click();
+      if (e.key === '3' && $('#g2')) $('#g2').click();
+    }
   };
   draw();
 }
