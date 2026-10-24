@@ -1966,7 +1966,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "zam",
+  "id": "zam", "mindmap": "zam-mindmap.html",
   "title": "Ahead of the Market",
   "subtitle": "Phương pháp Zacks: phát hiện cổ phiếu sớm trong mọi nền kinh tế",
   "author": "Mitch Zacks (HarperCollins, 2003)",
@@ -2141,8 +2141,75 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "dien",
+  "title": "Giáo trình Điện cơ bản",
+  "subtitle": "Thiết bị điện, động cơ và mạch điều khiển (Cao đẳng Điện lực miền Bắc)",
+  "author": "Trường Cao đẳng Điện lực miền Bắc (2020)",
+  "cat": "Kỹ thuật điện",
+  "tags": [
+    "Điện cơ bản",
+    "Đồng hồ vạn năng",
+    "Áptômát",
+    "Động cơ không đồng bộ",
+    "Khởi động từ",
+    "Mạch điều khiển"
+  ],
+  "level": "Cơ bản",
+  "emoji": "⚡",
+  "color": "#f59e0b",
+  "desc": "9 bài: dùng đồng hồ vạn năng và mêgôm mét; cầu chì, cầu dao, áptômát, công tắc, ổ cắm, đèn; động cơ một pha và ba pha; mạch khởi động từ đơn, đảo chiều, bơm nước, cửa cuốn, bảo vệ mất pha và hãm động năng. Có máy tính tính chọn thiết bị và mô phỏng mạch điều khiển. Luôn cắt điện và tuân thủ quy định an toàn khi thực hành.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Sử dụng một số thiết bị đo điện",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Lắp đặt, thay thế, sửa chữa thiết bị điện gia đình",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Tháo, lắp, kiểm tra và bảo dưỡng động cơ không đồng bộ một pha",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Tháo, lắp, kiểm tra và bảo dưỡng động cơ không đồng bộ ba pha",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Mạch điều khiển động cơ một pha, ba pha bằng khởi động từ đơn",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Mạch đảo chiều quay động cơ ba pha bằng khởi động từ kép",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Mạch điều khiển máy bơm nước một pha tự động",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Mạch điều khiển động cơ đóng, mở cửa rào, cửa cuốn",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Mạch bảo vệ mất pha và hãm động cơ",
+      "ready": true
+    }
+  ]
 }
 ];
+
 
 
 
