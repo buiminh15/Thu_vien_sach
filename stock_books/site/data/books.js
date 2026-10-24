@@ -354,7 +354,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "kinhte",
+    id: "kinhte", "mindmap": "kinhte-mindmap.html",
     title: "Các khái niệm cơ bản về kinh tế",
     subtitle: "Basic Economic Concepts – Phần 1–3: Vi mô, vĩ mô, tài chính & thuế",
     author: "Nhiều tác giả – Chương trình Giảng dạy Kinh tế Fulbright (FETP)",
