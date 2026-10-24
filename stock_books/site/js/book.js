@@ -37,7 +37,8 @@ function renderMain() {
     return;
   }
   const dueN = SRS.dueInChapter(book.id, ch).length;
-  const tabs = [['learn', '📖 Bài học'], ['cards', dueN ? `🃏 Flashcard (${dueN} đến hạn)` : `🃏 Flashcard (${ch.cards.length})`], ['quiz', '✅ Trắc nghiệm (' + ch.quiz.length + ')'], ['match', '🔗 Ghép cặp']];
+  const missN = Mistakes.countInChapter(book.id, ch);
+  const tabs = [['learn', '📖 Bài học'], ['cards', dueN ? `🃏 Flashcard (${dueN} đến hạn)` : `🃏 Flashcard (${ch.cards.length})`], ['quiz', missN ? `✅ Trắc nghiệm (${missN} câu sai)` : '✅ Trắc nghiệm (' + ch.quiz.length + ')'], ['match', '🔗 Ghép cặp']];
   main.innerHTML = `
     <div class="chhead"><small>Chương ${ch.n} · ${esc(book.title)}</small><h1>${esc(ch.title)}</h1><p>${ch.intro}</p></div>
     <div class="tabs">${tabs.map(t => `<button class="tab ${t[0] === mode ? 'on' : ''}" data-m="${t[0]}">${t[1]}</button>`).join('')}</div>
@@ -88,7 +89,7 @@ function learn(ch, pane) {
 
 /* ---------- FLASHCARD (ôn ngắt khoảng - xem js/srs.js) ---------- */
 function cards(ch, pane) {
-  let showAll = false, deck = [], i = 0, flip = false;
+  let showAll = false, deck = [], i = 0, flip = false, guess = '';
   function build() {
     deck = showAll ? ch.cards.map((c, k) => k) : SRS.dueInChapter(book.id, ch);
     if (i >= deck.length) i = 0;
@@ -111,24 +112,28 @@ function cards(ch, pane) {
       <div class="fc ${flip ? 'flip' : ''}" id="card"><div class="in">
         <div class="face">${s.reps > 1 ? `<span class="hint" style="top:10px;bottom:auto">🔥 đã nhớ ${s.reps} lần</span>` : ''}${c[0]}<span class="hint">chạm để lật</span></div>
         <div class="face back">${c[1]}</div></div></div>
+      ${!flip
+        ? `<textarea class="guess" id="gs" placeholder="✍️ Gõ câu trả lời của bạn trước (không bắt buộc), rồi lật thẻ để tự so sánh…">${esc(guess)}</textarea>`
+        : guess ? `<div class="box tip"><b class="t">✍️ Bạn đã trả lời</b>${esc(guess)}</div>` : ''}
       <div class="fc-bar">${flip
         ? `<button class="btn bad" id="g0">😵 Quên</button><button class="btn" id="g1">🙂 Ổn</button><button class="btn ok" id="g2">🤩 Dễ</button>`
         : `<button class="btn" id="sk">Bỏ qua →</button><button class="btn primary" id="fp">Lật thẻ (Space)</button>`}</div>
       <p class="small" style="text-align:center">${flip ? 'Phím tắt: 1 Quên · 2 Ổn · 3 Dễ' : 'Phím tắt: Space = lật'}</p></div>`;
     $('#card').onclick = () => { flip = !flip; draw(); };
+    if ($('#gs')) $('#gs').oninput = e => { guess = e.target.value; };
     if ($('#fp')) $('#fp').onclick = () => { flip = true; draw(); };
-    if ($('#sk')) $('#sk').onclick = () => { i = (i + 1) % deck.length; draw(); };
-    $('#all').onchange = e => { showAll = e.target.checked; i = 0; draw(); };
+    if ($('#sk')) $('#sk').onclick = () => { i = (i + 1) % deck.length; guess = ''; draw(); };
+    $('#all').onchange = e => { showAll = e.target.checked; i = 0; guess = ''; draw(); };
     const grade = g => {
       SRS.grade(book.id, ch.n, idx, g);
       if (g !== 0) i++; // "Quên" (0) để build() tự xếp thẻ xuất hiện lại trong buổi ôn này
-      flip = false; draw();
+      flip = false; guess = ''; draw();
     };
     if ($('#g0')) { $('#g0').onclick = () => grade(0); $('#g1').onclick = () => grade(1); $('#g2').onclick = () => grade(2); }
   }
   window.onkeydown = e => {
     if (mode !== 'cards' || !$('#card')) return;
-    if (e.code === 'Space') { e.preventDefault(); $('#card').click(); }
+    if (e.code === 'Space' && document.activeElement.id !== 'gs') { e.preventDefault(); $('#card').click(); }
     if (flip) {
       if (e.key === '1' && $('#g0')) $('#g0').click();
       if (e.key === '2' && $('#g1')) $('#g1').click();
@@ -145,7 +150,7 @@ function quiz(ch, pane) {
   function start() { qs = shuffle(ch.quiz); i = 0; score = 0; wrong = []; show(); }
   function show() {
     if (i >= qs.length) return finish();
-    const q = qs[i];
+    const q = qs[i], qIdx = ch.quiz.indexOf(q);
     const order = shuffle(q.o.map((t, k) => k));
     pane.innerHTML = `<div class="qz"><div class="fc-top"><span class="pill">Câu ${i + 1}/${qs.length}</span><span class="small">Đúng: ${score}</span></div>
       <div class="qbar"><i style="width:${i / qs.length * 100}%"></i></div>
@@ -155,7 +160,7 @@ function quiz(ch, pane) {
     pane.querySelectorAll('.opt').forEach(b => b.onclick = () => {
       const k = +b.dataset.k, ok = k === q.a;
       pane.querySelectorAll('.opt').forEach(x => { x.disabled = true; if (+x.dataset.k === q.a) x.classList.add('ok'); });
-      if (!ok) { b.classList.add('no'); wrong.push(q); } else score++;
+      if (!ok) { b.classList.add('no'); wrong.push(q); Mistakes.markWrong(book.id, ch.n, qIdx); } else { score++; Mistakes.markRight(book.id, ch.n, qIdx); }
       $('#ex').innerHTML = `<div class="explain"><b>${ok ? '✅ Chính xác!' : '❌ Chưa đúng.'}</b> ${q.e}</div><button class="btn primary" id="nx">${i + 1 < qs.length ? 'Câu tiếp →' : 'Xem kết quả'}</button>`;
       $('#nx').onclick = () => { i++; show(); };
     });
@@ -163,12 +168,17 @@ function quiz(ch, pane) {
   function finish() {
     const pct = Math.round(score / qs.length * 100), best = Math.max(Store.get(key, 0), pct);
     Store.set(key, best);
+    const missN = Mistakes.countInChapter(book.id, ch);
     pane.innerHTML = `<div class="qz score"><div class="big">${score}/${qs.length}</div>
       <h2>${pct >= 80 ? '🏆 Xuất sắc!' : pct >= 50 ? '👍 Khá tốt, ôn thêm chút nữa' : '📚 Cần đọc lại bài học'}</h2>
       <p class="small">Điểm cao nhất: ${best}%</p>
-      <button class="btn primary" id="again">Làm lại</button> ${wrong.length ? '<button class="btn" id="rw">Làm lại câu sai (' + wrong.length + ')</button>' : ''} <button class="btn" id="bk">Xem lại bài học</button></div>`;
+      <button class="btn primary" id="again">Làm lại</button>
+      ${wrong.length ? '<button class="btn" id="rw">Làm lại câu sai lần này (' + wrong.length + ')</button>' : ''}
+      ${missN ? '<button class="btn bad" id="rm">📝 Ôn sổ tay câu đang sai (' + missN + ')</button>' : ''}
+      <button class="btn" id="bk">Xem lại bài học</button></div>`;
     $('#again').onclick = start;
     if (wrong.length) $('#rw').onclick = () => { qs = shuffle(wrong); i = 0; score = 0; wrong = []; show(); };
+    if (missN) $('#rm').onclick = () => { qs = shuffle(Mistakes.listInChapter(book.id, ch).map(k => ch.quiz[k])); i = 0; score = 0; wrong = []; show(); };
     $('#bk').onclick = () => { mode = 'learn'; go(); };
   }
   start();

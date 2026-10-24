@@ -75,3 +75,33 @@ const SRS = (() => {
 
   return { get, grade, isDue, isNew, dueInChapter, dueAcrossBooks, stats };
 })();
+
+// Sổ tay câu trắc nghiệm đang sai: đánh dấu khi trả lời sai, xoá dấu khi trả lời đúng lại —
+// nên đây luôn là "những câu đang yếu", không phải lịch sử toàn bộ các lần sai.
+const Mistakes = (() => {
+  const LKEY = 'mistakes';
+  const all = () => Store.get(LKEY, {});
+  const keyOf = (bid, n, i) => `${bid}::${n}::${i}`;
+
+  function markWrong(bid, n, i) { const m = all(); m[keyOf(bid, n, i)] = Date.now(); Store.set(LKEY, m); }
+  function markRight(bid, n, i) { const m = all(); delete m[keyOf(bid, n, i)]; Store.set(LKEY, m); }
+  function listInChapter(bid, ch) {
+    const m = all();
+    return (ch.quiz || []).map((q, i) => i).filter(i => m[keyOf(bid, ch.n, i)] !== undefined);
+  }
+  function countInChapter(bid, ch) { return listInChapter(bid, ch).length; }
+  function byBook() {
+    const out = {};
+    (window.BOOKS || []).forEach(b => {
+      const d = window.BOOK_DATA && BOOK_DATA[b.id];
+      if (!d) return;
+      let n = 0;
+      d.chapters.forEach(ch => n += countInChapter(b.id, ch));
+      if (n) out[b.id] = { book: b, n };
+    });
+    return out;
+  }
+  function countAll() { return Object.values(byBook()).reduce((s, x) => s + x.n, 0); }
+
+  return { markWrong, markRight, listInChapter, countInChapter, byBook, countAll };
+})();
