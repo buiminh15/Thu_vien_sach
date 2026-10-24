@@ -442,7 +442,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "mba30",
+    id: "mba30", "mindmap": "mba30-mindmap.html",
     title: "Tự học MBA Marketing trong 30 ngày",
     subtitle: "Teach Yourself MBA in Marketing in 30 Days",
     author: "Colin Barrow",
