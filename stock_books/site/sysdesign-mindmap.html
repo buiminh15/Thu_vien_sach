@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – System Design Fundamentals (SDIR) – bản dễ hiểu</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 🏗 System Design Fundamentals (SDIR) – bản dễ hiểu
+## 🧭 1. Phỏng vấn thiết kế hệ thống: lộ trình 5 bước
+### 🧭 Vì sao có vòng phỏng vấn này?
+### 5️⃣ Khung 5 bước (≈ 45 phút)
+### 🔗 Ví dụ xuyên suốt: bộ rút gọn URL (như bit.ly)
+### 📝 Tóm tắt
+- Phỏng vấn thiết kế hệ thống kiểm tra tư duy kiến trúc, không phải thuật toán.
+- Khung 5 bước: Làm rõ → Tổng thể → Đào sâu → Mở rộng → Tổng kết.
+- Luôn bắt đầu từ yêu cầu và quy mô; nói to quá trình suy nghĩ.
+- URL shortener: đọc nhiều hơn ghi → cache, read replica, sharding, CDN.
+## 🛣 2. Hiệu năng: độ trễ, thông lượng và định luật Little
+### 🛣 Hai khái niệm, một con đường cao tốc
+### ⚖️ Vì sao phải đánh đổi?
+### 📐 Định luật Little: L = λ × W
+### 📝 Tóm tắt
+- Độ trễ = một việc mất bao lâu; thông lượng = làm được bao nhiêu việc mỗi giây.
+- Gom lô, hàng đợi, song song hóa tăng thông lượng nhưng có thể tăng độ trễ.
+- Little: L = λ × W — cố định sức chứa thì tăng thông lượng buộc phải giảm độ trễ.
+- Tối ưu theo quy trình đo → tìm nút thắt → đổi một thứ → đo lại; mục tiêu theo percentile.
+## 🧩 3. Năm yêu cầu phi chức năng và “độ chín” sẵn sàng
+### 🧩 Năm NFR cốt lõi
+### 9️⃣ “Các số 9” của độ sẵn sàng
+### ⚖️ Cân bằng và đo lường NFR
+### 📝 Tóm tắt
+- NFR = chất lượng hệ thống: mở rộng, hiệu năng, tin cậy, bảo mật, bảo trì.
+- NFR phải đo được; chúng xung đột nhau nên cần ưu tiên theo kinh doanh.
+- 99,9% ≈ 8,8 giờ ngừng/năm; 99,99% ≈ 53 phút/năm — mỗi số 9 thêm đều rất đắt.
+## 🎯 4. Ước lượng nhanh (back-of-the-envelope)
+### 🎯 Vì sao và cách làm
+### 🔗 Ví dụ 1: URL shortener
+### 🎬 Ví dụ 2: nền tảng video kiểu YouTube
+### 📝 Tóm tắt
+- Ước lượng để biết bậc độ lớn và nút thắt, không cần chính xác tuyệt đối.
+- 1 ngày ≈ 86.400 s; QPS = số yêu cầu/ngày ÷ 86.400; nhân hệ số đỉnh (thường 2×).
+- URL shortener: ~429 QPS, ~1 TB/5 năm → một máy là đủ ban đầu.
+- Video: PB/ngày lưu trữ, PB/ngày băng thông → bắt buộc phân tán + CDN.
+- Luôn nêu giả định rõ ràng và kiểm tra tính hợp lý của kết quả.
+## ↕️ 5. Mở rộng dọc/ngang và cân bằng tải
+### ↕️ Dọc hay ngang?
+### ⚖️ Load balancer chia việc như thế nào?
+### 🔧 Loại LB, tính năng, mẫu triển khai
+### 📝 Tóm tắt
+- Dọc = máy mạnh hơn (đơn giản, có trần, một điểm hỏng); ngang = thêm máy (cần LB, linh hoạt, chịu lỗi).
+- Thực tế dùng lai: DB dọc, app/cache ngang.
+- LB: Round Robin, Least Connections, IP Hash, Weighted, Least Response Time, Random-2.
+- L4 nhanh theo IP/port; L7 đọc nội dung HTTP.
+- Làm LB dư thừa; health check phải kiểm chức năng thật.
+## 📦 6. Mạng và giao thức: TCP, UDP, HTTP và giao tiếp thời gian thực
+### 📦 TCP/IP: chắc chắn nhưng có thủ tục
+### 📡 Ba cách “đẩy” dữ liệu thời gian thực
+### 📝 Tóm tắt
+- TCP: kết nối, đáng tin, đúng thứ tự, có kiểm soát tắc nghẽn; UDP: nhanh, nhẹ, không đảm bảo.
+- Bắt tay 3 bước: SYN → SYN-ACK → ACK.
+- Long polling (cũ, chạy khắp nơi), SSE (một chiều, đơn giản), WebSocket (hai chiều, mạnh nhất).
+- HTTP/3 chạy trên UDP (QUIC) — UDP không chỉ dành cho game.
+## 🍽 7. API và định dạng dữ liệu: REST, GraphQL, gRPC; JSON, Protobuf, Avro
+### 🍽 Ba phong cách API
+### 🧳 Định dạng dữ liệu (serialization)
+### 📝 Tóm tắt
+- REST đơn giản/phổ biến; GraphQL linh hoạt lấy đúng dữ liệu; gRPC nhanh cho nội bộ.
+- GraphQL giải over/under-fetching nhưng cache khó; gRPC khó dùng trực tiếp từ trình duyệt.
+- JSON dễ đọc, Protobuf gọn + nhanh, Avro mạnh về tiến hóa schema và big data.
+- Hệ thống lớn thường dùng lai: JSON ngoài, Protobuf trong, Avro cho dữ liệu.
+## 🏢 8. Kiến trúc: monolith hay microservices; proxy hay API gateway
+### 🏢 Monolith và Microservices
+### 🚪 Proxy và API Gateway
+### 📝 Tóm tắt
+- Monolith: đơn giản lúc đầu; microservices: linh hoạt nhưng vận hành phức tạp; modular monolith là điểm giữa.
+- Chọn theo quy mô nhóm, độ phức tạp miền, nhu cầu scale riêng — không có đáp án tuyệt đối.
+- Strangler Fig để di cư từ monolith; DDD để tìm ranh giới dịch vụ.
+- Proxy lo mạng/giao thức; API gateway lo ngữ nghĩa API. Hệ lớn dùng cả hai theo lớp.
+## 🗄 9. Dữ liệu phân tán: SQL/NoSQL, định lý CAP và mô hình nhất quán
+### 🗄 SQL hay NoSQL?
+### 🍕 Định lý CAP bằng chuyện giao pizza
+### 🔄 Các mô hình nhất quán (từ chặt đến lỏng)
+### 📝 Tóm tắt
+- SQL: cấu trúc rõ, ACID, JOIN; NoSQL: linh hoạt, scale ngang; thực tế dùng nhiều loại (polyglot).
+- CAP: khi có partition phải chọn nhất quán (CP) hay sẵn sàng (AP).
+- Nhất quán mạnh → causal → eventual: càng lỏng càng nhanh/sẵn sàng nhưng có thể đọc dữ liệu cũ.
+- Chọn mô hình theo từng loại dữ liệu và yêu cầu kinh doanh.
+## 📓 10. Tăng tốc: Caching và CDN
+### 📓 Cache là gì và vì sao cần
+### 🗑 Khi cache đầy thì bỏ cái nào?
+### 🏗 Các tầng cache và chuyện “làm mới”
+### 🎬 CDN: ca Netflix Open Connect
+### 📝 Tóm tắt
+- Cache lưu bản sao nhanh gần nơi dùng: hit trả ngay, miss đọc nguồn rồi lưu lại.
+- Chính sách đẩy ra: LRU, LFU, FIFO, TTL.
+- Ghi: write-through (an toàn), write-back (nhanh, rủi ro), write-around.
+- Invalidation là phần khó nhất; cẩn thận cache stampede.
+- CDN đặt nội dung gần người dùng; Netflix đẩy trước nội dung hot vào OCA trong ISP.
+## ☕ 11. Hàng đợi tin nhắn và giới hạn tốc độ (rate limiting)
+### ☕ Message queue: quầy gọi nước ở quán cà phê
+### 🚦 Rate limiting: người gác cổng cho API
+### 📝 Tóm tắt
+- Message queue: tách rời, san tải, tin cậy, mở rộng; chú ý idempotent và poison message.
+- Pub/Sub (một→nhiều) và work queue (chia việc).
+- Rate limiting bảo vệ và công bằng: token bucket (cho bùng nổ), leaky bucket (làm mượt), cửa sổ cố định/trượt.
+- Vượt ngưỡng → HTTP 429 kèm header hướng dẫn; phân tán dùng Redis.
+## ⏱ 12. Thiết kế cho sự cố: timeout, retry và circuit breaker
+### ⏱ Timeout: “tôi không chờ mãi”
+### 🔁 Retry: thử lại có suy nghĩ
+### 🔌 Circuit breaker: cầu dao tự ngắt
+### ⛓ Chuỗi chống chịu và bài học
+### 📝 Tóm tắt
+- Timeout: không chờ vô hạn; chặt dần về phía sâu (deadline funnel).
+- Retry: backoff + jitter + idempotency; không retry lỗi vĩnh viễn.
+- Circuit breaker: closed → open → half-open; ngăn lỗi lan truyền.
+- Kết hợp cả ba; thiết kế xử lý lỗi trước khi xây tính năng.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>

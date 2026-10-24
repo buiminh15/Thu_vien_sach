@@ -225,7 +225,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "sysdesign",
+    id: "sysdesign", "mindmap": "sysdesign-mindmap.html",
     title: "System Design Fundamentals (SDIR) – bản dễ hiểu",
     subtitle: "Lộ trình phỏng vấn & nền tảng thiết kế hệ thống, có giải thích đời thường và bổ sung ngoài sách",
     author: "System Design Interview Roadmap (Substack) – biên soạn tiếng Việt, bổ sung giải thích",
