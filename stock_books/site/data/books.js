@@ -328,7 +328,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "buffett",
+    id: "buffett", "mindmap": "buffett-mindmap.html",
     title: "Phong cách đầu tư Warren Buffett",
     subtitle: "The Warren Buffett Way",
     author: "Robert G. Hagstrom",
