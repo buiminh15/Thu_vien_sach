@@ -9,7 +9,7 @@ const chData = n => data.chapters.find(c => c.n === n);
 const doneList = () => Store.get('done:' + book.id, []);
 
 function go() {
-  location.hash = `#ch${cur}/${mode}`;
+  location.hash = cur === 0 ? '#mindmap' : `#ch${cur}/${mode}`;
   renderSide(); renderMain();
   window.scrollTo({ top: 0 });
 }
@@ -20,10 +20,16 @@ function renderSide() {
     <button class="chbtn ${c.n === cur ? 'on' : ''} ${done.includes(c.n) ? 'done' : ''} ${c.ready ? '' : 'lock'}" data-n="${c.n}">
       <span class="n">${done.includes(c.n) ? '✓' : c.n}</span><span class="tt">${esc(c.title)}${c.ready ? '' : '<br><small>Đang soạn…</small>'}</span>
     </button>`).join('') || '<div class="small" style="padding:8px">Sách này đang được soạn.</div>';
+  if (book.mindmap) $('#chlist').insertAdjacentHTML('beforeend', `<button class="chbtn ${cur === 0 ? 'on' : ''}" data-n="0"><span class="n">🗺</span><span class="tt">Mindmap toàn sách</span></button>`);
   $('#chlist').querySelectorAll('.chbtn').forEach(b => b.onclick = () => { cur = +b.dataset.n; mode = 'learn'; go(); });
 }
 
 function renderMain() {
+  if (cur === 0 && book.mindmap) {
+    main.innerHTML = `<div class="chhead"><small>${esc(book.title)}</small><h1>🗺 Mindmap toàn sách</h1><p>Bấm vào nút tròn ở mỗi nhánh để mở/gấp, cuộn chuột để phóng to, kéo để di chuyển. <a href="${book.mindmap}" target="_blank" rel="noopener">Mở toàn màn hình ↗</a></p></div>
+      <iframe src="${book.mindmap}" title="Mindmap" style="width:100%;height:75vh;border:1px solid var(--line);border-radius:12px;background:#fff"></iframe>`;
+    return;
+  }
   const meta = book.chapters.find(c => c.n === cur);
   const ch = chData(cur);
   if (!meta || !ch) {
@@ -192,7 +198,8 @@ if (!book) {
   document.title = book.title;
   $('#bktitle').textContent = book.emoji + ' ' + book.title;
   const h = location.hash.match(/^#ch(\d+)(?:\/(\w+))?/);
-  if (h) { cur = +h[1]; if (h[2]) mode = h[2]; }
+  if (location.hash === '#mindmap' && book.mindmap) cur = 0;
+  else if (h) { cur = +h[1]; if (h[2]) mode = h[2]; }
   else { const f = book.chapters.find(c => c.ready); cur = f ? f.n : 1; }
   go();
 }

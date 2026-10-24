@@ -4,174 +4,174 @@
 <style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
 </head><body>
 <div class="markmap"><script type="text/template">
-# High Performance Web Sites
-## 1. Tầm quan trọng của hiệu năng frontend
-### Thời gian của người dùng đi đâu?
-### Quy tắc vàng về hiệu năng
-### Vì sao nên tối ưu frontend trước?
-### Tóm tắt
+# 🚀 High Performance Web Sites
+## ⏱️ 1. Tầm quan trọng của hiệu năng frontend
+### ⏱️ Thời gian của người dùng đi đâu?
+### 🏆 Quy tắc vàng về hiệu năng
+### 🎯 Vì sao nên tối ưu frontend trước?
+### 📝 Tóm tắt
 - Chỉ 10–20% thời gian chờ là tải HTML; 80–90% là tải các thành phần (ảnh, script, CSS, Flash…).
 - Giảm frontend một nửa → giảm ~40–45% tổng thời gian; giảm backend một nửa → chỉ ~5–10%.
 - Tối ưu frontend nhanh (giờ/ngày), rẻ và đã được chứng minh (hơn 50 nhóm Yahoo!, thường giảm ≥25%).
 - Có 14 quy tắc, xếp theo mức ưu tiên chung; làm đủ có thể nhanh hơn 25–50%.
-## 2. Tổng quan về HTTP
-### Request, response và header
-### Nén, conditional GET và Expires
-### Keep-Alive và pipelining
-### Tóm tắt
+## 📨 2. Tổng quan về HTTP
+### 📨 Request, response và header
+### 🗜️ Nén, conditional GET và Expires
+### 🔌 Keep-Alive và pipelining
+### 📝 Tóm tắt
 - HTTP là request/response dạng văn bản; sách tập trung vào GET.
 - Nén: Accept-Encoding (client) ↔ Content-Encoding (server).
 - Conditional GET dùng Last-Modified/If-Modified-Since hoặc ETag/If-None-Match → 304 nếu chưa đổi.
 - Expires (hoặc Cache-Control max-age) giúp bỏ hẳn request cho thành phần còn “tươi”.
 - Keep-Alive tái dùng socket; pipelining chưa được IE/Firefox lúc đó hỗ trợ tốt.
-## 3. Rule 1: Giảm số HTTP request
-### Image map
-### CSS sprite
-### Inline image (data: URL)
-### Gộp script và stylesheet
-### Tóm tắt
+## 🔗 3. Rule 1: Giảm số HTTP request
+### 🗺️ Image map
+### 🧩 CSS sprite
+### 🧬 Inline image (data: URL)
+### 📚 Gộp script và stylesheet
+### 📝 Tóm tắt
 - Rule 1 là quy tắc quan trọng nhất: hiệu quả cho cả lần vào đầu và các lần sau.
 - Image map: nhiều liên kết ảnh → 1 ảnh (nhanh hơn 56%); chỉ hợp ảnh liền kề, hình chữ nhật.
 - CSS sprite: gộp ảnh, dùng background-position; linh hoạt, thường nhỏ hơn tổng ảnh rời.
 - data: URL không cần request nhưng IE ≤ 7 không hỗ trợ; đặt trong stylesheet ngoài để được cache.
 - Gộp script/stylesheet bằng bước build, giữ code gốc module hóa.
-## 4. Rule 2: Dùng mạng phân phối nội dung (CDN)
-### Vì sao bắt đầu từ thành phần tĩnh?
-### CDN là gì và ai cung cấp?
-### Lợi – hại và cách đo
-### Tóm tắt
+## 🌍 4. Rule 2: Dùng mạng phân phối nội dung (CDN)
+### 🌍 Vì sao bắt đầu từ thành phần tĩnh?
+### 🛰️ CDN là gì và ai cung cấp?
+### ⚖️ Lợi – hại và cách đo
+### 📝 Tóm tắt
 - Phân tán thành phần tĩnh bằng CDN trước khi nghĩ đến phân tán ứng dụng.
 - CDN chọn server theo độ gần mạng; dùng cho ảnh, script, CSS, Flash.
 - Ví dụ: nhanh hơn 18% (1013 ms vs 1232 ms); Yahoo! Shopping giảm 20% khi bật CDN thật.
 - Đo hiệu quả từ nhiều địa điểm, không chỉ từ gần server của bạn.
 - Nhược điểm: chi phí, chia sẻ server, ít quyền kiểm soát, phụ thuộc nhà cung cấp.
-## 5. Rule 3: Thêm header Expires
-### Expires và Cache-Control
-### Cache rỗng và cache đã có
-### Làm sao cập nhật khi file đổi?
-### Hiệu quả đo được
-### Tóm tắt
+## 📅 5. Rule 3: Thêm header Expires
+### 📅 Expires và Cache-Control
+### 🧑‍💻 Cache rỗng và cache đã có
+### 🔄 Làm sao cập nhật khi file đổi?
+### 📈 Hiệu quả đo được
+### 📝 Tóm tắt
 - Thêm Expires tương lai xa (hoặc Cache-Control max-age) cho mọi thành phần ít đổi.
 - Dùng mod_expires/ExpiresDefault để có cả hai header, thời gian tương đối.
 - 75–85% lượt xem trang ở Yahoo! có cache đã có → rất đáng tối ưu.
 - Khi file đổi, đổi tên file (version trong tên) và cập nhật tham chiếu trong HTML qua build.
 - Ví dụ: lần xem lại từ ~600 ms xuống ~260 ms (−57%).
-## 6. Rule 4: Nén thành phần bằng gzip
-### Cách nén hoạt động
-### Tiết kiệm bao nhiêu?
-### Cấu hình Apache
-### Proxy cache, Vary và ca “biên”
-### Tóm tắt
+## 🗜️ 6. Rule 4: Nén thành phần bằng gzip
+### 🗜️ Cách nén hoạt động
+### 📉 Tiết kiệm bao nhiêu?
+### ⚙️ Cấu hình Apache
+### 🧱 Proxy cache, Vary và ca “biên”
+### 📝 Tóm tắt
 - Gzip giảm ~70% kích thước văn bản; ví dụ nén tất cả: 177,6K → 46,4K, nhanh hơn 53,2%.
 - Nén HTML, script, CSS, XML, JSON; không nén ảnh/PDF; nén file > 1–2K.
 - Apache 1.3: mod_gzip; Apache 2: mod_deflate (nén bằng gzip).
 - Dùng Vary: Accept-Encoding để proxy lưu cả bản nén và không nén.
 - Lo trình duyệt cũ: whitelist + Cache-Control: private (mất proxy cache); cân nhắc theo đối tượng người dùng.
-## 7. Rule 5: Đặt stylesheet ở đầu trang
-### Hiển thị tiến dần quan trọng thế nào?
-### Màn hình trắng và FOUC
-### LINK hay @import?
-### Công cụ thí nghiệm sleep.cgi
-### Tóm tắt
+## 🎨 7. Rule 5: Đặt stylesheet ở đầu trang
+### 🖼️ Hiển thị tiến dần quan trọng thế nào?
+### ⬜ Màn hình trắng và FOUC
+### 🔗 LINK hay @import?
+### 🧪 Công cụ thí nghiệm sleep.cgi
+### 📝 Tóm tắt
 - Đặt stylesheet ở HEAD (thẻ LINK) để trang hiển thị tiến dần.
 - CSS đặt cuối trang → IE hiện màn hình trắng, Firefox bị FOUC.
 - @import cũng gây màn hình trắng vì CSS bị tải cuối; ưu tiên LINK.
 - Tổng thời gian tải không đổi, chỉ cảm nhận của người dùng thay đổi.
 - CSS không cần cho lần render đầu: nạp động sau onload.
-## 8. Rule 6: Đặt script ở cuối trang
-### Tải song song và hostname
-### Script chặn mọi thứ
-### Giải pháp và ngoại lệ
-### Tóm tắt
+## ⬇️ 8. Rule 6: Đặt script ở cuối trang
+### 🔀 Tải song song và hostname
+### ⛔ Script chặn mọi thứ
+### ⬇️ Giải pháp và ngoại lệ
+### 📝 Tóm tắt
 - Trình duyệt chỉ tải ~2 thành phần song song mỗi hostname (HTTP/1.1); chia ra 2 hostname là hợp lý.
 - Script đang tải chặn mọi tải khác, kể cả hostname khác; cũng chặn render phần bên dưới.
 - Đặt script ở cuối trang để hiển thị tiến dần và tải song song.
 - DEFER chưa đáng tin (Firefox vẫn chặn); script không dời được thường do document.write.
-## 9. Rule 7: Tránh CSS expression
-### CSS expression là gì?
-### Chúng bị tính lại bao nhiêu lần?
-### Hai cách tránh
-### Tóm tắt
+## 🧮 9. Rule 7: Tránh CSS expression
+### 🧮 CSS expression là gì?
+### 🔥 Chúng bị tính lại bao nhiêu lần?
+### 🛠️ Hai cách tránh
+### 📝 Tóm tắt
 - CSS expression: thuộc tính CSS = kết quả JavaScript; chỉ IE 5+.
 - Tính lại cả khi cuộn và di chuột → có thể hàng chục nghìn lần.
 - Cách tránh: one-time expression (tự ghi đè) hoặc event handler.
 - Có thể ảnh hưởng cả thời gian tải (ca 20 giây ở Yahoo!).
-## 10. Rule 8: Tách JavaScript và CSS ra file ngoài
-### Inline nhanh hơn, nhưng chỉ trong thí nghiệm
-### Ba số đo để quyết định
-### Ngoại lệ: trang chủ
-### Hưởng lợi cả hai: post-onload download và inline động
-### Tóm tắt
+## 📦 10. Rule 8: Tách JavaScript và CSS ra file ngoài
+### ⚖️ Inline nhanh hơn, nhưng chỉ trong thí nghiệm
+### 📊 Ba số đo để quyết định
+### 🏠 Ngoại lệ: trang chủ
+### 🪄 Hưởng lợi cả hai: post-onload download và inline động
+### 📝 Tóm tắt
 - Inline nhanh hơn 30–50% trong thí nghiệm do ít request, nhưng file ngoài được cache nên thường thắng ngoài đời.
 - Quyết định theo: page view/người dùng, tỷ lệ cache đã có, mức tái sử dụng thành phần.
 - Đa số site: file ngoài + Expires xa; chia vài nhóm trang thay vì mỗi trang một file hoặc một file khổng lồ.
 - Trang chủ thường nên inline; có thể kết hợp post-onload download.
 - Inline động dùng cookie để đoán tình trạng cache.
-## 11. Rule 9: Giảm số lần tra cứu DNS
-### DNS và cái giá của nó
-### DNS được cache ở đâu và bao lâu?
-### Giảm bao nhiêu hostname là vừa?
-### Tóm tắt
+## 📡 11. Rule 9: Giảm số lần tra cứu DNS
+### 📖 DNS và cái giá của nó
+### 🗃️ DNS được cache ở đâu và bao lâu?
+### 🎚️ Giảm bao nhiêu hostname là vừa?
+### 📝 Tóm tắt
 - Mỗi tra cứu DNS tốn 20–120 ms và chặn tải từ hostname đó.
 - DNS được cache ở ISP, hệ điều hành, trình duyệt; Keep-Alive có thể tránh tra cứu.
 - IE giữ bản ghi 30 phút; Firefox chỉ 1 phút và chỉ 20 bản ghi.
 - Tra cứu lúc cache rỗng = số hostname trong trang.
 - Dùng 2–4 hostname để cân bằng DNS và tải song song; bật Keep-Alive.
-## 12. Rule 10: Minify JavaScript
-### Minify và obfuscate
-### Tiết kiệm được bao nhiêu?
-### Thêm vài mẹo khác
-### Tóm tắt
+## ✂️ 12. Rule 10: Minify JavaScript
+### ✂️ Minify và obfuscate
+### 📏 Tiết kiệm được bao nhiêu?
+### 🧩 Thêm vài mẹo khác
+### 📝 Tóm tắt
 - Minify = bỏ chú thích và khoảng trắng; obfuscate = minify + đổi tên symbol.
 - Ưu tiên minify (an toàn); obfuscate hiếm khi đáng rủi ro.
 - Minify giảm trung bình ~21%; sau gzip vẫn giảm thêm ~20% (23K → 19K).
 - Minify cả script inline; CSS tiết kiệm ít hơn.
-## 13. Rule 11: Tránh redirect
-### Redirect là gì và vì sao chậm?
-### Thiếu dấu gạch chéo cuối URL
-### Kết nối site cũ/mới và các backend
-### Theo dõi lưu lượng
-### URL đẹp, dễ nhớ
-### Tóm tắt
+## ↪️ 13. Rule 11: Tránh redirect
+### ↪️ Redirect là gì và vì sao chậm?
+### ➗ Thiếu dấu gạch chéo cuối URL
+### 🔌 Kết nối site cũ/mới và các backend
+### 📡 Theo dõi lưu lượng
+### ✨ URL đẹp, dễ nhớ
+### 📝 Tóm tắt
 - Redirect (3xx) làm trễ toàn bộ tài liệu HTML nên rất tốn kém; 301/302 không cache được nếu thiếu header.
 - Tránh redirect do thiếu dấu “/” cuối URL; dùng Alias/mod_rewrite/DirectorySlash.
 - Nối backend bằng Alias, liên kết code trực tiếp, hoặc CNAME thay vì redirect.
 - Theo dõi lưu lượng bằng Referer logging hoặc beacon (204), không bằng redirect.
 - URL đẹp nên đạt được bằng rewrite/alias, không bằng redirect.
-## 14. Rule 12: Loại bỏ script trùng lặp
-### Vì sao script bị trùng?
-### Tác hại
-### Module quản lý script
-### Tóm tắt
+## 🔁 14. Rule 12: Loại bỏ script trùng lặp
+### 🔁 Vì sao script bị trùng?
+### 🐢 Tác hại
+### 🧰 Module quản lý script
+### 📝 Tóm tắt
 - Script trùng làm chậm: IE tạo request thừa nếu không cache (hoặc khi Refresh); cả hai trình duyệt chạy lại script.
 - Nguyên nhân: nhiều nhóm cùng chèn HTML và nhiều script trên trang.
 - Dùng module quản lý script: chống trùng, xử lý phụ thuộc, quản lý phiên bản tên file.
-## 15. Rule 13: Cấu hình ETag
-### ETag là gì?
-### Vấn đề: ETag mặc định gắn với từng server
-### Giải pháp
-### Tóm tắt
+## 🏷️ 15. Rule 13: Cấu hình ETag
+### 🏷️ ETag là gì?
+### 💥 Vấn đề: ETag mặc định gắn với từng server
+### 🧹 Giải pháp
+### 📝 Tóm tắt
 - ETag dùng với If-None-Match để xác thực cache (HTTP/1.1).
 - Mặc định Apache (inode-size-timestamp) và IIS (timestamp:ChangeNumber) khác nhau giữa các server → ETag lệch.
 - n server round-robin: chỉ 1/n cơ hội nhận 304; còn lại 200 tốn kém.
 - Giải pháp: bỏ phần riêng server, tốt nhất bỏ hẳn ETag (FileETag none), dùng Last-Modified.
-## 16. Rule 14: Làm cho Ajax cacheable
-### Web 2.0, DHTML, Ajax
-### Bất đồng bộ ≠ tức thì
-### Ví dụ: Yahoo! Mail Ajax
-### Các quy tắc khác cũng áp dụng cho Ajax
-### Tóm tắt
+## ⚡ 16. Rule 14: Làm cho Ajax cacheable
+### 🌐 Web 2.0, DHTML, Ajax
+### ⏳ Bất đồng bộ ≠ tức thì
+### 📬 Ví dụ: Yahoo! Mail Ajax
+### 🧭 Các quy tắc khác cũng áp dụng cho Ajax
+### 📝 Tóm tắt
 - Các quy tắc hiệu năng áp dụng cho Web 2.0; Rule 14 đặc biệt cho Ajax.
 - Bất đồng bộ không có nghĩa tức thì: request chủ động vẫn khiến người dùng chờ.
 - Làm phản hồi Ajax cacheable bằng Expires xa và URL phản ánh người dùng + ID duy nhất.
 - Dùng packet sniffer để tìm request Ajax chủ động; áp dụng gzip, minify, tránh redirect, bỏ ETag.
-## 17. Phân tích 10 website hàng đầu
-### Số liệu tổng quan và YSlow
-### Amazon
-### CNN – trang nặng nhất
-### eBay
-### Google, Yahoo! và những điều nhận ra ở site khác
-### Tóm tắt
+## 🏆 17. Phân tích 10 website hàng đầu
+### 📊 Số liệu tổng quan và YSlow
+### 🛒 Amazon
+### 📰 CNN – trang nặng nhất
+### 🏪 eBay
+### 🔎 Google, Yahoo! và những điều nhận ra ở site khác
+### 📝 Tóm tắt
 - Khối lượng trang tương quan 0,94 với thời gian phản hồi; điểm YSlow tương quan 0,76 (nghịch).
 - Các lỗi phổ biến: thiếu Expires, nhiều request nhỏ, không gzip, ETag mặc định, quá nhiều domain, ảnh chứa chữ.
 - Công cụ: IBM Page Detailer, Gomez, Firebug, YSlow.

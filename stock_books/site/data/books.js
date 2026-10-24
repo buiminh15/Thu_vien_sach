@@ -17,7 +17,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "reactref",
+    id: "reactref", "mindmap": "reactref-mindmap.html",
     title: "React Reference – giáo trình tiếng Việt dễ hiểu",
     subtitle: "Hooks, Components, APIs, Legacy và Rules of React (react.dev/reference/react)",
     author: "Biên soạn tiếng Việt từ tài liệu chính thức react.dev",
@@ -1504,6 +1504,7 @@ window.BOOKS = [
 },
 {
   "id": "hpws",
+  "mindmap": "hpws-mindmap.html",
   "title": "High Performance Web Sites",
   "subtitle": "14 quy tắc tăng tốc website cho kỹ sư frontend",
   "author": "Steve Souders – O'Reilly, 2007",
@@ -1832,6 +1833,138 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "fcf",
+  "title": "Fundamentals of Corporate Finance",
+  "subtitle": "Nền tảng tài chính doanh nghiệp",
+  "author": "Brealey, Myers, Marcus (McGraw-Hill)",
+  "cat": "Tài chính",
+  "tags": [
+    "Tài chính doanh nghiệp",
+    "NPV",
+    "Chi phí vốn",
+    "Định giá",
+    "Cơ cấu vốn",
+    "Ngân sách vốn"
+  ],
+  "level": "Cơ bản → Trung cấp",
+  "emoji": "🏦",
+  "color": "#0ea5e9",
+  "desc": "22 chương tóm lược giáo trình tài chính doanh nghiệp: giá trị thời gian của tiền, báo cáo tài chính, vốn lưu động, định giá trái phiếu và cổ phiếu, rủi ro–lợi suất, NPV/IRR, chi phí vốn, tài trợ, sáp nhập và tài chính quốc tế. Mỗi chương có máy tính tương tác, thẻ ghi nhớ, câu hỏi và trò ghép cặp.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Doanh nghiệp và nhà quản lý tài chính",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Giá trị thời gian của tiền",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Hoạch định tài chính",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Kế toán và tài chính",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Phân tích báo cáo tài chính",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Quản lý vốn lưu động và hoạch định ngắn hạn",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Quản lý tiền mặt và hàng tồn kho",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Quản lý tín dụng và thu nợ",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Định giá trái phiếu",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Định giá cổ phiếu",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Rủi ro, lợi suất và chi phí cơ hội của vốn",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Giá trị hiện tại ròng và các tiêu chí đầu tư khác",
+      "ready": true
+    },
+    {
+      "n": 13,
+      "title": "Phân tích dòng tiền chiết khấu để ra quyết định đầu tư",
+      "ready": true
+    },
+    {
+      "n": 14,
+      "title": "Rủi ro, lợi suất và ngân sách vốn",
+      "ready": true
+    },
+    {
+      "n": 15,
+      "title": "Chi phí vốn",
+      "ready": true
+    },
+    {
+      "n": 16,
+      "title": "Phân tích dự án",
+      "ready": true
+    },
+    {
+      "n": 17,
+      "title": "Tổng quan về tài trợ doanh nghiệp",
+      "ready": true
+    },
+    {
+      "n": 18,
+      "title": "Cách công ty phát hành chứng khoán",
+      "ready": true
+    },
+    {
+      "n": 19,
+      "title": "Thuê tài sản (Phụ lục B)",
+      "ready": true
+    },
+    {
+      "n": 20,
+      "title": "Đòn bẩy và cơ cấu vốn (Phụ lục B)",
+      "ready": true
+    },
+    {
+      "n": 21,
+      "title": "Sáp nhập, mua lại và quyền kiểm soát doanh nghiệp",
+      "ready": true
+    },
+    {
+      "n": 22,
+      "title": "Quản lý tài chính quốc tế",
+      "ready": true
+    }
+  ]
 }
 ];
+
 

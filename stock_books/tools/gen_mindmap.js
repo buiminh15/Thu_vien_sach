@@ -1,16 +1,17 @@
 // Sinh mindmap markmap (HTML độc lập) từ data/<prefix>-N.js
-// Dùng: node gen_mindmap.js <bookId> <prefix> <số chương> <tiêu đề> <file ra>
+// Dùng: node gen_mindmap.js <bookId> <prefix> <số chương> <tiêu đề> <file ra> [icon gốc] [icon chương, cách nhau bằng dấu phẩy]
 const fs = require('fs'), path = require('path');
-const [id, prefix, count, title, out] = process.argv.slice(2);
+const [id, prefix, count, title, out, rootIcon = '', chIcons = ''] = process.argv.slice(2);
+const icons = chIcons ? chIcons.split(',') : [];
 global.window = global;
 const dir = path.join(__dirname, '..', 'site', 'data');
 for (let n = 1; n <= +count; n++) (0, eval)(fs.readFileSync(path.join(dir, `${prefix}-${n}.js`), 'utf8'));
 const strip = s => s.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').trim();
-let md = `# ${title}\n`;
+let md = `# ${rootIcon ? rootIcon + ' ' : ''}${title}\n`;
 for (const c of BOOK_DATA[id].chapters) {
-  md += `## ${c.n}. ${strip(c.title)}\n`;
-  for (const s of c.sections) md += `### ${strip(s.title)}\n`;
-  md += `### Tóm tắt\n`;
+  md += `## ${icons[c.n - 1] || c.sections[0].icon || '📖'} ${c.n}. ${strip(c.title)}\n`;
+  for (const s of c.sections) md += `### ${s.icon || '▪️'} ${strip(s.title)}\n`;
+  md += `### 📝 Tóm tắt\n`;
   for (const t of c.summary) md += `- ${strip(t)}\n`;
 }
 const html = `<!doctype html>

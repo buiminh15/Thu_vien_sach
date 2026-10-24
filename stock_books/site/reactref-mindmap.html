@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – React Reference – giáo trình tiếng Việt dễ hiểu</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# ⚛️ React Reference – giáo trình tiếng Việt dễ hiểu
+## 🧠 1. State: useState và useReducer
+### 🧠 useState
+### 🧮 useReducer
+### 📝 Tóm tắt
+- useState trả [state, set]; set chỉ đổi cho lần render kế; cập nhật theo giá trị cũ thì dùng updater c => c + 1.
+- Đừng sửa trực tiếp object/mảng; tạo bản sao mới. Reset state bằng key.
+- useReducer(reducer, initial) gom luật cập nhật vào một hàm pure; gửi bằng dispatch(action).
+## 📡 2. Context: createContext, useContext và use
+### 📡 Ba bước dùng context
+### 📋 Điều cần nhớ
+### ✨ use(context): bản linh hoạt hơn
+### 📝 Tóm tắt
+- Context: createContext → Provider (<Ctx value> ở React 19) → useContext.
+- Provider gần nhất phía trên thắng; value đổi → mọi consumer render lại.
+- Kết hợp state để context đổi theo thời gian; kết hợp reducer cho app lớn.
+- use(context) cho phép đọc trong điều kiện/vòng lặp.
+## 📦 3. Ref và DOM: useRef, useImperativeHandle
+### 📦 useRef: giá trị nhớ được nhưng không gây render
+### 🎯 Ref vào DOM
+### 🔌 Cho cha điều khiển con: ref là prop và useImperativeHandle
+### 📝 Tóm tắt
+- useRef(initial) trả object { current }; đổi không render lại; chỉ đọc/ghi trong handler hoặc Effect.
+- Ref gắn DOM để focus/scroll/đo; không dùng để sửa DOM do React quản lý.
+- React 19: ref là prop, bỏ forwardRef; useImperativeHandle để lộ một “tay cầm” tùy chỉnh.
+## 🔌 4. Effect: useEffect, useEffectEvent, useLayoutEffect, useInsertionEffect
+### 🔌 useEffect: setup và cleanup
+### 🧪 Strict Mode: chạy thêm một vòng để bắt lỗi
+### 🎯 useEffectEvent: tách “sự kiện” khỏi Effect
+### 📐 useLayoutEffect và useInsertionEffect
+### 📝 Tóm tắt
+- Effect = đồng bộ với hệ thống ngoài: setup (kết nối) + cleanup (ngắt); dependencies quyết định khi nào “rút ra cắm lại”.
+- Strict Mode dev chạy thêm một vòng setup/cleanup để bắt thiếu cleanup. Lấy dữ liệu cần xử lý race condition.
+- Bạn có thể không cần Effect. useEffectEvent tách logic “như sự kiện” để không buộc Effect chạy lại.
+- useLayoutEffect chạy trước khi vẽ (chặn vẽ); useInsertionEffect cho CSS-in-JS.
+## 🧠 5. Ghi nhớ để tối ưu: useMemo, useCallback, memo và React Compiler
+### 🧠 Ba công cụ ghi nhớ
+### 🔗 Vì sao hay phải dùng chung với nhau
+### 🤖 React Compiler
+### 📝 Tóm tắt
+- useMemo nhớ kết quả; useCallback nhớ hàm; memo bỏ render lại khi props không đổi.
+- Giữ tham chiếu ổn định để memo hữu hiệu; chỉ là tối ưu, không đổi tính đúng đắn.
+- Đo trước khi tối ưu; React Compiler tự làm nhiều việc này.
+## 🚦 6. Giao diện mượt: Transition, DeferredValue, Suspense, lazy và use(Promise)
+### 🚦 useTransition và startTransition
+### 🕰 useDeferredValue
+### ⏳ Suspense, lazy và use(Promise)
+### 📝 Tóm tắt
+- useTransition/startTransition: cập nhật làm nền, bị gián đoạn được; có isPending.
+- useDeferredValue: bản “chậm” của giá trị — ô nhập mượt, kết quả đuổi theo.
+- Suspense hiện fallback khi con treo (lazy, use(promise), streaming); Transition giữ nội dung cũ thay vì fallback.
+- Không để use trong try/catch; cache Promise; dùng Error Boundary.
+## 📨 7. Form và dữ liệu: useActionState, useOptimistic và Actions
+### 📨 Action là gì
+### 📝 useActionState
+### 😎 useOptimistic: “lạc quan” khi chờ server
+### 📝 Tóm tắt
+- Action = hàm (thường async) chạy trong Transition; React theo dõi pending.
+- useActionState trả [state, dispatchAction, isPending]; reducerAction được async; action xếp hàng tuần tự.
+- useOptimistic hiện kết quả tạm ngay lập tức, tự về giá trị thật khi Action xong.
+## 🆔 8. Hook khác: useId, useSyncExternalStore, useDebugValue và custom Hook
+### 🆔 useId
+### 🔔 useSyncExternalStore
+### 🏷 useDebugValue và Custom Hook
+### 📝 Tóm tắt
+- useId cho ID tiếp cận duy nhất (không dùng làm key).
+- useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot?) đọc kho ngoài; snapshot bất biến.
+- useDebugValue gán nhãn DevTools; custom Hook (tên useXxx) tái dùng logic có state.
+## 📦 9. Component có sẵn: Fragment, StrictMode, Profiler, Activity, ViewTransition
+### 📦 Fragment: nhóm mà không thêm thẻ
+### 🧪 StrictMode: bắt lỗi sớm lúc phát triển
+### ⏱ Profiler: đo thời gian render
+### 🗄 Activity: ẩn mà vẫn giữ trạng thái
+### 🎬 ViewTransition và addTransitionType
+### 📝 Tóm tắt
+- Fragment nhóm không thêm DOM (cần key → dạng đầy đủ); có ref (FragmentInstance).
+- StrictMode (dev): render hai lần, Effect/ref chạy lại, cảnh báo API cũ. Profiler đo thời gian render.
+- Activity ẩn nhưng giữ state; ViewTransition tạo hiệu ứng chuyển cảnh; addTransitionType gắn nguyên nhân.
+## 🧭 10. Server Components: cache, cacheSignal, “use client” và “use server”
+### 🧭 Server hay Client?
+### 📌 'use client' và 'use server'
+### 💾 cache và cacheSignal
+### 📝 Tóm tắt
+- Server Component chạy ở server (không gửi JS); Client Component cần state/effect/event.
+- 'use client' vạch ranh giới client; 'use server' tạo Server Function — luôn xem đối số là không tin cậy.
+- cache(fn) nhớ kết quả trong một request (chỉ RSC); cacheSignal() để hủy việc không còn cần.
+## 🪝 11. Quy tắc của React: Hook, thuần khiết, và công cụ kiểm thử/gỡ lỗi
+### 🪝 Rules of Hooks
+### 🧼 Component và Hook phải thuần khiết (pure)
+### 📞 React gọi component và Hook
+### 🧰 act và captureOwnerStack
+### 📝 Tóm tắt
+- Rules of Hooks: cấp trên cùng, từ component/custom Hook; thứ tự gọi phải ổn định mỗi render.
+- Render phải thuần: idempotent, không tác dụng phụ, không sửa giá trị ngoài. Tác dụng phụ vào event handler/Effect.
+- Không gọi component như hàm; không truyền/biến đổi Hook như giá trị thường.
+- await act(async ...) để kiểm thử; captureOwnerStack để gỡ lỗi (dev).
+## 🏚 12. API cũ (Legacy): class component, Children, cloneElement, forwardRef…
+### 🏚 Bảng chuyển đổi
+### 🔄 Chuyển class sang function (ý tưởng)
+### 📝 Tóm tắt
+- Legacy: Component, PureComponent, forwardRef, createRef, Children, cloneElement, createElement, isValidElement.
+- Thay bằng function component + Hook, memo, ref-as-prop (React 19), JSX, props/context.
+- Error Boundary hiện vẫn cần class (hoặc thư viện).
+## 🗺 13. Bản đồ tra cứu: chọn đúng API cho đúng việc
+### 🗺 Chọn nhanh theo nhu cầu
+### 🔎 Tra cứu từ khóa
+### 🧭 Lời khuyên tổng kết
+### 📝 Tóm tắt
+- State: useState/useReducer; ref: useRef; chia sẻ: context; ngoại vi: Effect; tối ưu: memo/useMemo/useCallback; UX: Transition/Deferred/Suspense; form: useActionState/useOptimistic.
+- Luôn giữ render thuần, tuân Rules of Hooks, và hỏi “có cần Effect không?”.
+- Đo rồi mới tối ưu; dùng framework cho định tuyến/dữ liệu/RSC.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>
