@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Android Data Use (AOSP)</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 📶 Android Data Use (AOSP)
+## 🎯 1. Tổng quan: Android theo dõi và kiểm soát dữ liệu mạng thế nào
+### 🎯 Hệ thống làm được gì?
+### 🧱 Các tầng của hệ thống
+### 🔐 Góc nhìn bảo mật và riêng tư
+### 🗺️ Bản đồ phần còn lại
+### 📝 Tóm tắt
+- Android đo lưu lượng tổng và theo từng app (UID), có cảnh báo/giới hạn và chặn dữ liệu nền.
+- Các tầng: Settings/app → framework (NetworkStatsService, NetworkPolicy) → netd → kernel (qtaguid cũ / eBPF mới) → driver.
+- Số liệu lưu lượng nhạy cảm: app không đọc trực tiếp kernel; gán lại quyền sở hữu cần MODIFY_NETWORK_ACCOUNTING.
+## 💡 2. Data Saver: chế độ tiết kiệm dữ liệu
+### 💡 Data Saver làm gì
+### ⚙️ Giao diện cài đặt trong AOSP
+### 📱 Trách nhiệm của ứng dụng (kể cả app cài sẵn)
+### ✅ Kiểm tra (validation)
+### 📝 Tóm tắt
+- Data Saver (Android 7.0): chặn dữ liệu nền theo ý người dùng; app dùng API để thích ứng; OEM có sẵn mặc định.
+- OEM không nên whitelist app; mọi app (kể cả cài sẵn) phải tiết kiệm: bớt ảnh/video, không prefetch, không autoplay.
+- Kiểm tra bằng CTS và lệnh adb của netpolicy.
+## 🏷️ 3. Kernel cũ: xt_qtaguid, quota2 và “tag” lưu lượng
+### 🏷️ xt_qtaguid hoạt động thế nào
+### 🔖 Tag được giải thích
+### 📏 xt_quota2 và hạn mức
+### 🛠️ Thay đổi kernel so với mainline
+### 📝 Tóm tắt
+- xt_qtaguid đếm byte theo socket → UID (+ nhãn acct_tag); xt_quota2 đặt hạn mức, hết quota thì drop lưu lượng.
+- Tag = uid_tag (bắt buộc, dùng áp chính sách) + acct_tag (tùy app, dùng phân loại thống kê); default_tag gom tổng.
+- Cơ chế này nằm ngoài kernel mainline và giảm dần từ Android 9 để nhường chỗ cho eBPF.
+## 🧠 4. eBPF traffic monitoring: cơ chế hiện đại (Android 9+)
+### 🧠 eBPF là gì (giải thích dễ hiểu)
+### 🏗️ Kiến trúc và luồng hoạt động
+### ✅ Yêu cầu và lộ trình loại bỏ qtaguid
+### 🧪 Kiểm thử và gỡ lỗi
+### 📝 Tóm tắt
+- eBPF (Android 9+): chương trình cgroup + xt_bpf đếm theo UID và interface, ghi vào eBPF map ghim ở /sys/fs/bpf; NetworkStatsService đọc map.
+- Luồng: trafficController tạo map → bpfloader nạp chương trình → tag/untag socket lúc chạy → đọc stats; firewall UID bằng các map powersave/standby/dozable.
+- Bắt buộc với thiết bị kernel ≥ 4.9 xuất xưởng bản 9; cần 5 CONFIG kernel; app SDK ≥ 28 không đọc được proc của qtaguid; kiểm bằng VTS/CTS/dumpsys netd.
+## 📟 5. Thống kê theo interface và điều kiện với driver mạng
+### 📟 Quy tắc cho driver mạng
+### 🧭 Đăng ký interface với framework
+### 📦 Danh sách kiểm tra khi tích hợp driver
+### 📝 Tóm tắt
+- dev_get_stats() phải đơn điệu tăng, đếm byte ở tầng IP (không gồm header tầng dưới), chỉ reset sau unregister_netdev/NETDEV_UNREGISTER.
+- Framework chỉ thu thống kê từ interface gắn với một mạng đã đăng ký (loại + IMSI); mọi interface dẫn dữ liệu phải được đại diện.
+- Sai số liệu ở driver kéo theo sai cước, sai hạn mức và sai biểu đồ.
+## 📅 6. Chu kỳ dùng dữ liệu, loại trừ loại mạng và tethering
+### 📅 Ngày reset chu kỳ dùng dữ liệu
+### 🚫 Loại trừ loại mạng khỏi tổng dữ liệu
+### 🔗 Dữ liệu tethering
+### ⚡ Tethering hardware offload (Android 8.1+)
+### 📝 Tóm tắt
+- Chu kỳ: reset lúc 00:00 UTC của ngày chọn; tháng ngắn hơn thì reset ngày 1 tháng sau (30 → 30/1 và 1/3).
+- config_data_usage_network_types loại loại mạng khỏi tổng (zero-rating), nhưng không loại được APN dùng chung interface.
+- Tethering: ghi thống kê theo cặp interface; offload cần IOffloadConfig + IOffloadControl + callback; gói điều khiển IPv4 vẫn qua phần mềm; hết lượng → framework đặt data limit.
+## 🗺️ 7. Bản đồ tra cứu: vấn đề → cơ chế → cách kiểm tra
+### 🗺️ Vấn đề → thành phần
+### 🔎 Tra cứu thuật ngữ
+### 📈 Dòng thời gian các thay đổi
+### 🧭 Lời khuyên tổng kết cho người tích hợp
+### 📝 Tóm tắt
+- Mỗi nhu cầu có thành phần chuyên trách: UID/eBPF map (đếm), tag (phân loại), NetworkPolicy+Data Saver (chặn), config loại mạng (zero-rating), offload (tiết kiệm pin).
+- Mốc chính: 4.0 thống kê interface; 7.0 Data Saver; 8.1 offload; 9 eBPF thay qtaguid.
+- Khi tích hợp: bật CONFIG eBPF, kiểm VTS/CTS/dumpsys netd, chuẩn hóa driver và đăng ký interface.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>

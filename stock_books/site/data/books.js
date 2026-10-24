@@ -151,7 +151,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "aospdata",
+    id: "aospdata", "mindmap": "aospdata-mindmap.html",
     title: "Android Data Use (AOSP)",
     subtitle: "Data Saver, eBPF traffic monitoring, xt_qtaguid, tethering offload (source.android.com/docs/core/data)",
     author: "source.android.com/docs/core/data",
