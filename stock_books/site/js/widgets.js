@@ -3232,3 +3232,118 @@ WIDGETS['fc-irp'] = host => dlCalc(host, [{ id: 's', label: 'Spot (nội tệ/ng
 
 WIDGETS['fc-hedge'] = host => dlCalc(host, [{ id: 'amt', label: 'Phải thu (ngoại tệ)', v: 100000 }, { id: 'spot', label: 'Spot hiện tại (USD/ngoại tệ)', v: 1.10, step: 0.01 }, { id: 'fwd', label: 'Forward (USD/ngoại tệ)', v: 1.12, step: 0.01 }, { id: 'fut', label: 'Spot thực tế khi thu tiền', v: 1.05, step: 0.01 }],
   v => 'Không hedge: <b>' + cpF(v.amt * v.fut, 0) + ' USD</b><br>Hedge bằng forward: <b>' + cpF(v.amt * v.fwd, 0) + ' USD</b><br>Hedge ' + (v.fwd >= v.fut ? 'có lợi' : 'bất lợi') + ' hơn: <b>' + cpF(v.amt * (v.fwd - v.fut), 0) + ' USD</b>.');
+// ===== Ahead of the Market (zm-*) — dùng cpF, cpP, cpScore từ w-cp =====
+const zmList = s => String(s).split(/[,;\s]+/).filter(x => x !== '').map(Number).filter(x => isFinite(x));
+const zmChange = (now, prev) => prev ? (now - prev) / Math.abs(prev) * 100 : NaN;
+
+WIDGETS['zm-consensus'] = host => { host.innerHTML = '<div class="row"><label>Các ước tính EPS (cách nhau dấu phẩy) <input id="s" value="1.97, 2.05, 2.08, 2.10, 2.12, 2.06, 2.04, 2.07" style="width:260px"></label><label>Đồng thuận 30 ngày trước <input id="p" type="number" value="2.15" step="0.01" style="width:80px"></label></div><div class="calc" id="o"></div>'; const draw = () => { const a = zmList(host.querySelector('#s').value), p = parseFloat(host.querySelector('#p').value) || 0; const o = host.querySelector('#o'); if (!a.length) { o.innerHTML = 'Nhập ít nhất một ước tính.'; return; } const m = a.reduce((s, x) => s + x, 0) / a.length, ch = zmChange(m, p); o.innerHTML = a.length + ' nhà phân tích · thấp ' + cpF(Math.min(...a)) + ' · cao ' + cpF(Math.max(...a)) + '<br>Đồng thuận: <b>' + cpF(m, 3) + '</b> · thay đổi 30 ngày: <b>' + (isNaN(ch) ? '—' : cpP(ch)) + '</b><br>' + (isNaN(ch) ? '' : ch > 3 ? '🟢 Vượt ngưỡng nâng ~3%: tín hiệu mua.' : ch < -3 ? '🔴 Bị hạ mạnh: tín hiệu tiêu cực.' : '🟡 Thay đổi nhỏ.'); }; host.querySelectorAll('input').forEach(i => i.oninput = draw); draw(); };
+
+WIDGETS['zm-quintile'] = host => dlCalc(host, [{ id: 'g', label: 'Nhóm', v: '20.1', opts: [['-4.2', '1. Bị cắt mạnh (−4,2%)'], ['4.7', '2 (4,7%)'], ['9.0', '3 (9,0%)'], ['14.0', '4 (14,0%)'], ['20.1', '5. Được nâng mạnh (20,1%)'], ['9.0', 'S&P 500 (9,0%)']] }, { id: 'n', label: 'Số năm', v: 10, min: 1, max: 30 }, { id: 'c', label: 'Vốn (USD)', v: 10000, step: 1000 }, { id: 'fee', label: 'Phí giao dịch trừ hằng năm (điểm %)', v: 0, step: 0.5 }],
+  v => { const r = (parseFloat(v.g) - v.fee) / 100; return 'Sau ' + v.n + ' năm: <b>' + cpF(v.c * Math.pow(1 + r, v.n), 0) + ' USD</b> (lợi suất ròng ' + cpP(r * 100) + '/năm).<br><i>Số liệu quá khứ của tác giả, chưa trừ phí; thử tăng phí để thấy tác động.</i>'; });
+
+WIDGETS['zm-bias'] = host => cpScore(host, [
+  'Hãng môi giới của nhà phân tích từng bảo lãnh hoặc tư vấn cho công ty này', 'Khuyến nghị là "buy/strong buy" trong khi chưa nhà phân tích nào khuyến nghị bán', 'Nhà phân tích được trả thưởng theo doanh thu ngân hàng đầu tư', 'Văn bản dùng nhiều câu trung tính, ít nêu rủi ro', 'Nhà phân tích ngừng theo dõi cổ phiếu mà không giải thích'
+], [[0, '✅ Không thấy dấu hiệu thiên lệch.'], [2, '🟡 Có thể thiên lệch: chỉ dùng số liệu, bỏ qua khuyến nghị.'], [4, '🔴 Thiên lệch cao: đừng dựa vào khuyến nghị này.']], 'Đánh dấu điều đúng:');
+
+WIDGETS['zm-text-decoder'] = host => dlDiag(host, [
+  ['"Doanh thu tăng mạnh hơn dự kiến và hợp đồng mới tăng"', ['Nâng ước tính nhờ doanh thu hữu cơ'], '🟢 Tích cực nhất.'],
+  ['"Cắt giảm chi phí giúp biên lợi nhuận tốt hơn"', ['Nâng nhờ tiết kiệm chi phí'], '🟡 Tạm được, bền vững thấp hơn doanh thu.'],
+  ['"Thương vụ mua lại sẽ cộng vào lợi nhuận"', ['Nâng nhờ mua lại'], '🟠 Chiết khấu mạnh: có thể trả giá cao.'],
+  ['"Thay đổi chuẩn kế toán làm lợi nhuận cao hơn"', ['Không phải cải thiện kinh doanh'], '🔴 Bỏ qua.'],
+  ['"Công ty vẫn đang thực hiện kế hoạch"', ['Câu trung tính'], '🔴 Hiểu như tin xấu nhẹ: không rõ ràng tích cực.']
+], 'Câu trong báo cáo');
+
+WIDGETS['zm-revision-quality'] = host => dlCalc(host, [{ id: 'w', label: 'Nguyên nhân nâng ước tính', v: 'rev', opts: [['rev', 'Doanh thu tăng'], ['cost', 'Cắt chi phí'], ['acq', 'Mua lại công ty'], ['acc', 'Thay đổi kế toán']] }, { id: 'p', label: 'Mức nâng (%)', v: 5, step: 0.5 }],
+  v => { const f = { rev: 1, cost: 0.7, acq: 0.3, acc: 0 }[v.w]; return 'Mức nâng "có giá trị": <b>' + cpP(v.p * f) + '</b> (hệ số ' + f + ').<br>' + { rev: 'Ưu tiên cao nhất.', cost: 'Tạm được.', acq: 'Chiết khấu mạnh.', acc: 'Bỏ qua.' }[v.w] + ' <i>(Hệ số minh họa, không phải của tác giả.)</i>'; });
+
+WIDGETS['zm-stake'] = host => dlCalc(host, [{ id: 'pct', label: 'Tỷ lệ sở hữu (%)', v: 20, max: 100 }, { id: 'ni', label: 'Lợi nhuận công ty/năm', v: 100000, step: 1000 }, { id: 'pe', label: 'P/E bạn sẵn sàng trả', v: 12 }],
+  v => 'Phần lợi nhuận của bạn: <b>' + cpF(v.ni * v.pct / 100, 0) + '</b>/năm<br>Giá hợp lý cho phần này: <b>' + cpF(v.ni * v.pct / 100 * v.pe, 0) + '</b>.');
+
+WIDGETS['zm-creep'] = host => dlCalc(host, [{ id: 'e0', label: 'Ước tính ban đầu', v: 1.00, step: 0.01 }, { id: 'step', label: 'Mỗi lần nâng (%)', v: 2, step: 0.5 }, { id: 'n', label: 'Số tháng', v: 6, min: 1, max: 12 }],
+  v => { let e = v.e0, out = ''; for (let i = 1; i <= v.n; i++) { e *= 1 + v.step / 100; out += 'T' + i + ': ' + cpF(e, 3) + ' &nbsp; '; } return out + '<br>Tổng nâng: <b>' + cpP((e / v.e0 - 1) * 100) + '</b> — nâng nhỏ nhiều lần cùng hướng.'; });
+
+WIDGETS['zm-trend'] = host => dlCalc(host, [{ id: 'c', label: 'Hiện tại', v: 1.30, step: 0.01 }, { id: 'd30', label: '30 ngày trước', v: 1.27, step: 0.01 }, { id: 'd60', label: '60 ngày trước', v: 1.16, step: 0.01 }, { id: 'd90', label: '90 ngày trước', v: 1.16, step: 0.01 }],
+  v => '30 ngày: <b>' + cpP(zmChange(v.c, v.d30)) + '</b> · 60 ngày: <b>' + cpP(zmChange(v.c, v.d60)) + '</b> · 90 ngày: <b>' + cpP(zmChange(v.c, v.d90)) + '</b><br>' + (v.c > v.d30 && v.d30 >= v.d60 ? '🟢 Xu hướng nâng liên tục.' : v.c < v.d30 ? '🔴 Đang bị hạ.' : '🟡 Chưa rõ.'));
+
+WIDGETS['zm-signal'] = host => dlCalc(host, [{ id: 'c', label: 'Đồng thuận hiện tại', v: 1.30, step: 0.01 }, { id: 'p', label: '30 ngày trước', v: 1.25, step: 0.01 }, { id: 'thr', label: 'Ngưỡng mua (%)', v: 3 }],
+  v => { const ch = zmChange(v.c, v.p); return 'Thay đổi: <b>' + cpP(ch) + '</b> → ' + (ch > v.thr ? '🟢 vượt ngưỡng: tín hiệu mua (nếu EPS dự báo dương).' : ch < 0 ? '🔴 bị hạ: bán/tránh.' : '🟡 chưa đủ mạnh.'); });
+
+WIDGETS['zm-histogram'] = host => dlCalc(host, [{ id: 'cons', label: 'Đồng thuận (X)', v: 0.12, step: 0.01 }, { id: 'mr', label: 'Ước tính gần nhất (O)', v: 0.06, step: 0.01 }],
+  v => 'Ước tính gần nhất ' + (v.mr > v.cons ? '<b>cao hơn</b> đồng thuận → nhà phân tích đang nâng 🟢.' : v.mr < v.cons ? '<b>thấp hơn</b> đồng thuận → đang hạ 🔴.' : 'bằng đồng thuận.') + '<br>Chênh: ' + cpF(v.mr - v.cons, 3) + '.');
+
+WIDGETS['zm-checklist5'] = host => dlCheck(host, [
+  ['EPS dự báo năm nay và năm sau đều dương', 'Không mua công ty dự báo lỗ.'],
+  ['Đồng thuận năm hiện tại tăng >3% trong 30 ngày', 'Mức tăng càng lớn tín hiệu càng mạnh.'],
+  ['Các ước tính mới nhất (O) nằm bên phải đồng thuận (X)', 'Nhà phân tích đang nâng tiếp.'],
+  ['Nguyên nhân nâng là doanh thu, không phải kế toán', 'Đọc vài báo cáo.'],
+  ['Phí giao dịch kiểm soát được', 'Vòng quay cao.']
+], '✅ Đủ điều kiện theo danh sách của sách (không phải bảo đảm sinh lời).');
+
+WIDGETS['zm-surprise'] = host => dlCalc(host, [{ id: 'a', label: 'EPS thực tế', v: 0.55, step: 0.01 }, { id: 'c', label: 'Đồng thuận', v: 0.50, step: 0.01 }],
+  v => { const s = zmChange(v.a, v.c); return 'Bất ngờ: <b>' + (v.a - v.c >= 0 ? '+' : '') + cpF(v.a - v.c, 3) + '</b> USD = <b>' + cpP(s) + '</b> ' + (s > 0 ? '🟢 dương' : s < 0 ? '🔴 âm' : '🟡 đúng kỳ vọng'); });
+
+WIDGETS['zm-accretion'] = host => dlCalc(host, [{ id: 'pa', label: 'P/E bên mua', v: 25 }, { id: 'pb', label: 'P/E mục tiêu', v: 12 }, { id: 'ea', label: 'Lợi nhuận bên mua', v: 100 }, { id: 'eb', label: 'Lợi nhuận mục tiêu', v: 30 }, { id: 'sa', label: 'Số cổ phiếu bên mua', v: 50 }],
+  v => { const pxA = v.ea / v.sa * v.pa, newSh = v.eb * v.pb / pxA, eps0 = v.ea / v.sa, eps1 = (v.ea + v.eb) / (v.sa + newSh); return 'Trả bằng cổ phiếu: phát hành thêm ' + cpF(newSh, 1) + '<br>EPS: ' + cpF(eps0, 3) + ' → <b>' + cpF(eps1, 3) + '</b> (' + cpP((eps1 / eps0 - 1) * 100) + ').<br>' + (eps1 > eps0 ? 'EPS tăng chỉ vì P/E bên mua cao hơn — chưa chắc tạo giá trị.' : 'EPS giảm.'); });
+
+WIDGETS['zm-surprise-check'] = host => dlCheck(host, [
+  ['EPS vượt đồng thuận quý', ''], ['EPS vượt các ước tính gần nhất (O)', ''], ['Không có khoản bất thường làm đẹp lợi nhuận', 'Phải loại bỏ.'], ['Không cảnh báo giảm cho quý tới', ''], ['Không cảnh báo trước khi công bố', ''], ['Thị trường chưa đoán trước bất ngờ này', 'Dùng phản ứng giá làm lối tắt.']
+], '✅ Bất ngờ "sạch". Cân nhắc mua khi giá yếu đi một chút.');
+
+WIDGETS['zm-drift'] = host => dlCalc(host, [{ id: 'p0', label: 'Giá trước công bố', v: 50 }, { id: 'j', label: 'Phản ứng ngày đầu (%)', v: 4 }, { id: 'd', label: 'Drift thêm trong 3 tháng (%)', v: 5 }],
+  v => { const d1 = v.p0 * (1 + v.j / 100), d3 = d1 * (1 + v.d / 100); return 'Sau ngày đầu: <b>' + cpF(d1) + '</b>; sau 3 tháng: <b>' + cpF(d3) + '</b> (tổng ' + cpP((d3 / v.p0 - 1) * 100) + ').<br>Tác giả khuyên đừng cố là người đầu tiên mua.'; });
+
+WIDGETS['zm-rank-lab'] = host => dlCalc(host, [{ id: 'ag', label: 'Agreement (0–10)', v: 8, max: 10 }, { id: 'mg', label: 'Magnitude (0–10)', v: 6, max: 10 }, { id: 'up', label: 'Upside (0–10)', v: 5, max: 10 }, { id: 'su', label: 'Surprise (0–10)', v: 7, max: 10 }],
+  v => { const s = (v.ag + v.mg + v.up + v.su) / 4, rank = s >= 8 ? 1 : s >= 6.5 ? 2 : s >= 4 ? 3 : s >= 2.5 ? 4 : 5; return 'Điểm tổng hợp: <b>' + cpF(s) + '</b> → hạng minh họa <b>#' + rank + '</b> (' + ['', 'Strong Buy', 'Buy', 'Hold', 'Sell', 'Strong Sell'][rank] + ').<br><i>Đây là mô phỏng đơn giản, không phải công thức thật của Zacks.</i>'; });
+
+WIDGETS['zm-compound'] = host => dlCalc(host, [{ id: 'g', label: 'Lợi suất gộp (%/năm)', v: 32 }, { id: 'c', label: 'Phí giao dịch trừ (điểm %/năm)', v: 10 }, { id: 'n', label: 'Số năm', v: 10, min: 1, max: 30 }, { id: 'v', label: 'Vốn', v: 10000, step: 1000 }, { id: 'm', label: 'S&P 500 (%/năm)', v: 12.6 }],
+  v => 'Chiến lược sau phí: <b>' + cpF(v.v * Math.pow(1 + (v.g - v.c) / 100, v.n), 0) + '</b> (' + cpP(v.g - v.c) + '/năm)<br>S&P 500: <b>' + cpF(v.v * Math.pow(1 + v.m / 100, v.n), 0) + '</b><br>Phí giao dịch có thể ăn phần lớn lợi thế.');
+
+WIDGETS['zm-wcom'] = host => dlDiag(host, [
+  ['Tháng 6/2000, giá 45,88', ['23 công ty môi giới: tất cả khuyến nghị mua/mua mạnh', 'Zacks Rank: bán'], 'Tránh được nếu theo điều chỉnh ước tính.'],
+  ['Tuần 12/4/2002, giá 5,01', ['Lần đầu có công ty môi giới khuyến nghị bán'], 'Quá muộn: giá đã giảm ~89%.'],
+  ['Tháng 6/2002, giá ~1,22', ['Zacks Rank vẫn bán/trung lập'], 'Cổ phiếu tiếp tục giảm.']
+], 'Mốc thời gian');
+
+WIDGETS['zm-turnover'] = host => dlCalc(host, [{ id: 'cap', label: 'Vốn', v: 20000, step: 1000 }, { id: 'to', label: 'Số lần quay vòng/năm', v: 6, min: 0, max: 24 }, { id: 'fee', label: 'Phí + chênh lệch mỗi lượt mua–bán (%)', v: 0.5, step: 0.1 }],
+  v => { const cost = v.cap * v.to * v.fee / 100 * 2; return 'Chi phí/năm: <b>' + cpF(cost, 0) + ' USD</b> = <b>' + cpP(cost / v.cap * 100) + '</b> vốn.<br>' + (cost / v.cap * 100 > 2 ? '🔴 Vượt giới hạn 2%/năm trong sách.' : '✅ Trong giới hạn 2%.'); });
+
+WIDGETS['zm-sell-rules'] = host => dlCalc(host, [{ id: 'rank', label: 'Hạng hiện tại', v: 2, opts: [[1, '#1'], [2, '#2'], [3, '#3'], [4, '#4'], [5, '#5']] }, { id: 'm', label: 'Số tháng đã giữ', v: 2, min: 0 }, { id: 'neg', label: 'Báo bất ngờ âm / hạ dự báo?', v: 'n', opts: [['n', 'Không'], ['y', 'Có']] }, { id: 'rel', label: 'Lợi suất so với S&P (điểm %)', v: -10 }],
+  v => { const rank = +v.rank; let r = []; if (rank >= 4) r.push('hạng ' + rank + ' → bán'); if (v.neg === 'y') r.push('bất ngờ âm/hạ dự báo → bán'); if (v.m >= 3 && rank >= 3) r.push('sau 3 tháng hạng ≤ #3 → bán'); if (v.rel < -35) r.push('kém S&P hơn 35% → bán'); return r.length ? '🔴 Nên bán: ' + r.join('; ') + '.' : '🟢 Chưa có quy tắc bán nào bị kích hoạt.'; });
+
+WIDGETS['zm-consensus-score'] = host => dlCalc(host, [{ id: 'sb', label: 'Strong buy (1)', v: 6 }, { id: 'b', label: 'Buy (2)', v: 3 }, { id: 'h', label: 'Hold (3)', v: 10 }, { id: 's', label: 'Sell (4)', v: 0 }, { id: 'ss', label: 'Strong sell (5)', v: 0 }],
+  v => { const n = v.sb + v.b + v.h + v.s + v.ss, t = v.sb + 2 * v.b + 3 * v.h + 4 * v.s + 5 * v.ss; return n ? 'Điểm đồng thuận: <b>' + cpF(t / n) + '</b> (' + n + ' nhà phân tích) — càng thấp càng tích cực.' : 'Nhập số khuyến nghị.'; });
+
+WIDGETS['zm-piggyback'] = host => dlCalc(host, [{ id: 'up', label: 'Lợi suất nhóm được nâng (%/năm)', v: 16.1 }, { id: 'dn', label: 'Lợi suất nhóm bị hạ (%/năm)', v: -1.5 }, { id: 'n', label: 'Số năm', v: 5, min: 1 }, { id: 'c', label: 'Vốn', v: 10000, step: 1000 }],
+  v => 'Nhóm được nâng: <b>' + cpF(v.c * Math.pow(1 + v.up / 100, v.n), 0) + '</b> · nhóm bị hạ: <b>' + cpF(v.c * Math.pow(1 + v.dn / 100, v.n), 0) + '</b><br>Chênh: ' + cpF(v.up - v.dn, 1) + ' điểm/năm (chưa trừ phí; quay vòng gần 9 lần/năm).');
+
+WIDGETS['zm-neglect'] = host => dlCalc(host, [{ id: 'n', label: 'Số nhà phân tích theo dõi', v: 2, min: 0 }, { id: 'ch', label: 'Thay đổi so với 3 tháng trước', v: 1 }],
+  v => (v.n <= 3 ? 'Ít nhà phân tích: <b>có thể bị bỏ rơi</b>. ' : v.n >= 20 ? 'Nhiều nhà phân tích: <b>được chú ý nhiều</b>. ' : 'Mức độ trung bình. ') + (v.ch > 0 ? '🟢 Độ phủ đang tăng.' : v.ch < 0 ? '🔴 Độ phủ giảm (có thể ngầm báo bán).' : 'Không đổi.'));
+
+WIDGETS['zm-ltg'] = host => dlCalc(host, [{ id: 'l', label: 'LTG đồng thuận (%/năm)', v: 25 }, { id: 'ch', label: 'LTG thay đổi trong tháng (điểm)', v: 1, step: 0.5 }],
+  v => (v.l > 30 ? '🔴 LTG > 30%: nên tránh (quá lạc quan, thị trường trả giá cao).' : v.l < 8 ? '🟡 LTG rất thấp: ít lợi thế.' : '🟢 LTG trong vùng hợp lý.') + '<br>' + (v.ch > 0 ? 'LTG vừa được nâng: tín hiệu tốt (12,9%/năm trong mẫu).' : v.ch < 0 ? 'LTG vừa bị hạ: tín hiệu xấu (5,9%/năm).' : 'Không đổi (9,4%/năm).'));
+
+WIDGETS['zm-peg'] = host => dlCalc(host, [{ id: 'p', label: 'Giá', v: 40 }, { id: 'e', label: 'Đồng thuận EPS năm tới', v: 2 }, { id: 'g', label: 'Tăng trưởng dài hạn (%)', v: 20 }],
+  v => { const pe = v.e ? v.p / v.e : NaN, peg = v.g ? pe / v.g : NaN; return 'Forward P/E: <b>' + cpF(pe, 1) + '</b> · PEG: <b>' + cpF(peg) + '</b><br>' + (pe > 65 ? '🔴 Forward P/E > 65: nên tránh.' : peg < 1 ? '🟢 PEG < 1: có vẻ rẻ so với tăng trưởng.' : peg < 2 ? '🟡 PEG vừa phải.' : '🟠 PEG cao.'); });
+
+WIDGETS['zm-uncertainty'] = host => { host.innerHTML = '<div class="row"><label>Ước tính EPS năm nay <input id="a" value="1.00, 1.05, 1.10, 1.02" style="width:200px"></label><label>Ước tính năm sau <input id="b" value="1.20, 1.50, 1.00, 1.40" style="width:200px"></label></div><div class="calc" id="o"></div>'; const sd = a => { const m = a.reduce((s, x) => s + x, 0) / a.length; return { m, s: Math.sqrt(a.reduce((s, x) => s + (x - m) ** 2, 0) / Math.max(1, a.length - 1)) }; }; const draw = () => { const a = zmList(host.querySelector('#a').value), b = zmList(host.querySelector('#b').value), o = host.querySelector('#o'); if (a.length < 2 || b.length < 2) { o.innerHTML = 'Nhập ít nhất 2 ước tính mỗi dòng.'; return; } const x = sd(a), y = sd(b), u = x.s / x.m + y.s / y.m; o.innerHTML = 'Năm nay: đồng thuận ' + cpF(x.m, 3) + ', σ ' + cpF(x.s, 3) + ' · Năm sau: ' + cpF(y.m, 3) + ', σ ' + cpF(y.s, 3) + '<br>Chỉ số bất định = <b>' + cpF(u, 3) + '</b> ' + (u < 0.15 ? '🟢 thấp' : u < 0.35 ? '🟡 vừa' : '🔴 cao: ước tính "rải khắp nơi"') + '.'; }; host.querySelectorAll('input').forEach(i => i.oninput = draw); draw(); };
+
+WIDGETS['zm-fed'] = host => dlCalc(host, [{ id: 'eps', label: 'EPS dự phóng của chỉ số', v: 52, step: 1 }, { id: 'y', label: 'Lợi suất Kho bạc 10 năm (%)', v: 4, step: 0.1 }, { id: 'idx', label: 'Mức chỉ số hiện tại', v: 800, step: 10 }],
+  v => { const fair = v.eps / (v.y / 100), over = (v.idx / fair - 1) * 100; return 'Giá trị hợp lý: <b>' + cpF(fair, 0) + '</b> · chỉ số: ' + cpF(v.idx, 0) + '<br>' + (over >= 0 ? 'Đắt hơn hợp lý <b>' + cpP(over) + '</b>' : 'Rẻ hơn hợp lý <b>' + cpP(-over) + '</b>') + '.'; });
+
+WIDGETS['zm-alloc'] = host => dlCalc(host, [{ id: 'o', label: 'Thị trường đắt (+) / rẻ (−) so với hợp lý (%)', v: -20, min: -60, max: 80 }],
+  v => { const x = v.o; const s = x > 30 ? 50 : x > 20 ? 60 : x > 10 ? 65 : x >= -10 ? 70 : x >= -20 ? 75 : 80; return 'Gợi ý (sách): <b>' + s + '% cổ phiếu / ' + (100 - s) + '% trái phiếu</b>.<br><i>Quy tắc minh họa của tác giả, không phải lời khuyên.</i>'; });
+
+WIDGETS['zm-final-checklist'] = host => dlCheck(host, [
+  ['Không dựa vào báo cáo của một nhà phân tích', 'Dùng đồng thuận và thay đổi.'],
+  ['Theo dõi điều chỉnh ước tính (>3% trong 30 ngày)', 'Chỉ mua công ty dự báo có lãi.'],
+  ['Kiểm tra chất lượng lợi nhuận và bất ngờ doanh thu', 'Bỏ qua nâng do kế toán.'],
+  ['Kiểm soát vòng quay và phí giao dịch', 'Dưới 2%/năm.'],
+  ['Có quy tắc bán rõ ràng và tái cân bằng định kỳ', 'Không bình quân giá xuống.'],
+  ['Kiểm chứng dữ liệu hiện hành, hiểu sách đã cũ', 'Không phải lời khuyên đầu tư.']
+], '✅ Bạn đã có quy trình kỷ luật theo logic của sách.');
+
+WIDGETS['zm-breakeven-fee'] = host => dlCalc(host, [{ id: 'ex', label: 'Lợi thế kỳ vọng so với thị trường (%/năm)', v: 5, step: 0.5 }, { id: 'to', label: 'Số lần quay vòng/năm', v: 6 }, { id: 'fee', label: 'Chi phí mỗi lượt mua–bán (%)', v: 0.6, step: 0.1 }, { id: 'fix', label: 'Phí cố định mỗi lệnh (USD)', v: 8 }, { id: 'pos', label: 'Số vị thế', v: 20, min: 1 }],
+  v => { const pctCost = v.to * v.fee * 2; const minCap = (v.to * v.pos * 2 * v.fix) / Math.max(0.0001, (v.ex - pctCost) / 100); return 'Chi phí theo % mỗi năm: <b>' + cpP(pctCost) + '</b>. ' + (pctCost >= v.ex ? '🔴 Chi phí đã ăn hết lợi thế.' : 'Vốn tối thiểu để phí cố định không vượt lợi thế còn lại: khoảng <b>' + cpF(minCap, 0) + ' USD</b>.'); });
+
+WIDGETS['zm-dow-strategy'] = host => dlCalc(host, [{ id: 'ex', label: 'Lợi thế mỗi năm so với Dow (%)', v: 4.5, step: 0.5 }, { id: 'dow', label: 'Lợi suất Dow (%/năm)', v: 8 }, { id: 'n', label: 'Số năm', v: 15, min: 1, max: 40 }, { id: 'c', label: 'Vốn', v: 10000, step: 1000 }],
+  v => 'Dow: <b>' + cpF(v.c * Math.pow(1 + v.dow / 100, v.n), 0) + '</b> · chiến lược: <b>' + cpF(v.c * Math.pow(1 + (v.dow + v.ex) / 100, v.n), 0) + '</b><br><i>Back-test của tác giả; có nguy cơ data mining.</i>');

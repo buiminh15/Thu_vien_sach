@@ -1964,7 +1964,94 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "zam",
+  "title": "Ahead of the Market",
+  "subtitle": "Phương pháp Zacks: phát hiện cổ phiếu sớm trong mọi nền kinh tế",
+  "author": "Mitch Zacks (HarperCollins, 2003)",
+  "cat": "Tài chính",
+  "tags": [
+    "Nhà phân tích",
+    "Ước tính lợi nhuận",
+    "Zacks Rank",
+    "Bất ngờ lợi nhuận",
+    "Định giá",
+    "Chọn cổ phiếu"
+  ],
+  "level": "Cơ bản → Trung cấp",
+  "emoji": "🔭",
+  "color": "#8b5cf6",
+  "desc": "13 chương tóm lược cách dùng nghiên cứu của nhà phân tích Phố Wall mà không bị thiên lệch: theo dõi điều chỉnh ước tính lợi nhuận, bất ngờ lợi nhuận, Zacks Rank, piggybacking khuyến nghị, cổ phiếu bị bỏ rơi, PEG/P/E, bất định lợi nhuận và mô hình Fed. Có máy tính tương tác. Lưu ý: sách 2003 của người bán dịch vụ dữ liệu; kết quả chưa tính phí, không phải lời khuyên đầu tư.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Những chủ đề chính",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Vì sao nhà phân tích thiên lệch",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Mổ xẻ báo cáo của nhà phân tích",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Tầm quan trọng của lợi nhuận và điều chỉnh ước tính",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Dùng ước tính lợi nhuận để chọn cổ phiếu",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Bất ngờ về lợi nhuận (earnings surprise)",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Dùng bất ngờ lợi nhuận trong quy trình đầu tư",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Tất cả hội tụ: Zacks Rank",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Áp dụng Zacks Rank hiệu quả",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Dùng khuyến nghị của nhà phân tích đúng cách",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Cổ phiếu bị bỏ rơi và ước tính tăng trưởng dài hạn",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Định giá, bất định lợi nhuận và mô hình Fed",
+      "ready": true
+    },
+    {
+      "n": 13,
+      "title": "Kết luận: tổng hợp bốn chiến lược chính",
+      "ready": true
+    }
+  ]
 }
 ];
+
 
 
