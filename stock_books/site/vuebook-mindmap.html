@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Fullstack Vue (bản tiếng Việt dễ hiểu)</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 💚 Fullstack Vue (bản tiếng Việt dễ hiểu)
+## 🧱 1. Ứng dụng Vue đầu tiên: UpVote!
+### 🧱 Instance, dữ liệu và binding
+### 🔁 Danh sách (v-for), key và sắp xếp (computed)
+### ⚡ Sự kiện và tính phản ứng (reactivity)
+### 🧩 Component và props
+### 📝 Tóm tắt
+- Instance có el, data, methods, computed, components.
+- {{ }} cho chữ; :thuộc-tính (v-bind) cho thuộc tính; @sự-kiện (v-on) cho sự kiện.
+- v-for + :key duy nhất; computed tự cập nhật theo dữ liệu.
+- Sửa dữ liệu → giao diện tự cập nhật (reactive).
+- Component chia nhỏ giao diện; props truyền dữ liệu từ cha xuống con.
+## 📄 2. Component một file (.vue) và cách xây app từ đầu
+### 📄 Single-file component (SFC)
+### 🛠 Môi trường phát triển (Vue CLI)
+### 🧭 Quy trình 4 bước dựng app (ví dụ lịch tuần)
+### 🗃 Chia sẻ dữ liệu giữa component
+### 📝 Tóm tắt
+- File .vue = template + script + style (scoped); cần công cụ build.
+- Dự án Vue CLI có main.js (điểm vào), public/index.html, package.json; ngày nay dùng Vite.
+- Quy trình: bản tĩnh → chia component → dữ liệu cứng → tương tác (qua store).
+- Cha→con: props; con→cha: $emit; chia sẻ rộng: store.
+- v-model hai chiều; v-if hiển thị có điều kiện.
+## 📣 3. Sự kiện tùy chỉnh và Event Bus
+### 📣 Con nhắn lên cha: $emit
+### 🚌 Event bus: một kênh chung cho mọi component
+### 📝 Tóm tắt
+- Props xuống, sự kiện lên: con $emit, cha @sự-kiện.
+- @keyup.enter lắng nghe đúng phím Enter.
+- Event bus: một Vue instance rỗng để mọi component phát/nghe sự kiện — dễ làm nhưng khó theo dõi.
+- App có nhiều trạng thái chung nên dùng Vuex/Pinia; Vue 3 đã bỏ $on.
+## 🔄 4. Vuex nhập môn: quản lý trạng thái kiểu Flux
+### 🔄 Flux: dòng dữ liệu một chiều
+### 🏬 Bốn mảnh của Vuex store
+### ⏪ Công cụ: Vue devtools và “time-travel”
+### 📝 Tóm tắt
+- Flux: một chiều view → action → mutation → state → view.
+- Vuex store gồm state, mutations (sửa duy nhất), actions (gọi mutation, được bất đồng bộ), getters (computed của store).
+- Component gọi dispatch và đọc qua getters/computed.
+- Devtools có time-travel; ngày nay dùng Pinia cho Vue 3.
+## 🌐 5. Vuex và máy chủ: giỏ hàng có lưu dữ liệu
+### 🌐 Giao tiếp với server
+### 🧩 Chia store thành module
+### 🔌 Nối store vào component
+### 📝 Tóm tắt
+- GET để đọc, POST để ghi; dữ liệu qua lại dạng JSON.
+- Server lưu bền vững, store giữ bản cho giao diện; ghi thì cập nhật cả hai.
+- CORS chặn gọi chéo nguồn; khi dev dùng proxy (/api → server).
+- Chia store thành module; dùng mapGetters/mapActions; tải dữ liệu ở created().
+## 🖱 6. Xử lý form: nhập liệu, kiểm tra hợp lệ, lưu bất đồng bộ
+### 🖱 Từ nút bấm đến ô nhập
+### ✅ Kiểm tra hợp lệ (validation)
+### 💾 Lưu bất đồng bộ: loading, saving, lỗi
+### 📝 Tóm tắt
+- @click="tênHàm" truyền hàm; event object cho biết phần tử nào bị tác động.
+- Ưu tiên v-model thay vì ref; gom nhiều ô vào object fields.
+- Kiểm tra từng ô bằng computed + v-if + :disabled; kiểm tra cả form khi submit.
+- Lưu bất đồng bộ: loading và saveStatus (READY/SAVING/SUCCESS/ERROR); chỉ cập nhật sau khi lưu thành công; luôn kiểm tra lại ở server.
+## 🧭 7. Routing: nhiều “trang” trong một ứng dụng một trang
+### 🧭 Routing là gì, SPA là gì
+### 🔧 Tự xây router để hiểu bản chất
+### 🛣 vue-router thật
+### 🔐 Đăng nhập, watcher và navigation guards
+### 📝 Tóm tắt
+- SPA: tải app một lần, router đổi component theo URL, không tải lại trang.
+- Router tự xây gồm router-view (component động + pathname) và router-link (pushState + chặn mặc định) + popstate cho Back/Forward.
+- vue-router: routes, history mode, redirect, /:id, props: true, $router.push, route 404.
+- Watcher theo dõi dữ liệu; guard beforeEach + meta.requiresAuth chặn trang cần đăng nhập — nhưng bảo mật thật ở server.
+## 🧪 8. Unit test cho component Vue
+### 🧪 Hai loại test và bộ công cụ
+### 🔬 vue-test-utils: mount, shallowMount, wrapper
+### 🧭 Test gì, theo thứ tự nào
+### 📝 Tóm tắt
+- E2E kiểm cả app như người dùng; unit test kiểm từng khối cô lập, nhanh và chính xác.
+- describe/it/expect; mount (đủ con) vs shallowMount (con giả, cô lập).
+- wrapper.find().trigger/setValue, wrapper.vm, setData; dựng wrapper mới trong beforeEach.
+- Test trạng thái ban đầu → hành vi người dùng → store (mock API). Vue 3: Vitest + test-utils v2, nhớ await.
+## 🗺 9. Vue 3 hiện đại: Composition API, Pinia, Vite (bổ sung ngoài sách)
+### 🗺 Bản đồ chuyển đổi Vue 2 → Vue 3
+### 🧩 Composition API trong 5 phút
+### 🍍 Pinia thay cho Vuex
+### 🧰 Hệ sinh thái hôm nay
+### 📝 Tóm tắt
+- Khái niệm cốt lõi (binding, v-for, computed, props/emit, store, router, test) giữ nguyên từ Vue 2 sang Vue 3.
+- Vue 3: createApp, <script setup>, ref/reactive/computed/watch, defineProps/defineEmits.
+- Pinia thay Vuex; Vue Router 4; Vite thay Vue CLI; Vitest cho test.
+- Viết mới bằng Vue 3; dùng sách để hiểu tư duy.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>

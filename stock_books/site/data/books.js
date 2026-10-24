@@ -202,7 +202,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "vuebook",
+    id: "vuebook", "mindmap": "vuebook-mindmap.html",
     title: "Fullstack Vue (bản tiếng Việt dễ hiểu)",
     subtitle: "Vue.js, Vuex, Router, Form, Unit test – kèm chương bổ sung Vue 3",
     author: "Hassan Djirdeh, Nate Murray, Ari Lerner (Fullstack.io, 2018) – biên soạn tiếng Việt",
