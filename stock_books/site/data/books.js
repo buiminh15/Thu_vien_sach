@@ -1689,7 +1689,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "crashp",
+  "id": "crashp", "mindmap": "crashp-mindmap.html",
   "title": "Crash Profits",
   "subtitle": "Kiếm tiền khi cổ phiếu sụp đổ và hồi phục",
   "author": "Martin D. Weiss (Wiley, 2003)",
