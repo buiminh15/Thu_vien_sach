@@ -1346,7 +1346,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "dlanh",
+  "id": "dlanh", "mindmap": "dlanh-mindmap.html",
   "title": "Dạy nghề sửa chữa tủ lạnh và máy điều hòa dân dụng",
   "subtitle": "Kiến thức cơ sở – cấu tạo – điện tự động – lắp đặt – gia công – sửa chữa",
   "author": "Nguyễn Đức Lợi – NXB Giáo dục, 2007",
