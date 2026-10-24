@@ -421,7 +421,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "ichimoku",
+    id: "ichimoku", "mindmap": "ichimoku-mindmap.html",
     title: "Giao dịch với Ichimoku",
     subtitle: "Trading with Ichimoku",
     author: "Karen Péloille",
