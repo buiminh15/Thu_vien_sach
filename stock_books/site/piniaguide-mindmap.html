@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Pinia – quản lý state cho Vue (tiếng Việt dễ hiểu)</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 🍍 Pinia – quản lý state cho Vue (tiếng Việt dễ hiểu)
+## 🧭 1. Pinia là gì, vì sao dùng và cài đặt
+### 🧭 Vấn đề: chia sẻ state giữa nhiều component
+### ⭐ Vì sao Pinia
+### 📦 Cài đặt
+### 🚀 Ví dụ đầu tiên: bộ đếm
+### 📝 Tóm tắt
+- Pinia là store chính thức của Vue: không có mutation, không cần module lồng, TypeScript tốt, có DevTools/HMR/SSR/plugin.
+- Cài: createPinia() + app.use(pinia); store = defineStore(id, ...); dùng bằng useXxxStore().
+- state = data, getters = computed, actions = methods.
+## 🏷️ 2. Định nghĩa store: Option store, Setup store, storeToRefs
+### 🏷️ defineStore và id
+### 📋 Option store
+### ⚙️ Setup store
+### ⚖️ Chọn kiểu nào?
+### 🔌 Dùng store trong component
+### 📝 Tóm tắt
+- defineStore(id, options | setupFn): id duy nhất; mỗi store một file.
+- Setup store: ref=state, computed=getter, function=action và phải return tất cả; Option store dễ học, có $reset().
+- Không destructure store trực tiếp; dùng storeToRefs() cho state/getters, action destructure được.
+## 🧱 3. State: đọc, ghi, $patch, $reset và $subscribe
+### 🧱 Khai báo state
+### ✍️ Đọc và ghi
+### ♻️ Đặt lại (reset)
+### 📡 Theo dõi state: $subscribe
+### 🧩 Dùng state với Options API (map helpers)
+### 📝 Tóm tắt
+- State là hàm trả về giá trị ban đầu; khai báo đủ thuộc tính; đọc/ghi trực tiếp.
+- $patch gom nhiều thay đổi (object hoặc hàm), $reset (có sẵn ở Option store), $subscribe theo dõi và chạy một lần sau patch.
+- Không thay cả $state; dùng $patch; Options API có mapState/mapWritableState/mapStores.
+## 🧮 4. Getters: giá trị dẫn xuất của store
+### 🧮 Getter cơ bản
+### 🎯 Getter nhận tham số
+### 🤝 Dùng getter của store khác
+### 📝 Tóm tắt
+- Getter = computed của store: nhận state, dùng this để gọi getter khác (TS cần ghi kiểu trả về).
+- Getter trả về hàm để nhận tham số nhưng mất cache.
+- Dùng store khác ngay trong getter bằng useOtherStore().
+## ⚡ 5. Actions: logic nghiệp vụ và theo dõi action
+### ⚡ Định nghĩa và gọi action
+### 🔗 Gọi action của store khác
+### 🧩 Dùng action với Options API
+### 👂 Theo dõi action: $onAction
+### 📝 Tóm tắt
+- Action = methods: async được, có tác dụng phụ, gọi store/action khác; đặt logic nghiệp vụ ở đây.
+- Trong SSR, gọi useStore() trước mọi await trong action.
+- $onAction nghe trước/sau/lỗi của mọi action (log, đo, giám sát).
+## 🏠 6. Store ngoài component, ghép store và dùng composable
+### 🏠 Dùng store ngoài component
+### 🧱 Ghép store (composing stores)
+### 🧰 Dùng composable trong store
+### 📝 Tóm tắt
+- SPA: gọi useStore() sau app.use(pinia) (trong hàm chạy muộn); SSR: truyền pinia vào useStore(pinia).
+- Ghép store: gọi useOther() ở đầu Setup store hoặc trong getter/action; đừng tạo vòng lặp đọc state lẫn nhau lúc khởi tạo.
+- Composable: Option store chỉ dùng loại trả state ghi được; Setup store dùng gần như mọi composable.
+## 🔌 7. Plugins: mở rộng mọi store
+### 🔌 Plugin là gì và cách cài
+### 🧾 Context của plugin
+### ➕ Thêm thuộc tính cho store
+### 💾 Ví dụ thực tế: lưu state vào localStorage
+### 🧩 Thêm option riêng và bọc action
+### 📝 Tóm tắt
+- Plugin: hàm nhận { pinia, app, store, options } và return thuộc tính để thêm vào mọi store; cài bằng pinia.use().
+- Chỉ áp cho store tạo sau khi cài plugin và sau app.use(pinia); state thêm mới phải đặt ở store và store.$state.
+- Dùng cho: localStorage, router/toast toàn cục, debounce action, logging; áp riêng bằng option tùy biến.
+## ⚠️ 8. SSR và Nuxt
+### ⚠️ Vì sao SSR cần cẩn thận
+### 📤 Dùng store ngoài setup() trong SSR
+### 💧 Hydrate state
+### 🟢 Nuxt: làm hộ gần hết
+### 📝 Tóm tắt
+- SSR: mỗi request cần pinia riêng; gọi useStore() ở đầu setup/getters/actions; ngoài setup truyền pinia.
+- Hydrate: serialize pinia.state.value ở server, gán lại ở client (Nuxt làm hộ).
+- @pinia/nuxt: module + auto-import + store trong stores/; callOnce để gọi action một lần.
+## 🧪 9. Testing, HMR và chuyển từ Vuex
+### 🧪 Unit test một store
+### 🧱 Test component dùng store
+### ♨️ Hot Module Replacement (HMR)
+### 🔄 Chuyển từ Vuex sang Pinia
+### 📝 Tóm tắt
+- Test store: setActivePinia(createPinia()) mỗi test; test component: createTestingPinia (stubActions mặc định true, initialState, createSpy).
+- HMR: acceptHMRUpdate(useStore, import.meta.hot) ở mỗi file store.
+- Vuex → Pinia: module → store, bỏ mutations (gộp vào actions), state là hàm, dùng useStore() / map helpers.
+## 🗺️ 10. Bản đồ tra cứu và lời khuyên tổng kết
+### 🗺️ Tình huống → công cụ
+### 🔎 Tra cứu từ khóa
+### 🧭 Lời khuyên tổng kết
+### 📝 Tóm tắt
+- Chọn công cụ theo vai trò: state (dữ liệu), getters (dẫn xuất), actions (logic/async), $patch/$subscribe/$onAction, plugin, createTestingPinia.
+- Store cho dữ liệu chia sẻ; mỗi miền một store; không destructure store.
+- SSR/Nuxt: pinia riêng cho mỗi request; test và HMR giúp phát triển nhanh và an toàn.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>

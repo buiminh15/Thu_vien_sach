@@ -99,7 +99,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "piniaguide",
+    id: "piniaguide", "mindmap": "piniaguide-mindmap.html",
     title: "Pinia – quản lý state cho Vue (tiếng Việt dễ hiểu)",
     subtitle: "Core Concepts, Plugins, SSR/Nuxt, Testing (pinia.vuejs.org)",
     author: "Biên soạn tiếng Việt từ tài liệu chính thức Pinia",
