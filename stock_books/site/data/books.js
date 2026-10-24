@@ -2050,8 +2050,100 @@ window.BOOKS = [
       "ready": true
     }
   ]
+},
+{
+  "id": "dtb",
+  "title": "The Day Trader's Bible",
+  "subtitle": "Bí quyết giao dịch trong ngày của Wyckoff (1919)",
+  "author": "Richard D. Wyckoff (1919; bản biên tập ePublishingETC)",
+  "cat": "Tài chính",
+  "tags": [
+    "Giao dịch trong ngày",
+    "Đọc băng",
+    "Wyckoff",
+    "Khối lượng",
+    "Lệnh dừng",
+    "Tích lũy – phân phối"
+  ],
+  "level": "Cơ bản → Trung cấp",
+  "emoji": "📟",
+  "color": "#16a34a",
+  "desc": "14 chương tóm lược cuốn sách kinh điển về đọc băng giá: phẩm chất người giao dịch, chọn cổ phiếu, chi phí và lệnh dừng, khối lượng, nhận diện tích lũy–phân phối, thị trường trầm lắng, biểu đồ, kỷ luật vào–ra. Có máy tính tương tác và câu hỏi. Lưu ý: bối cảnh thị trường 1919; giao dịch trong ngày rủi ro cao, không phải lời khuyên đầu tư.",
+  "chapters": [
+    {
+      "n": 1,
+      "title": "Giới thiệu: đọc băng giá (tape reading)",
+      "ready": true
+    },
+    {
+      "n": 2,
+      "title": "Bắt đầu học đọc băng",
+      "ready": true
+    },
+    {
+      "n": 3,
+      "title": "Phân tích danh sách cổ phiếu và các nhóm",
+      "ready": true
+    },
+    {
+      "n": 4,
+      "title": "Quy tắc giao dịch",
+      "ready": true
+    },
+    {
+      "n": 5,
+      "title": "Khối lượng và ý nghĩa của chúng",
+      "ready": true
+    },
+    {
+      "n": 6,
+      "title": "Kỹ thuật thị trường",
+      "ready": true
+    },
+    {
+      "n": 7,
+      "title": "Thị trường trầm lắng và cơ hội của nó",
+      "ready": true
+    },
+    {
+      "n": 8,
+      "title": "Dùng biểu đồ làm kim chỉ nam",
+      "ready": true
+    },
+    {
+      "n": 9,
+      "title": "Giao dịch trong ngày và giao dịch dài hạn",
+      "ready": true
+    },
+    {
+      "n": 10,
+      "title": "Các ví dụ và gợi ý khác",
+      "ready": true
+    },
+    {
+      "n": 11,
+      "title": "Những trở ngại và lợi nhuận tiềm năng",
+      "ready": true
+    },
+    {
+      "n": 12,
+      "title": "Đóng giao dịch (quan trọng như mở giao dịch)",
+      "ready": true
+    },
+    {
+      "n": 13,
+      "title": "Hai ngày giao dịch: ví dụ áp dụng phương pháp",
+      "ready": true
+    },
+    {
+      "n": 14,
+      "title": "Áp dụng các nguyên tắc cho giao dịch dài hạn hơn",
+      "ready": true
+    }
+  ]
 }
 ];
+
 
 
 

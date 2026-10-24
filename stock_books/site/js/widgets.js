@@ -3347,3 +3347,109 @@ WIDGETS['zm-breakeven-fee'] = host => dlCalc(host, [{ id: 'ex', label: 'Lợi th
 
 WIDGETS['zm-dow-strategy'] = host => dlCalc(host, [{ id: 'ex', label: 'Lợi thế mỗi năm so với Dow (%)', v: 4.5, step: 0.5 }, { id: 'dow', label: 'Lợi suất Dow (%/năm)', v: 8 }, { id: 'n', label: 'Số năm', v: 15, min: 1, max: 40 }, { id: 'c', label: 'Vốn', v: 10000, step: 1000 }],
   v => 'Dow: <b>' + cpF(v.c * Math.pow(1 + v.dow / 100, v.n), 0) + '</b> · chiến lược: <b>' + cpF(v.c * Math.pow(1 + (v.dow + v.ex) / 100, v.n), 0) + '</b><br><i>Back-test của tác giả; có nguy cơ data mining.</i>');
+// ===== The Day Trader's Bible (dt-*) — dùng cpF, cpP, cpScore từ w-cp =====
+WIDGETS['dt-trader-qual'] = host => cpScore(host, [
+  'Tôi tự quyết định, không đổi ý theo lời khuyên của người khác', 'Tôi kiểm soát được sợ hãi, tham lam và hấp tấp', 'Tôi chịu được một chuỗi lỗ mà không bỏ cuộc', 'Tôi biết cách tay to tích lũy và phân phối cổ phiếu', 'Tôi giao dịch ở nơi yên tĩnh, không bị tin đồn chi phối', 'Tôi biết rõ khi nào cắt lỗ và khi nào chốt lời'
+], [[0, '🔴 Chưa sẵn sàng: bắt đầu bằng học và giao dịch giấy.'], [3, '🟡 Có nền tảng: cần luyện thêm kỷ luật.'], [5, '🟢 Phẩm chất tốt theo tiêu chí của Wyckoff — vẫn phải thử với lô rất nhỏ.']], 'Đánh dấu điều đúng với bạn:');
+
+WIDGETS['dt-lot-risk'] = host => dlCalc(host, [{ id: 'sh', label: 'Số cổ phiếu', v: 100, step: 10 }, { id: 'pt', label: 'Điểm sai (điểm giá)', v: 2, step: 0.25 }, { id: 'cap', label: 'Vốn', v: 10000, step: 500 }],
+  v => { const loss = v.sh * v.pt; return 'Lỗ nếu sai: <b>' + cpF(loss, 0) + '</b> = <b>' + cpP(v.cap ? loss / v.cap * 100 : 0) + '</b> vốn.<br>' + (loss / v.cap > 0.02 ? '🔴 Vượt 2% vốn/giao dịch (mức thận trọng thường dùng).' : '✅ Trong tầm kiểm soát.'); });
+
+WIDGETS['dt-points'] = host => dlCalc(host, [{ id: 'p', label: 'Giá cổ phiếu', v: 150 }, { id: 'sh', label: 'Số cổ phiếu', v: 100 }],
+  v => { const avg = v.p >= 150 ? 2.5 : v.p <= 50 ? 1 : 1 + (v.p - 50) / 100 * 1.5; return 'Dao động trung bình ngày ước tính: <b>' + cpF(avg, 2) + ' điểm</b> (theo sách: ~2,5 điểm ở 150 USD, ~1 điểm ở 50 USD).<br>Lãi tiềm năng/ngày với ' + v.sh + ' cp: <b>' + cpF(avg * v.sh, 0) + ' USD</b>.'; });
+
+WIDGETS['dt-leader'] = host => dlDiag(host, [
+  ['Dẫn đầu tăng mạnh, các cổ phiếu khác bị bán nặng', ['Phân phối dưới sự che chở của sức mạnh dẫn đầu'], 'Thận trọng: có thể gần đỉnh; chờ dẫn đầu ngừng tăng.'],
+  ['Dẫn đầu tăng, mọi cổ phiếu khác cùng tăng', ['Thị trường khỏe, đồng thuận'], 'Đi theo xu hướng.'],
+  ['Cổ phiếu thứ cấp bắt đầu tăng mạnh', ['Dẫn đầu sắp hết đà'], 'Cẩn trọng với vị thế mua ở dẫn đầu.'],
+  ['Cổ phiếu nhỏ bùng nổ riêng lẻ', ['Có thể chỉ là chuyện nội bộ cổ phiếu đó'], 'Không suy ra cả nhóm tăng.']
+], 'Tình huống');
+
+WIDGETS['dt-groups'] = host => dlDiag(host, [
+  ['Cả nhóm cổ phiếu cùng tăng đều và bền', ['Có chiến dịch của người nắm nhóm'], 'Đi cùng cho đến khi có phân phối.'],
+  ['Một cổ phiếu trong nhóm dẫn tăng, các cổ phiếu khác chỉ nhích', ['Chỉ chuyện riêng cổ phiếu'], 'Không suy ra cả nhóm.'],
+  ['Steel mạnh trước tin xấu', ['Công chúng giữ vững'], 'Tâm lý tốt.'],
+  ['Steel yếu bất thường', ['Vị thế công chúng yếu'], 'Cẩn trọng.']
+], 'Quan sát');
+
+WIDGETS['dt-cost'] = host => dlCalc(host, [{ id: 'sh', label: 'Số cổ phiếu', v: 100 }, { id: 'com', label: 'Hoa hồng mỗi chiều (USD)', v: 12.5 }, { id: 'spr', label: 'Chênh lệch mua–bán (điểm)', v: 0.125, step: 0.01 }, { id: 'tax', label: 'Thuế/phí khác mỗi vòng (USD)', v: 2 }],
+  v => { const total = v.com * 2 + v.spr * v.sh + v.tax; return 'Chi phí 1 vòng: <b>' + cpF(total) + ' USD</b> = <b>' + cpF(total / v.sh, 3) + ' điểm</b>.<br>Cần giá đi đúng ít nhất ' + cpF(total / v.sh, 3) + ' điểm mới hòa vốn; lỗ phí ở giao dịch đầu cần lãi gấp đôi.'; });
+
+WIDGETS['dt-stop'] = host => dlCalc(host, [{ id: 'e', label: 'Giá vào', v: 100 }, { id: 'st', label: 'Giá dừng', v: 98 }, { id: 'tg', label: 'Giá mục tiêu', v: 104 }, { id: 'sh', label: 'Số cổ phiếu', v: 100 }],
+  v => { const risk = Math.abs(v.e - v.st) * v.sh, rew = Math.abs(v.tg - v.e) * v.sh; return 'Rủi ro tối đa: <b>' + cpF(risk, 0) + '</b> · Lãi mục tiêu: <b>' + cpF(rew, 0) + '</b> · tỷ lệ lãi/lỗ: <b>' + cpF(risk ? rew / risk : 0, 2) + '</b><br>' + (Math.abs(v.e - v.st) > 2 ? '🟠 Lỗ vượt ~2 điểm: lớn hơn mức quen dùng trong sách.' : '✅ Dừng trong ~2 điểm.'); });
+
+WIDGETS['dt-shorting'] = host => dlCalc(host, [{ id: 'e', label: 'Giá bán khống', v: 143.75 }, { id: 'st', label: 'Giá dừng (mua lại)', v: 144.5 }, { id: 'tg', label: 'Giá mục tiêu', v: 139 }, { id: 'sh', label: 'Số cổ phiếu', v: 100 }],
+  v => { const r = (v.st - v.e) * v.sh, g = (v.e - v.tg) * v.sh; return 'Rủi ro: <b>' + cpF(r, 0) + '</b> · Mục tiêu: <b>' + cpF(g, 0) + '</b> · tỷ lệ: <b>' + cpF(r ? g / r : 0, 1) + '</b><br>Chưa tính hoa hồng, chênh lệch giá và phí vay cổ phiếu.'; });
+
+WIDGETS['dt-volume-scale'] = host => dlCalc(host, [{ id: 'b', label: 'Cổ phiếu mua ở giá cao', v: 2500, step: 100 }, { id: 's', label: 'Cổ phiếu bán ở giá thấp', v: 700, step: 100 }],
+  v => { const r = v.s ? v.b / v.s : NaN; return 'Tỷ lệ mua/bán: <b>' + cpF(r, 2) + '</b><br>' + (r > 1.5 ? '🟢 Mua chiếm ưu thế.' : r < 0.67 ? '🔴 Bán chiếm ưu thế.' : '🟡 Tương đối cân bằng.'); });
+
+WIDGETS['dt-gap'] = host => dlCalc(host, [{ id: 'g', label: 'Khoảng nhảy giữa hai giao dịch liên tiếp (phân số)', v: 2, min: 0, step: 1 }, { id: 'dir', label: 'Hướng', v: 'up', opts: [['up', 'Lên'], ['down', 'Xuống']] }],
+  v => v.g >= 2 ? (v.dir === 'up' ? '🟢 Bên mua chủ động "với tới" mua: áp lực mua kiên trì.' : '🔴 Bên bán chủ động hạ giá: thiếu hỗ trợ.') : '🟡 Khoảng nhỏ: chưa rõ bên nào chủ động.');
+
+WIDGETS['dt-wyckoff-phase'] = host => dlCalc(host, [{ id: 'trend', label: 'Giá', v: 'side', opts: [['side', 'Đi ngang'], ['up', 'Đang tăng'], ['down', 'Đang giảm']] }, { id: 'vol', label: 'Khối lượng', v: 'big', opts: [['big', 'Lớn ở mức giá thấp'], ['bigh', 'Lớn ở mức giá cao'], ['small', 'Nhỏ']] }],
+  v => v.trend === 'side' && v.vol === 'big' ? '🟢 Có thể là <b>tích lũy</b> (gom hàng ở vùng thấp).' : v.trend === 'side' && v.vol === 'bigh' ? '🔴 Có thể là <b>phân phối</b> (bán dần ở vùng cao).' : v.trend === 'up' ? 'Đang trong giai đoạn <b>đẩy giá</b>; theo dõi dấu hiệu phân phối.' : v.trend === 'down' ? 'Đang <b>hạ giá</b>; chờ dấu hiệu tích lũy.' : 'Đi ngang, khối lượng nhỏ: <b>chết lặng</b>.');
+
+WIDGETS['dt-retrace'] = host => dlCalc(host, [{ id: 'up', label: 'Đợt tăng (điểm)', v: 84.25 }, { id: 'dn', label: 'Đợt giảm sau đó (điểm)', v: 12.375 }],
+  v => 'Giảm bằng <b>' + cpP(v.up ? v.dn / v.up * 100 : 0) + '</b> mức tăng. ' + (v.dn / v.up < 0.2 ? 'Rất khỏe về kỹ thuật.' : v.dn / v.up < 0.4 ? 'Khá khỏe.' : 'Yếu: bị bán nặng.'));
+
+WIDGETS['dt-rebound'] = host => dlCalc(host, [{ id: 'top', label: 'Đỉnh', v: 99.625 }, { id: 'low', label: 'Đáy', v: 78 }],
+  v => { const dec = v.top - v.low; return 'Giảm: <b>' + cpF(dec, 2) + '</b> điểm · hồi nửa nhịp kỳ vọng: <b>' + cpF(dec / 2, 2) + '</b> → mục tiêu <b>' + cpF(v.low + dec / 2, 2) + '</b>.<br>(Ví dụ American Smelters: hồi thực tế đến 89⅜.)'; });
+
+WIDGETS['dt-dull-signal'] = host => cpScore(host, [
+  'Hồi nhưng không giữ được', 'Không phản ứng với tin tốt', 'Giảm khi có tin xấu nhỏ', 'Các đợt tấn công bán không thu được nhiều cổ phiếu', 'Giá cứng dần ở vùng cao'
+], [[0, 'Chọn các dấu hiệu bạn quan sát được.'], [1, 'Hãy so số dấu hiệu yếu (3 đầu) và mạnh (2 cuối) để định hướng.']], 'Dấu hiệu thị trường lặng:');
+
+WIDGETS['dt-double-stop'] = host => dlCalc(host, [{ id: 'sh', label: 'Số cổ phiếu bán khống', v: 100 }, { id: 'e', label: 'Giá bán khống', v: 181.25 }, { id: 'st', label: 'Giá dừng đôi', v: 181.625 }],
+  v => 'Lệnh: mua <b>' + (2 * v.sh) + '</b> cổ phiếu ở ' + cpF(v.st, 3) + ' (đóng ' + v.sh + ' khống + mở ' + v.sh + ' mua).<br>Lỗ nếu dừng: <b>' + cpF((v.st - v.e) * v.sh, 0) + ' USD</b> chưa tính phí; nếu giá bật ngược thì có thể bị quét hai lần.');
+
+WIDGETS['dt-pyramid'] = host => dlCalc(host, [{ id: 'p1', label: 'Giá mua 1', v: 44 }, { id: 'p2', label: 'Giá mua 2', v: 45 }, { id: 'p3', label: 'Giá mua 3', v: 46 }, { id: 'sh', label: 'Cổ phiếu mỗi lần', v: 100 }, { id: 'ex', label: 'Giá bán', v: 46.625, step: 0.125 }],
+  v => { const avg = (v.p1 + v.p2 + v.p3) / 3, pl = (v.ex - avg) * v.sh * 3; return 'Giá vốn trung bình: <b>' + cpF(avg, 3) + '</b><br>Lãi: <b>' + cpF(pl, 2) + ' USD</b> (chưa tính phí; sách nêu 406,50 USD).'; });
+
+WIDGETS['dt-trend-read'] = host => { host.innerHTML = '<div class="row"><label>Chuỗi giá đỉnh/đáy (cách nhau dấu phẩy) <input id="s" value="100, 102, 101, 104, 103, 106" style="width:260px"></label></div><div class="calc" id="o"></div>'; const draw = () => { const a = host.querySelector('#s').value.split(/[,;\s]+/).filter(Boolean).map(Number).filter(isFinite), o = host.querySelector('#o'); if (a.length < 4) { o.innerHTML = 'Nhập ít nhất 4 giá trị.'; return; } const hi = a.filter((x, i) => i % 2 === 1), lo = a.filter((x, i) => i % 2 === 0); const inc = arr => arr.every((x, i) => i === 0 || x > arr[i - 1]), dec = arr => arr.every((x, i) => i === 0 || x < arr[i - 1]); o.innerHTML = inc(hi) && inc(lo) ? '🟢 Đỉnh và đáy cao dần: xu hướng tăng.' : dec(hi) && dec(lo) ? '🔴 Đỉnh và đáy thấp dần: xu hướng giảm.' : '🟡 Không rõ xu hướng hoặc kháng cự.'; }; host.querySelector('#s').oninput = draw; draw(); };
+
+WIDGETS['dt-chart-vs-tape'] = host => dlDiag(host, [
+  ['Muốn biết hướng nhịp lớn sắp tới', ['Biểu đồ hình số hiển thị tích lũy/phân phối'], 'Dùng biểu đồ làm kim chỉ nam.'],
+  ['Muốn biết thời điểm vào lệnh', ['Băng giá thể hiện hiện tại'], 'Dùng băng giá.'],
+  ['Chỉ nhìn biểu đồ một cổ phiếu', ['Bị các cổ phiếu khác chi phối'], 'Dễ bị đánh lừa.']
+], 'Mục đích');
+
+WIDGETS['dt-absorb'] = host => dlCalc(host, [{ id: 'dem', label: 'Cầu (cổ phiếu/phút)', v: 5000, step: 500 }, { id: 'sup', label: 'Cung (cổ phiếu/phút)', v: 3000, step: 500 }],
+  v => v.dem > v.sup * 1.2 ? '🟢 Cầu hấp thụ cung: giá có xu hướng nhảy lên.' : v.sup > v.dem * 1.2 ? '🔴 Cung vượt cầu: giá chững rồi giảm (phân phối).' : '🟡 Cung cầu cân bằng: thị trường chững lại.');
+
+WIDGETS['dt-flip'] = host => dlCalc(host, [{ id: 'a', label: 'Lãi/lỗ giao dịch 1 (điểm)', v: -0.625, step: 0.125 }, { id: 'b', label: 'Giao dịch 2', v: 2.0, step: 0.125 }, { id: 'c', label: 'Giao dịch 3', v: -0.25, step: 0.125 }, { id: 'sh', label: 'Số cổ phiếu', v: 100 }],
+  v => { const t = v.a + v.b + v.c; return 'Tổng: <b>' + cpF(t, 3) + ' điểm</b> = <b>' + cpF(t * v.sh, 0) + ' USD</b> (chưa tính phí). ' + (t > 0 ? 'Đổi vị thế nhanh cho kết quả dương.' : 'Âm: đổi vị thế chưa đủ nhanh.'); });
+
+WIDGETS['dt-scale-up'] = host => dlCalc(host, [{ id: 'sh', label: 'Lô ban đầu', v: 100, step: 100 }, { id: 'avg', label: 'Lãi trung bình/ngày (điểm)', v: 0.25, step: 0.05 }, { id: 'step', label: 'Vốn thêm để tăng một bậc', v: 1500, step: 100 }],
+  v => { const day = v.sh * v.avg, days = day ? v.step / day : NaN; return 'Lãi/ngày: <b>' + cpF(day) + ' USD</b>; cần <b>' + cpF(days, 0) + ' ngày</b> để thêm ' + cpF(v.step, 0) + ' vốn và nâng lô.<br>Giả định lãi đều, không chuỗi lỗ.'; });
+
+WIDGETS['dt-churn'] = host => dlCalc(host, [{ id: 'vol', label: 'Khối lượng trong biên độ nhỏ (cổ phiếu)', v: 80000, step: 5000 }, { id: 'rng', label: 'Biên độ giá (điểm)', v: 0.5, step: 0.1 }, { id: 'avg', label: 'Khối lượng thường ngày', v: 20000, step: 5000 }],
+  v => { const x = v.avg ? v.vol / v.avg : NaN; return 'Khối lượng gấp <b>' + cpF(x, 1) + '</b> lần bình thường trong biên độ ' + cpF(v.rng) + ' điểm.<br>' + (x > 3 && v.rng < 1 ? '🔴 Dấu hiệu thao túng/phân phối: cẩn trọng.' : '🟡 Chưa bất thường.'); });
+
+WIDGETS['dt-crowd'] = host => dlCalc(host, [{ id: 'swing', label: 'Dao động ngày (điểm)', v: 8 }, { id: 'lag', label: 'Độ trễ băng giá (giây)', v: 30 }],
+  v => (v.swing >= 6 ? 'Dao động lớn: nhiều cơ hội nhưng ' : 'Dao động nhỏ: ít cơ hội, ') + (v.lag > 20 ? '<b>băng chậm → trượt giá lớn</b> (thị trường đông công chúng).' : 'khớp lệnh tương đối nhanh.'));
+
+WIDGETS['dt-compound'] = host => dlCalc(host, [{ id: 'sh', label: 'Lô ban đầu', v: 100, step: 100 }, { id: 'pt', label: 'Lãi mỗi 100 cp/ngày (USD)', v: 12.5, step: 0.5 }, { id: 'cap', label: 'Vốn để tăng 100 cp thêm', v: 1000, step: 100 }, { id: 'days', label: 'Số ngày', v: 250, step: 10 }, { id: 'cost', label: 'Chi phí (% lãi gộp)', v: 16 }],
+  v => { let sh = v.sh, acc = 0, total = 0; for (let d = 0; d < v.days; d++) { const g = v.pt * sh / 100; total += g; acc += g; while (acc >= v.cap) { acc -= v.cap; sh += 100; } } return 'Lô cuối kỳ: <b>' + cpF(sh, 0) + '</b>; lãi gộp: <b>' + cpF(total, 0) + '</b>; sau chi phí: <b>' + cpF(total * (1 - v.cost / 100), 0) + '</b>.<br><i>Giả định lãi đều mọi ngày — không thực tế.</i>'; });
+
+WIDGETS['dt-risk-1'] = host => dlCalc(host, [{ id: 'cap', label: 'Vốn', v: 10000, step: 500 }, { id: 'rk', label: 'Rủi ro mỗi giao dịch (USD)', v: 50 }, { id: 'lim', label: 'Mức sụt giảm vốn chịu được (%)', v: 10 }],
+  v => { const n = v.rk ? Math.floor(v.cap * v.lim / 100 / v.rk) : 0; return 'Chịu được <b>' + n + '</b> lần lỗ liên tiếp trước khi mất ' + cpP(v.lim) + ' vốn.<br>Mỗi giao dịch rủi ro ' + cpP(v.cap ? v.rk / v.cap * 100 : 0) + ' vốn.'; });
+
+WIDGETS['dt-exit-signal'] = host => cpScore(host, [
+  'Giá vừa tăng nhanh đến mức cản/đỉnh trước', 'Có một lệnh bid khối lượng lớn "ồn ào" như mồi nhử', 'Khối lượng bùng nổ nhưng giá không tăng thêm', 'Cổ phiếu khác trong nhóm không theo kịp', 'Đã đạt mục tiêu ban đầu của nhịp'
+], [[0, '🟢 Chưa có dấu hiệu kết thúc.'], [2, '🟡 Xem xét thu hẹp lệnh dừng hoặc chốt một phần.'], [4, '🔴 Nhiều dấu hiệu kết thúc nhịp: cân nhắc thoát.']], 'Dấu hiệu đạt đỉnh:');
+
+WIDGETS['dt-streak'] = host => dlCalc(host, [{ id: 'wr', label: 'Tỷ lệ thắng (%)', v: 50, max: 100 }, { id: 'n', label: 'Số lỗ liên tiếp muốn kiểm tra', v: 5, min: 1, max: 20 }],
+  v => { const p = Math.pow(1 - v.wr / 100, v.n); return 'Xác suất <b>' + v.n + ' lỗ liên tiếp</b> ở một giao dịch bất kỳ: <b>' + cpP(p * 100) + '</b>. Trong 100 giao dịch, gặp ít nhất một chuỗi như vậy khá thường xuyên: chuẩn bị tinh thần.'; });
+
+WIDGETS['dt-winrate'] = host => dlCalc(host, [{ id: 'w', label: 'Số thắng', v: 13 }, { id: 'l', label: 'Số thua', v: 1 }, { id: 'aw', label: 'Lãi trung bình/thắng (USD)', v: 20 }, { id: 'al', label: 'Lỗ trung bình/thua (USD)', v: 25 }, { id: 'cost', label: 'Chi phí/giao dịch (USD)', v: 5 }],
+  v => { const n = v.w + v.l; const ev = n ? (v.w * v.aw - v.l * v.al) / n - v.cost : 0; return 'Tỷ lệ thắng: <b>' + cpP(n ? v.w / n * 100 : 0) + '</b><br>Kỳ vọng mỗi giao dịch (sau chi phí): <b>' + cpF(ev) + ' USD</b>.'; });
+
+WIDGETS['dt-prep-phase'] = host => dlCalc(host, [{ id: 'm', label: 'Thời gian chuẩn bị (tháng)', v: 4, min: 0 }, { id: 'f', label: 'Tỷ lệ biên độ/tháng chuẩn bị (điểm)', v: 4 }],
+  v => 'Biên độ nhịp tiếp theo (minh họa): khoảng <b>' + cpF(v.m * v.f, 0) + ' điểm</b>.<br>Nguyên tắc sách: chuẩn bị càng lâu, nhịp càng lớn — con số này chỉ minh họa.');
+
+WIDGETS['dt-timeframe'] = host => dlDiag(host, [
+  ['Vài phút đến vài giờ', ['Giao dịch trong ngày', 'Chi phí và trượt giá quan trọng'], 'Đòi hỏi tập trung cao; rủi ro cao.'],
+  ['Vài ngày đến vài tuần', ['Dao động 5–20 điểm', 'Ít bị ràng buộc màn hình'], 'Wyckoff thấy "thoải mái" hơn.'],
+  ['Vài tháng đến vài năm', ['Theo chu kỳ chuẩn bị lớn'], 'Phù hợp nhà đầu tư kiên nhẫn.']
+], 'Khung thời gian');
