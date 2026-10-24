@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Next.js (App Router)</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# ▲ Next.js (App Router)
+## 🧭 1. Giới thiệu và cài đặt
+### 🧭 Next.js là gì? App Router và Pages Router
+### ⚡ Tạo dự án nhanh
+### 🛠️ Cài đặt thủ công
+### 🔧 TypeScript, editor và alias import
+### 📝 Tóm tắt
+- Next.js = React + routing + render server + tối ưu hoá; có App Router (app/) và Pages Router (pages/).
+- create-next-app --yes: TypeScript, Tailwind, ESLint, App Router, Turbopack, alias @/*; Node ≥ 20.9.
+- Root layout bắt buộc có html và body; page.tsx tạo route; public/ chứa file tĩnh.
+- Từ Next.js 16, next build không chạy lint; Turbopack là bundler mặc định.
+## 📁 2. Cấu trúc dự án và routing theo file
+### 📁 Thư mục và file cấp cao nhất
+### 📄 File đặc biệt của routing
+### 🔀 Route động, group và private folder
+### 🗂️ Chiến lược tổ chức dự án
+### 📝 Tóm tắt
+- Thư mục = segment URL; file page/route làm route công khai.
+- Hierarchy: layout → template → error → loading → not-found → page.
+- [x] một tham số, [...x] catch-all, [[...x]] optional catch-all.
+- (group) không vào URL; _private bị loại khỏi routing; @slot và (.) cho parallel/intercepting route.
+- Colocation an toàn vì chỉ nội dung của page/route được gửi đi.
+## 📄 3. Layouts, Pages và điều hướng
+### 📄 Page, layout và route lồng nhau
+### 🔗 Link và điều hướng
+### 📝 Tóm tắt
+- Page = default export trong page; layout nhận children và không render lại khi điều hướng.
+- params, searchParams là Promise; searchParams làm trang dynamic.
+- Link = prefetch + client-side transition; route động cần loading.tsx và generateStaticParams.
+- useLinkStatus cho phản hồi trên mạng chậm; prefetch={false} để tiết kiệm tài nguyên.
+## 🧠 4. Server Components và Client Components
+### 🧠 Khi nào dùng loại nào
+### ⚙️ Cách hoạt động
+### 🧱 Ranh giới 'use client' và cách ghép
+### 🛡️ Tránh “environment poisoning”
+### 📝 Tóm tắt
+- Server Component là mặc định; Client Component cần 'use client'.
+- Server: dữ liệu, bí mật, ít JS. Client: state, effect, API trình duyệt.
+- RSC Payload + HTML + JS hydrate; điều hướng sau dùng payload cache.
+- Ghép bằng children, provider đặt sâu, bọc thư viện bên thứ ba; server-only chặn lộ mã.
+## 🖥️ 5. Lấy dữ liệu và streaming
+### 🖥️ Lấy dữ liệu ở Server Component
+### 🌊 Streaming
+### 🧩 Lấy dữ liệu ở Client Component
+### ⏱️ Mẫu nâng cao
+### 📝 Tóm tắt
+- Server Component có thể await fetch hoặc truy vấn DB trực tiếp; fetch không cache mặc định.
+- Streaming: loading.js cho cả page, Suspense cho từng phần; đặt Suspense gần chỗ truy cập dữ liệu.
+- Client: use(Promise) hoặc SWR/React Query.
+- Tránh waterfall bằng Promise.all; React.cache dùng chung dữ liệu trong một request; preload để bắt đầu sớm.
+## ⚡ 6. Thay đổi dữ liệu: Server Functions và Actions
+### ⚡ Server Function và Server Action
+### 🛠️ Tạo Server Function
+### 📨 Gọi Server Function
+### 🔄 Sau khi mutate
+### 📝 Tóm tắt
+- Server Function = hàm async 'use server'; dùng với form/mutation gọi là Server Action (POST).
+- Gọi từ form (nhận FormData), event handler hoặc useEffect; pending qua useActionState/useTransition.
+- Luôn kiểm tra auth bên trong mỗi action.
+- Sau mutate: revalidatePath/Tag hoặc refresh, rồi redirect.
+## ⚙️ 7. Caching và Revalidating (Cache Components)
+### ⚙️ Bật Cache Components
+### 🗄️ Directive 'use cache'
+### 🎲 Giá trị ngẫu nhiên, thời gian và giá trị dự đoán được
+### 🧱 Prerendering, PPR và prefetching
+### ♻️ Revalidating
+### 📝 Tóm tắt
+- cacheComponents + use cache + cacheLife + cacheTag; dữ liệu tươi dùng Suspense, runtime API cần Suspense.
+- connection() cho giá trị theo request; use cache để chia sẻ giá trị.
+- PPR: static shell + stream; await càng sâu càng tốt để tăng phần tĩnh.
+- revalidateTag (SWR), updateTag (tức thì, chỉ Server Action), revalidatePath; ưu tiên tag.
+## ✅ 8. Xử lý lỗi và CSS
+### ✅ Lỗi dự kiến
+### 💥 Ngoại lệ không bắt được
+### 🎨 CSS
+### 📝 Tóm tắt
+- Lỗi dự kiến = giá trị trả về + useActionState; notFound() cho 404.
+- error.tsx, catchError, global-error.tsx cho ngoại lệ khi render; event handler tự try/catch.
+- CSS: Tailwind (khuyến nghị), CSS Modules, global ở root, stylesheet ngoài.
+- Thứ tự CSS theo thứ tự import; luôn kiểm tra bản build.
+## 🖼️ 9. Tối ưu ảnh, font và metadata
+### 🖼️ Tối ưu ảnh: next/image
+### 🔤 Tối ưu font: next/font
+### 🔎 Metadata và OG image
+### 📝 Tóm tắt
+- next/image: tự tối ưu kích thước, chống layout shift, lazy load; ảnh remote cần remotePatterns cụ thể.
+- next/font: self-host, không gọi mạng ngoài, không layout shift; ưu tiên variable font.
+- Metadata: object tĩnh, generateMetadata, file icon/OG/sitemap/robots; ImageResponse tạo OG động.
+- Bot nhận metadata blocking; dùng React.cache để tránh fetch trùng.
+## 🔌 10. Route Handlers, Proxy và triển khai
+### 🔌 Route Handlers
+### 🛡️ Proxy (middleware)
+### 🚀 Triển khai
+### 📝 Tóm tắt
+- route.ts: GET/POST/...; không đặt cùng segment với page; GET cache bằng force-static hoặc use cache.
+- proxy.ts: một file, chạy trước request, matcher giới hạn; không dùng cho dữ liệu chậm hay uỷ quyền đầy đủ.
+- Triển khai: Node.js/Docker hỗ trợ đầy đủ, static export hạn chế, adapters tuỳ nền tảng.
+## 🎚️ 11. Guides: Triết lý render và Streaming chuyên sâu
+### 🎚️ Tĩnh và động là một phổ
+### 🌊 Streaming: App Router giao trang thế nào
+### 📈 Streaming và Web Vitals
+### 📬 HTTP contract và những gì làm hỏng streaming
+### 📝 Tóm tắt
+- Next.js coi tĩnh/động là phổ ở cấp component; hệ quả: streaming, phối hợp cache, nhất quán HTML/RSC, PPR ở CDN.
+- HTML stream + component payload + static shell; loading.js cho cả page, Suspense cho granular.
+- Đẩy truy cập động xuống sâu, giữ LCP ngoài Suspense, skeleton khớp kích thước.
+- Status code cố định sau khi stream; proxy/buffer/CDN/nén/Safari có thể làm mất lợi ích streaming.
+## 🔐 12. Guides: Xác thực và bảo mật dữ liệu
+### 🔐 Authentication: đăng ký / đăng nhập
+### 🍪 Quản lý session
+### 🛂 Authorization
+### 🛡️ Data Security: nghĩ về dữ liệu với Server Components
+### 📝 Tóm tắt
+- Auth = authentication + session management + authorization; ưu tiên thư viện auth.
+- Session stateless (cookie ký, Jose) hay database; cookie HttpOnly, Secure, SameSite, set trên server.
+- Authorization: optimistic (Proxy, cookie) và secure (DB); DAL + DTO; không kiểm tra ở layout.
+- Server Action là endpoint công khai: validate input, xác thực/uỷ quyền lại, chống IDOR, lọc return.
+## 🔑 13. Guides: Biến môi trường và Redirect
+### 🔑 Biến môi trường
+### ↪️ Redirect
+### 📝 Tóm tắt
+- Các file .env* được nạp vào process.env; chỉ NEXT_PUBLIC_ lộ ra trình duyệt và bị inline lúc build.
+- Muốn giá trị runtime: connection() rồi đọc process.env ở server.
+- Ưu tiên: process.env > .env.$(NODE_ENV).local > .env.local > .env.$(NODE_ENV) > .env.
+- redirect() ném lỗi, gọi ngoài try; config redirects chạy trước Proxy; Bloom filter cho redirect quy mô lớn.
+## 🤖 14. Guides: Checklist đưa lên production
+### 🤖 Tối ưu tự động
+### 🛠️ Trong lúc phát triển
+### 🚀 Trước khi lên production
+### 📝 Tóm tắt
+- Server Components, code-splitting, prefetching, prerendering, caching là tối ưu mặc định.
+- Tránh waterfall, đừng gọi Route Handler từ Server Component, cẩn thận request-time APIs.
+- Bảo mật: tainting, kiểm tra quyền trong Server Action, DAL server-only, CSP, env an toàn.
+- Trước khi lên prod: next build + start, Lighthouse, Web Vitals, phân tích bundle.
+## ♿ 15. Architecture: Accessibility, Fast Refresh, Compiler, Browsers
+### ♿ Accessibility
+### 🔥 Fast Refresh
+### ⚙️ Next.js Compiler (SWC)
+### 🌐 Trình duyệt được hỗ trợ và polyfill
+### 📝 Tóm tắt
+- Route announcer đọc title → h1 → pathname; ESLint có jsx-a11y mặc định.
+- Fast Refresh giữ state cho function component; arrow ẩn danh, class, file có export khác component làm reset; effect luôn chạy lại.
+- Compiler Rust/SWC nhanh hơn Babel ~17x; có .babelrc thì quay lại Babel.
+- Mặc định hỗ trợ Chrome/Edge/Firefox 111+, Safari 16.4+; polyfill tự động và tuỳ chỉnh qua instrumentation-client.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>

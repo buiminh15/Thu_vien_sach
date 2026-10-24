@@ -976,7 +976,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "nextjs",
+  "id": "nextjs", "mindmap": "nextjs-mindmap.html",
   "title": "Next.js (App Router)",
   "subtitle": "Getting Started, Guides và Architecture",
   "author": "Tài liệu chính thức nextjs.org/docs",
