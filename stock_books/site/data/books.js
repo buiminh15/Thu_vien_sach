@@ -643,7 +643,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "stocks",
+  "id": "stocks", "mindmap": "stocks-mindmap.html",
   "title": "Hiểu về cổ phiếu (Understanding Stocks)",
   "subtitle": "Understanding Stocks – nhập môn thị trường chứng khoán cho người mới",
   "author": "Michael Sincere (McGraw-Hill)",
