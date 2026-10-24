@@ -276,7 +276,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "almanac",
+    id: "almanac", "mindmap": "almanac-mindmap.html",
     title: "Stock Trader's Almanac 2005",
     subtitle: "Niên giám nhà giao dịch chứng khoán – mùa vụ và chu kỳ thị trường",
     author: "Yale Hirsch & Jeffrey A. Hirsch",
