@@ -44,7 +44,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "nuxt4",
+    id: "nuxt4", "mindmap": "nuxt4-mindmap.html",
     title: "Nuxt 4 – giáo trình tiếng Việt dễ hiểu",
     subtitle: "Từ Get Started, Structure, Guide đến tra cứu API (nuxt.com/docs/4.x)",
     author: "Biên soạn tiếng Việt từ tài liệu chính thức Nuxt 4.x",

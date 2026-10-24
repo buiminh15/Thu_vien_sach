@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Nuxt 4 – giáo trình tiếng Việt dễ hiểu</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 🟢 Nuxt 4 – giáo trình tiếng Việt dễ hiểu
+## 🧭 1. Nuxt là gì và vì sao dùng?
+### 🧭 Nuxt khác Vue thường ở đâu?
+### ⚙️ Tự động hóa và quy ước
+### 🖥 Server-side rendering (SSR) nói đơn giản
+### 🧩 Các “bộ phận” của Nuxt
+### 📝 Tóm tắt
+- Nuxt = Vue + quy ước thư mục + SSR + server (Nitro) + build (Vite) + TypeScript, cấu hình tối thiểu.
+- SSR gửi HTML có sẵn nội dung → nhanh hơn, SEO tốt; rồi hydration làm trang tương tác.
+- Có thể chạy SSR, tĩnh, SPA hoặc lai (routeRules); deploy gần như mọi nơi.
+## 🚀 2. Cài đặt, nuxt.config và các loại cấu hình
+### 🚀 Tạo dự án mới
+### 📝 nuxt.config.ts
+### 🔐 runtimeConfig và app.config: khác nhau thế nào?
+### ⬆️ Nâng cấp
+### 📝 Tóm tắt
+- Tạo dự án: npm create nuxt@latest; cần Node 22+; dev ở cổng 3000.
+- Cấu hình trung tâm: nuxt.config.ts (defineNuxtConfig); có ghi đè theo môi trường.
+- runtimeConfig chứa bí mật (server) + public; app.config chỉ dành cho giá trị công khai.
+- Biến môi trường ghi đè runtimeConfig theo quy ước NUXT_....
+## 🗂 3. Cấu trúc thư mục Nuxt 4
+### 🗂 Bản đồ thư mục
+### 📁 Vai trò từng thư mục
+### 🧪 Kiểu và test
+### 📝 Tóm tắt
+- Nuxt 4: giao diện ở app/; server/, shared/, public/, modules/, layers/ ở gốc.
+- pages/ = route; components/composables/utils = auto-import; layouts/middleware/plugins có quy tắc riêng.
+- server/api có tiền tố /api; shared/ chia sẻ giữa app và server (không chứa code Vue/Nitro).
+- .nuxt/ và .output/ sinh tự động, không commit.
+## 🏗 4. Giao diện: app.vue, components, layouts, assets, styling
+### 🏗 Bốn tầng giao diện
+### 🧱 Components: tên tự động và tải lười
+### 🎨 Layouts
+### 🖼 Assets và styling
+### 📝 Tóm tắt
+- app.vue (gốc) → layouts (khung) → pages (route) → components (mảnh).
+- Component tên theo đường dẫn, Lazy để tải lười, .client/.server để chọn nơi render.
+- Page và layout cần một phần tử gốc; layout dùng <slot/>.
+- public/ giữ nguyên URL; assets/ được build tối ưu; CSS dùng import hoặc css: [].
+## 🗺 5. Routing, điều hướng và middleware
+### 🗺 Từ file thành route
+### 🔗 Điều hướng: NuxtLink, navigateTo, definePageMeta
+### 🛂 Middleware route
+### ✨ Transitions (hiệu ứng chuyển trang)
+### 📝 Tóm tắt
+- Tên file trong pages/ sinh route: [id] động, [[slug]] tùy chọn, lồng nhau cần <NuxtPage/>.
+- <NuxtLink> chuyển trang không tải lại và prefetch; await navigateTo() chuyển bằng code.
+- Middleware: ẩn danh, có tên, toàn cục (.global); trả về navigateTo/abortNavigation, không có next().
+- Transitions cần một phần tử gốc; cấu hình qua app.pageTransition hoặc definePageMeta.
+## 🧰 6. Lấy dữ liệu: $fetch, useFetch, useAsyncData
+### 🧰 Ba công cụ, ba mục đích
+### 🔑 Key, await, lazy và reactive
+### 🔧 Suspense, loading, và useFetch tùy biến
+### 📝 Tóm tắt
+- Server gọi API rồi trình duyệt lại gọi → phí. useFetch/useAsyncData gửi kèm payload để khỏi gọi lại.
+- $fetch cho tương tác phía client; useFetch cho lấy dữ liệu từ URL; useAsyncData cho logic tùy ý.
+- Tự đặt key; await không đổi HTML server mà đổi cách điều hướng client; lazy không chặn.
+- Chuyển cookie/header cẩn thận; muốn mặc định riêng thì tạo composable tùy biến.
+## 🧠 7. State, xử lý lỗi và SEO
+### 🧠 State: useState và Pinia
+### 🚨 Xử lý lỗi
+### 🔍 SEO và thẻ head
+### 📝 Tóm tắt
+- useState tạo state thân thiện SSR (key + hàm init, giá trị serialize được); không đặt ref ở cấp module.
+- Lỗi: bắt bằng onErrorCaptured/vue:error/app:error; trang lỗi error.vue; createError, showError, clearError.
+- SEO: app.head tĩnh, useHead động, useSeoMeta có kiểu cho meta chia sẻ.
+## 🛰 8. Server của Nuxt: Nitro, API và middleware
+### 🛰 Nitro cho bạn điều gì
+### 🔌 API route
+### 🧱 Quy tắc và an toàn
+### 📝 Tóm tắt
+- Nitro = server engine của Nuxt: API, middleware, plugin ngay trong dự án, deploy mọi nơi.
+- server/api có tiền tố /api; hậu tố .get/.post giới hạn method; [id] là tham số.
+- Server middleware chạy trước mọi route, không trả response.
+- Không trộn code Vue và code server; dùng shared/ để chia sẻ.
+## 🍽 9. Chế độ render, prerender và deploy
+### 🍽 Bốn cách render
+### 🎛 routeRules: render lai theo từng route
+### 📦 Prerendering (dựng sẵn)
+### 🌍 Deploy
+### 📝 Tóm tắt
+- Bốn cách render: Universal (SSR), client-side (ssr: false), hybrid (routeRules), edge (đích triển khai).
+- routeRules: prerender, swr, isr, ssr:false, redirect, proxy, cors, headers, noScripts.
+- nuxt generate bò link để dựng sẵn; trang không được link phải khai báo tay; có 200.html/404.html.
+- Deploy: Node (node .output/server/index.mjs), tĩnh (.output/public), serverless/edge (preset Nitro).
+## ⏱ 10. Vòng đời, auto-imports, plugins và Nuxt context
+### ⏱ Vòng đời: server rồi client
+### 🪄 Auto-imports
+### 🔌 Plugins
+### 📝 Tóm tắt
+- Vòng đời: plugin Nitro → middleware server → plugin app → validate → middleware route → render → HTML; rồi ở client: plugin → middleware → mount/hydrate.
+- Trên server không có reactivity; tác dụng phụ cần dọn dẹp đặt ở onMounted.
+- Auto-import từ components/composables/utils (và Vue/Nuxt API); composable cần Nuxt context và gọi đồng bộ.
+- Plugin: defineNuxtPlugin, hậu tố .client/.server, đánh số thứ tự, parallel.
+## 💧 11. Chất lượng: hydration, hiệu năng, tiếp cận, TypeScript, test
+### 💧 Hydration mismatch: đừng bỏ qua cảnh báo
+### ⚡ Hiệu năng
+### ♿ Tiếp cận (accessibility)
+### 🔷 TypeScript, code style, server components
+### 🧪 Testing
+### 📝 Tóm tắt
+- Hydration mismatch gây chậm, hỏng tương tác, lệch SEO: tránh API trình duyệt ở server, dữ liệu ngẫu nhiên, HTML không hợp lệ.
+- Hiệu năng: NuxtLink prefetch, route rules, Lazy/lazy hydration, useFetch, noScripts + server components.
+- Tiếp cận: tiêu đề riêng mỗi route (NuxtRouteAnnouncer), NuxtLink, skip link, focus.
+- TypeScript tự sinh (kiểm kiểu bằng nuxt typecheck); ESLint qua @nuxt/eslint; test với @nuxt/test-utils + Vitest.
+## 🧩 12. Modules và Layers: mở rộng và chia sẻ
+### 🧩 Dùng module có sẵn
+### 🛠 Viết module của riêng bạn
+### 🧱 Layers: tái sử dụng cả “app”
+### 📝 Tóm tắt
+- Module = mở rộng lúc build (nuxt module add); layer = chia sẻ cả cấu trúc app (extends).
+- Viết module: defineNuxtModule + @nuxt/kit (addPlugin, addComponent, addServerHandler…).
+- Thực hành: setup nhanh (<1s), đặt tiền tố cho mọi export, không để bí mật ở public runtime config.
+- Layers kế thừa component/page/plugin/server/config; app của bạn ghi đè layer.
+## 🍳 13. Recipes và chủ đề nâng cao
+### 🍳 Công thức thường gặp
+### 🪝 Hooks và sự kiện tùy chỉnh
+### ⚙️ Runtime config, NuxtApp, tính năng thử nghiệm, debug
+### 🤖 Dùng Nuxt với trợ lý AI
+### 📝 Tóm tắt
+- useAPI/createUseFetch cho mặc định riêng; nuxt-auth-utils cho session bằng cookie niêm phong; mostly-static = prerender + noScripts + islands.
+- Hooks (hookable): build-time, app runtime, Nitro; có thể tự tạo sự kiện bằng hook/callHook.
+- Runtime config + biến môi trường NUXT_...; useNuxtApp() cho ngữ cảnh; experimental có thể đổi bất kỳ lúc nào.
+- llms.txt và MCP giúp trợ lý AI hiểu Nuxt đúng.
+## 🔎 14. Tra cứu API nhanh: composables, utils, components, CLI
+### 🔎 Tìm nhanh
+### 🧪 Composables chính
+### 🧰 Utils và components hay dùng
+### ⌨️ Lệnh CLI
+### 📝 Tóm tắt
+- Nhớ nhóm: dữ liệu (useFetch/useAsyncData/useState/useCookie), cấu hình (useRuntimeConfig/useAppConfig), điều hướng (navigateTo/definePageMeta/middleware), lỗi (createError…).
+- Lệnh chính: dev, build, generate, preview, prepare, typecheck, add, module add, upgrade.
+- Chi tiết đầy đủ ở nuxt.com/docs/4.x/api (124 trang).
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>
