@@ -1291,7 +1291,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "refrig",
+  "id": "refrig", "mindmap": "refrig-mindmap.html",
   "title": "Sổ tay kỹ thuật viên tủ lạnh nén (WHO/EPI)",
   "subtitle": "Phần A: Kỹ thuật bảo dưỡng và sửa chữa",
   "author": "WHO – Expanded Programme on Immunization (bản sửa 09/1985)",
