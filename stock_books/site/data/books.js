@@ -72,7 +72,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "vue3guide",
+    id: "vue3guide", "mindmap": "vue3guide-mindmap.html",
     title: "Vue 3 Guide – giáo trình tiếng Việt dễ hiểu",
     subtitle: "Từ Introduction đến Extras: reactivity, component, composable, TypeScript, hiệu năng (vuejs.org/guide)",
     author: "Biên soạn tiếng Việt từ tài liệu chính thức vuejs.org",

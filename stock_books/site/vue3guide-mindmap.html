@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Vue 3 Guide – giáo trình tiếng Việt dễ hiểu</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 💚 Vue 3 Guide – giáo trình tiếng Việt dễ hiểu
+## 🧭 1. Vue là gì? Bắt đầu nhanh, ứng dụng và SFC
+### 🧭 Hai ý cốt lõi của Vue
+### 🧰 Framework “tiến dần” (progressive)
+### 📄 Single-File Component (SFC – file .vue)
+### 🔀 Hai kiểu API: Options và Composition
+### 🚀 Tạo dự án đầu tiên
+### 🏗️ Ứng dụng (application instance) và component gốc
+### 📝 Tóm tắt
+- Vue = render khai báo + reactivity; framework “tiến dần”, từ vài dòng trên trang tĩnh đến ứng dụng full-stack.
+- File .vue (SFC) gói script + template + style; hai kiểu API (Options/Composition) cùng nền, chọn theo nhu cầu.
+- Dự án mới: npm create vue@latest → dev → build ra dist; createApp(App).mount(...) là cửa vào.
+## 📝 2. Template, reactivity cơ bản và computed
+### 📝 Cú pháp template
+### 🔄 State phản ứng: ref()
+### 🧱 reactive() và những điều cần cẩn thận
+### 🧮 computed: giá trị dẫn xuất có cache
+### 📝 Tóm tắt
+- Template: {{ }}, v-bind (:), v-on (@), directive; chỉ dùng biểu thức, tránh tác dụng phụ.
+- Ref là mặc định cho state; trong JS dùng .value, trong template tự bỏ. reactive() chỉ cho object và có giới hạn (destructure, gán lại).
+- computed = giá trị dẫn xuất có cache, getter thuần; method chạy lại mỗi lần.
+## 🎨 3. Giao diện theo dữ liệu: class/style, v-if, v-for, sự kiện, form
+### 🎨 Class và style động
+### 🔀 Hiển thị có điều kiện
+### 🔁 Danh sách với v-for và key
+### 🖱️ Xử lý sự kiện
+### ⌨️ Form và v-model
+### 📝 Tóm tắt
+- Class/style động: object/mảng; v-if hủy–tạo, v-show chỉ ẩn; không trộn v-if và v-for.
+- v-for luôn kèm key ổn định; sắp xếp/lọc bằng computed, tránh sửa mảng gốc ngoài ý muốn.
+- Sự kiện: modifier (.prevent, .stop, .once, phím…); v-model là đường tắt hai chiều cho form, có .lazy/.number/.trim.
+## 👀 4. Watcher, vòng đời và template ref
+### 👀 watch: phản ứng với thay đổi
+### ⚡ watchEffect và dọn dẹp
+### 🔄 Vòng đời (lifecycle)
+### 📍 Template ref: chạm vào DOM/component
+### 📝 Tóm tắt
+- watch = tác dụng phụ khi state đổi (nguồn rõ ràng, có giá trị cũ); watchEffect = tự theo dõi phần đọc đồng bộ; cần dọn thì dùng onWatcherCleanup.
+- Hook chính: onMounted (truy cập DOM/gọi API) và onUnmounted (dọn dẹp); phải đăng ký đồng bộ trong setup.
+- useTemplateRef('name') lấy phần tử/component sau khi mount; component con cần defineExpose để lộ API.
+## 🧩 5. Component cơ bản: props, events, đăng ký
+### 🧩 Định nghĩa và dùng component
+### ⬇️ Props: dữ liệu từ cha xuống con
+### ⬆️ Events: con báo lên cha
+### 📛 Đăng ký component và lưu ý template trong DOM
+### 📝 Tóm tắt
+- Component = đơn vị dùng lại; mỗi instance có state riêng; script setup cho phép dùng import trực tiếp.
+- Props chảy xuống (con không sửa), events đi lên; luôn khai báo defineProps/defineEmits.
+- Đăng ký cục bộ là mặc định tốt; template trong DOM có hạn chế về hoa thường, thẻ tự đóng, vị trí phần tử.
+## 💧 6. Component nâng cao: attrs, slots, provide/inject, v-model, async
+### 💧 Attribute kế thừa (fallthrough attrs)
+### 🔌 Slots: chèn nội dung từ ngoài
+### 🛰️ Provide / Inject: truyền sâu
+### 🔁 v-model trên component và defineModel
+### ⏳ Component bất đồng bộ
+### 📝 Tóm tắt
+- Attrs không khai báo rơi xuyên vào phần tử gốc (class/style gộp); tắt bằng inheritAttrs:false + v-bind="$attrs".
+- Slot cho phép tùy biến nội dung (tên, fallback, scoped); provide/inject chuyển dữ liệu qua nhiều tầng (nên provide ref).
+- defineModel() đơn giản hóa v-model trên component; defineAsyncComponent để chia bundle.
+## 🧰 7. Tái sử dụng logic: composable, directive tùy biến, plugin
+### 🧰 Composable
+### 🎯 Directive tùy biến
+### 🔌 Plugin
+### 🧭 Chọn công cụ tái dùng nào?
+### 📝 Tóm tắt
+- Composable: hàm “use…” đóng gói state + logic có vòng đời; nhận ref/getter (toValue), trả object các ref.
+- Directive tùy biến chỉ cho thao tác DOM mức thấp; plugin cài đặt tính năng toàn app qua install().
+- Component tái dùng giao diện, composable tái dùng logic có trạng thái.
+## 🎞️ 8. Component dựng sẵn: Transition, KeepAlive, Teleport, Suspense
+### 🎞️ Transition
+### 📚 TransitionGroup
+### 💾 KeepAlive
+### 🚪 Teleport
+### ⏱️ Suspense (thử nghiệm)
+### 📝 Tóm tắt
+- Transition thêm/bớt class enter/leave theo giai đoạn; TransitionGroup cho danh sách (cần key, có -move).
+- KeepAlive giữ state component bị ẩn; Teleport đưa DOM tới nơi khác nhưng logic ở lại.
+- Suspense (thử nghiệm) hiện fallback khi chờ dependency bất đồng bộ.
+## 📄 9. Mở rộng quy mô: SFC, công cụ, router, state, SSR, test
+### 📄 SFC: vì sao và gồm gì
+### 🛠️ Công cụ
+### 🧭 Routing
+### 🗃️ Quản lý state dùng chung
+### 🌐 SSR / SSG
+### 🧪 Testing
+### 📝 Tóm tắt
+- SFC + Vite + Volar là bộ công cụ chuẩn; scoped CSS, v-bind trong CSS, :deep() khi cần.
+- Router (Vue Router) cho SPA, Pinia cho state chung, SSR/SSG cho SEO – ưu tiên framework như Nuxt.
+- Test: Vitest + Test Utils (unit/component), Playwright/Cypress (E2E); test hành vi, không test cài đặt.
+## 🧭 10. Vue với TypeScript
+### 🧭 Bắt đầu
+### 🧱 Kiểu cho props, emits, ref, computed
+### ⚙️ Options API với TypeScript (tham khảo)
+### 📝 Tóm tắt
+- Dùng <script setup lang="ts">; defineProps/defineEmits nhận kiểu qua generic; vue-tsc để kiểm kiểu (Vite không kiểm).
+- ref/computed tự suy luận; ghi rõ khi có union/null; InjectionKey cho provide/inject; useTemplateRef cho phần tử DOM.
+- Composition API hợp TypeScript hơn Options API.
+## 🚢 11. Thực hành tốt: triển khai, hiệu năng, tiếp cận, bảo mật
+### 🚢 Triển khai production
+### ⚡ Hiệu năng
+### ♿ Tiếp cận (accessibility – a11y)
+### 🔒 Bảo mật
+### 📝 Tóm tắt
+- Build production, bắt lỗi bằng errorHandler, cấu hình server cho history mode.
+- Hiệu năng: đo trước; giảm bundle, code splitting, props ổn định, virtualization, shallowRef cho dữ liệu lớn bất biến.
+- a11y: ngữ nghĩa, label, bàn phím, tương phản. Bảo mật: không template từ người dùng, cẩn thận v-html/URL/style; quyền hạn thật ở server.
+## 🔬 12. Nâng cao: reactivity sâu, cơ chế render, render function, web components
+### 🔬 Reactivity hoạt động thế nào
+### 🖼️ Cơ chế render
+### 🧑‍💻 Render function và JSX
+### 🧱 Web Components (Custom Elements)
+### 🎬 Kỹ thuật animation khác
+### ❓ Composition API FAQ: vì sao?
+### 📝 Tóm tắt
+- Reactivity = track (khi đọc) + trigger (khi ghi) qua Proxy/getter-setter; gán ra biến cục bộ là cắt kết nối.
+- Template → render function → vnode → patch; compiler tối ưu (cache static, patch flags, tree flattening) nên ưu tiên template.
+- Render function/JSX cho trường hợp rất động; defineCustomElement để chia sẻ qua mọi framework.
+## 🗺️ 13. Bản đồ tra cứu: chọn đúng tính năng cho đúng việc
+### 🗺️ Tình huống → công cụ
+### 🔎 Tra cứu từ khóa
+### 🧭 Lời khuyên tổng kết
+### 📝 Tóm tắt
+- Chọn công cụ theo vai trò: ref/computed/watch cho state; props/emits/slot cho component; composable/Pinia cho chia sẻ; built-in cho UX.
+- Đơn giản trước, tối ưu sau; template + TypeScript; giữ bảo mật ở server.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>
