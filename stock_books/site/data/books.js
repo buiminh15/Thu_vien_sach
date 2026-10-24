@@ -896,7 +896,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "ddia",
+  "id": "ddia", "mindmap": "ddia-mindmap.html",
   "title": "Thiết kế ứng dụng nặng dữ liệu (Designing Data-Intensive Applications)",
   "subtitle": "Nền tảng của hệ thống đáng tin cậy, mở rộng được, dễ bảo trì",
   "author": "Martin Kleppmann (O’Reilly)",

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Thiết kế ứng dụng nặng dữ liệu (Designing Data-Intensive Applications)</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 🗄️ Thiết kế ứng dụng nặng dữ liệu (Designing Data-Intensive Applications)
+## 🧱 1. Ứng dụng đáng tin cậy, mở rộng được, dễ bảo trì
+### 🧱 Hệ thống dữ liệu và ba mối quan tâm
+### 🛡️ Độ tin cậy (Reliability)
+### 📈 Khả năng mở rộng: mô tả tải
+### ⏱️ Mô tả hiệu năng: percentile
+### ↔️ Đối phó với tải tăng
+### 🔧 Khả năng bảo trì
+### 📝 Tóm tắt
+- Ứng dụng nặng dữ liệu = ghép database, cache, search index, stream, batch; bạn trở thành nhà thiết kế hệ thống dữ liệu.
+- Reliability: chịu fault (phần cứng ngẫu nhiên, phần mềm có tương quan, lỗi con người) để không thành failure.
+- Scalability: mô tả tải bằng load parameters (fan-out Twitter), đo hiệu năng bằng percentile, không dùng trung bình.
+- Không có kiến trúc scale “thần kỳ”; tùy giả định về thao tác phổ biến.
+- Maintainability: operability, simplicity (loại accidental complexity), evolvability.
+## 🧅 2. Mô hình dữ liệu và ngôn ngữ truy vấn
+### 🧅 Các lớp mô hình dữ liệu
+### 🗃️ Quan hệ vs tài liệu
+### ⚖️ So sánh hôm nay
+### 📝 Ngôn ngữ truy vấn: khai báo vs mệnh lệnh
+### 🕸️ Mô hình đồ thị
+### 📝 Tóm tắt
+- Dữ liệu bắt đầu là một cây (phân cấp), rồi quan hệ ra đời để giải many-to-many; NoSQL tách làm tài liệu (self-contained) và đồ thị (mọi thứ liên quan đến mọi thứ).
+- Document: schema-on-read, locality, gần cấu trúc ứng dụng; Relational: JOIN, many-to-many, schema-on-write. Hai mô hình đang hội tụ.
+- Khai báo (SQL, CSS) ẩn chi tiết cài đặt, dễ tối ưu và song song hơn mệnh lệnh.
+- MapReduce là giữa khai báo và mệnh lệnh; aggregation pipeline là cách MongoDB “tái phát minh” SQL.
+- Đồ thị: property graph (Cypher), triple-store (SPARQL), Datalog (luật đệ quy).
+## 📜 3. Lưu trữ và truy xuất (storage engine)
+### 📜 CSDL đơn giản nhất: append-only log
+### #️⃣ Chỉ mục băm (Hash index) – Bitcask
+### 🧱 SSTable và LSM-tree
+### 🌳 B-tree
+### 🔖 Các cấu trúc chỉ mục khác
+### 📊 OLTP vs OLAP, data warehouse
+### 🏛️ Lưu trữ theo cột (column-oriented)
+### 📝 Tóm tắt
+- Chỉ mục tăng tốc đọc, làm chậm ghi; chọn chỉ mục theo mẫu truy vấn.
+- Hai họ storage engine: log-structured (SSTable/LSM-tree: ghi tuần tự, compaction) và page-oriented (B-tree: ghi đè trang + WAL).
+- LSM thường nhanh ghi, nén tốt; B-tree thường nhanh đọc, dễ đoán; phải benchmark.
+- OLTP (truy vấn theo key, ghi nhỏ) khác OLAP (quét tổng hợp lớn) ⇒ data warehouse, ETL, star schema.
+- Lưu theo cột + nén bitmap + vectorized + sắp xếp + materialized view/cube giúp phân tích nhanh.
+## 🔄 4. Mã hoá (encoding) và tiến hoá lược đồ
+### 🔄 Vì sao cần tương thích
+### 📦 Định dạng: ngôn ngữ cụ thể, JSON/XML
+### 🧬 Thrift, Protocol Buffers, Avro
+### 🗄️ Luồng dữ liệu qua database
+### 🌐 Luồng dữ liệu qua dịch vụ: REST và RPC
+### ✉️ Luồng dữ liệu qua thông điệp bất đồng bộ
+### 📝 Tóm tắt
+- Dữ liệu và mã cũ–mới cùng tồn tại ⇒ cần tương thích ngược và xuôi.
+- Định dạng theo ngôn ngữ: tránh. JSON/XML/CSV: tiện nhưng mơ hồ; tốt cho trao đổi giữa tổ chức.
+- Protobuf/Thrift dùng field tag; Avro không tag, dùng writer/reader schema giải quyết theo tên trường — gọn nhất (32 byte).
+- Dữ liệu sống lâu hơn mã (data outlives code); bảo toàn trường lạ.
+- REST vs SOAP vs RPC; RPC không nên giả vờ là hàm cục bộ; message broker tách rời và đệm; actor là thông điệp phân tán.
+## 👑 5. Nhân bản dữ liệu (Replication)
+### 👑 Single-leader: leader và follower
+### 📓 Cài đặt log nhân bản
+### ⏳ Vấn đề của replication lag
+### 🔀 Multi-leader replication
+### 🕸️ Leaderless (kiểu Dynamo) và quorum
+### ⏱️ Phát hiện ghi đồng thời
+### 📝 Tóm tắt
+- Nhân bản phục vụ sẵn sàng cao, hoạt động offline, độ trễ thấp và mở rộng đọc.
+- Single-leader: đơn giản, không xung đột nhưng đọc từ follower có thể cũ; failover rủi ro (split brain, mất ghi).
+- Multi-leader và leaderless: bền với lỗi nhưng có xung đột ghi — cần LWW (mất dữ liệu), gộp, CRDT hoặc version vector.
+- Replication lag gây ba anomaly: đọc lại không thấy ghi của mình, thời gian đi lùi, vi phạm nhân quả ⇒ read-after-write, monotonic reads, consistent prefix.
+- Quorum w + r > n là kỳ vọng, không phải đảm bảo tuyệt đối.
+## 🧩 6. Phân vùng dữ liệu (Partitioning / Sharding)
+### 🧩 Phân vùng và nhân bản
+### 🔑 Phân vùng dữ liệu key-value
+### 🗂️ Phân vùng và chỉ mục thứ cấp
+### ⚖️ Tái cân bằng partition (rebalancing)
+### 🧭 Định tuyến yêu cầu và truy vấn song song
+### 📝 Tóm tắt
+- Phân vùng để mở rộng dữ liệu và tải; mục tiêu tránh skew và hot spot.
+- Key range: truy vấn khoảng dễ nhưng dễ hot spot; Hash: đều nhưng mất truy vấn khoảng; Cassandra thoả hiệp bằng khoá phức hợp.
+- Chỉ mục thứ cấp: local (ghi dễ, đọc scatter/gather) vs global term-partitioned (đọc hiệu quả, ghi phức tạp, thường bất đồng bộ).
+- Rebalancing: tránh hash mod N; dùng số partition cố định, dynamic, hay tỷ lệ theo node; cân nhắc có người duyệt.
+- Định tuyến: node bất kỳ, tầng định tuyến, hoặc client biết phân vùng; ZooKeeper/gossip cho cluster metadata.
+## 🧾 7. Giao dịch (Transactions) và mức cô lập
+### 🧾 Giao dịch và ACID
+### 🧱 Mức cô lập yếu: Read Committed
+### 📸 Snapshot isolation và repeatable read
+### 💥 Lost update, write skew và phantom
+### 🔒 Serializability: ba cách
+### 📝 Tóm tắt
+- ACID: A = abortability (all-or-nothing), C là tính chất của ứng dụng, I = cô lập, D = bền (không tuyệt đối).
+- Read committed chặn dirty read/write; snapshot isolation (MVCC) chặn read skew; vẫn còn lost update, write skew, phantom.
+- Lost update: atomic op, FOR UPDATE, phát hiện tự động, compare-and-set; write skew/phantom cần serializable hoặc khoá hàng phụ thuộc.
+- Serializable bằng: thực thi tuần tự (stored procedure + RAM), 2PL (index-range lock), SSI (lạc quan, phát hiện tiền đề cũ).
+- Retry giao dịch bị abort chỉ với lỗi tạm thời; cần idempotence/khử trùng lặp.
+## 💥 8. Rắc rối của hệ thống phân tán
+### 💥 Lỗi và lỗi một phần
+### 📡 Mạng không tin cậy
+### 🕰️ Đồng hồ không tin cậy
+### 🗳️ Tri thức, sự thật và dối trá
+### 📐 Mô hình hệ thống, safety và liveness
+### 📝 Tóm tắt
+- Lỗi một phần không xác định là đặc trưng của hệ phân tán; xây hệ tin cậy từ thành phần không tin cậy.
+- Mạng gói có trễ không giới hạn; timeout là cách duy nhất phát hiện lỗi nhưng không phân biệt mạng với node.
+- Đồng hồ thời gian thực có thể nhảy/trôi: dùng monotonic để đo khoảng thời gian, logical clock để sắp thứ tự; LWW nguy hiểm; Spanner TrueTime dùng khoảng tin cậy.
+- Tiến trình có thể bị dừng bất kỳ lúc nào (GC, VM) mà không biết: lease cần fencing token.
+- Sự thật do quorum định nghĩa; giả định node trung thực (không Byzantine); mô hình thực tế: partially synchronous + crash-recovery; phân biệt safety và liveness.
+## 🎯 9. Nhất quán (Consistency) và đồng thuận (Consensus)
+### 🎯 Linearizability
+### ⚖️ Cái giá và CAP
+### 🔗 Thứ tự, nhân quả và Lamport timestamp
+### 📢 Total order broadcast
+### 🤝 Giao dịch phân tán và Two-Phase Commit
+### 🏛️ Đồng thuận chịu lỗi
+### 📝 Tóm tắt
+- Linearizability: một bản sao, mọi thao tác nguyên tử — dễ hiểu nhưng chậm và mất sẵn sàng khi mạng chia.
+- CAP hẹp, ít hữu ích; nhân quả (partial order) thường là đủ; Lamport timestamp cho thứ tự toàn phần nhất quán với nhân quả.
+- Total order broadcast ⇔ linearizable cas ⇔ đồng thuận; là nền tảng của state machine replication.
+- 2PC đảm bảo atomic commit nhưng blocking; XA gây vấn đề vận hành; giao dịch phân tán khuếch đại lỗi.
+- Đồng thuận chịu lỗi (Paxos/Raft/Zab) cần đa số; ZooKeeper/etcd cung cấp khoá, fencing token, phát hiện lỗi, watch, membership.
+## 🧰 10. Xử lý theo lô (Batch Processing)
+### 🧰 Xử lý theo lô với công cụ Unix
+### 🗂️ MapReduce và hệ thống file phân tán
+### 🔗 Reduce-side join và GROUP BY
+### 🗺️ Map-side join
+### 📤 Đầu ra của workflow batch
+### ⚖️ Hadoop vs cơ sở dữ liệu phân tán (MPP)
+### 🚀 Vượt ra ngoài MapReduce: dataflow engine
+### 📝 Tóm tắt
+- Batch đọc dữ liệu có hạn (bounded), tạo đầu ra dẫn xuất, không sửa đầu vào; hiệu quả đo bằng throughput.
+- MapReduce = mapper + shuffle (phân vùng, sắp xếp) + reducer trên HDFS; kế thừa triết lý Unix.
+- Join: sort-merge (reduce-side), broadcast hash, partitioned hash, map-side merge; xử lý skew cho hot key.
+- Đầu ra tốt nhất là file bất biến nạp hàng loạt; human fault tolerance.
+- Dataflow engine (Spark, Tez, Flink) tránh materialize trung gian, tính lại để chịu lỗi (cần deterministic); Pregel cho đồ thị; ngày càng khai báo và giống MPP.
+## 📨 11. Xử lý luồng (Stream Processing)
+### 📨 Truyền luồng sự kiện
+### 📜 Log phân vùng (Kafka)
+### 🔄 CSDL và luồng: CDC và event sourcing
+### ⚙️ Xử lý luồng: ứng dụng
+### ⏰ Lập luận về thời gian
+### 🔗 Stream join
+### 🛡️ Chịu lỗi trong xử lý luồng
+### 📝 Tóm tắt
+- Luồng = dữ liệu vô hạn; broker AMQP/JMS phù hợp task queue, log-based broker (Kafka) phù hợp thông lượng cao, thứ tự, phát lại.
+- Log phân vùng: thứ tự trong partition, offset của consumer, log compaction để lưu trữ lâu dài.
+- Tránh dual writes; dùng CDC hoặc event sourcing; CQRS tách ghi và đọc; sự kiện bất biến + view dẫn xuất.
+- Lập luận về thời gian: event time vs processing time, straggler, bốn loại cửa sổ; ba loại join và time-dependence (SCD).
+- Exactly-once nhờ microbatching/checkpoint, atomic commit nội bộ, idempotence (offset), dựng lại trạng thái.
+## 🧩 12. Tương lai của hệ thống dữ liệu
+### 🧩 Tích hợp dữ liệu
+### 🧱 Tháo rời cơ sở dữ liệu (Unbundling)
+### 🌊 Thiết kế ứng dụng quanh dataflow
+### ✅ Hướng tới sự đúng đắn (Correctness)
+### ⚖️ Làm điều đúng đắn (đạo đức)
+### 📝 Tóm tắt
+- Tích hợp dữ liệu: một nguồn quyết định thứ tự, các hệ dẫn xuất qua log/CDC; log bất đồng bộ + idempotence thay giao dịch phân tán; cẩn thận giới hạn của thứ tự toàn phần và nhân quả.
+- Lambda → hợp nhất batch + stream (replay, exactly-once, event time); reprocessing để tiến hoá ứng dụng bằng view song song.
+- Tháo rời CSDL: federation cho đọc, unbundling cho ghi; ứng dụng dataflow như bảng tính; ranh giới write path/read path; client có trạng thái nhận thay đổi đẩy.
+- Đúng đắn đầu-cuối: request ID + ràng buộc UNIQUE; ràng buộc qua partition log; chuyển tiền không cần 2PC; integrity quan trọng hơn timeliness; ràng buộc lỏng + bù trừ; hệ tránh phối hợp.
+- Trust but verify: audit liên tục, thiết kế khả kiểm toán, Merkle tree.
+- Đạo đức: thiên lệch, trách nhiệm giải trình, vòng phản hồi, giám sát, quyền riêng tư; dữ liệu là tài sản độc hại — kỹ sư có trách nhiệm.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>
