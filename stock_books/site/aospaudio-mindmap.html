@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Android Audio (AOSP)</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 🔊 Android Audio (AOSP)
+## 🏗️ 1. Kiến trúc audio, thuật ngữ và Audio HAL (AIDL/HIDL)
+### 🏗️ Các tầng kiến trúc
+### 📖 Thuật ngữ cốt lõi
+### 🔌 AIDL Audio HAL (Android 14+)
+### 📝 Tóm tắt
+- Stack: android.media → JNI → native framework → Binder → AudioFlinger (media server) → HAL → driver (ALSA/tinyalsa).
+- Thuật ngữ: sample/frame, PCM, underrun/overrun, AudioFlinger/AudioMixer, fast track.
+- AIDL Audio HAL (Android 14+): IModule, IStreamIn/Out, IConfig, ITelephony, IBluetooth, ISoundDose; Effects qua IFactory/IEffect.
+- Patch, pause, resume, drain bắt buộc; module đăng ký trực tiếp với Service Manager.
+## 🔢 2. Định dạng dữ liệu, audio attributes và effects
+### 🔢 Định dạng dữ liệu audio
+### 🏷️ Audio attributes
+### 🎛️ Device effects (Android 11+)
+### 📝 Tóm tắt
+- Định dạng: PCM fixed-point Qm.n (bù hai) và float; container ≠ bit depth khi unpacked; float → fixed luôn lossy.
+- AudioAttributes: usage (17 giá trị), content type, flags, contexts (Android 9+); thay thế stream type của Android 4.4 trở xuống.
+- Stream type cũ được dịch tự động nhưng không đảm bảo nhất quán.
+- Device effects (Android 11+): deviceEffects trong audio_effects.xml hoặc System API; createEffect với session DEVICE.
+## ⏱️ 3. Latency: FAST mixer, AAudio/MMAP, priority inversion, resampling
+### ⏱️ Yếu tố góp phần vào độ trễ
+### 🚀 Thiết kế giảm độ trễ: FAST mixer
+### ⚡ AAudio và MMAP
+### 🔒 Tránh priority inversion
+### 🎚️ Sample rate conversion
+### 📝 Tóm tắt
+- Buffer lớn là hệ quả; tìm nguyên nhân gốc (CFS, ưu tiên, priority inversion, ngắt, nhiệt/điện).
+- FAST mixer: tối đa 7 fast track, không SRC/effect, chu kỳ 2–3 ms (~10 ms tổng); normal mixer 32 track, ≥ 20 ms.
+- AAudio/MMAP (8.1+): EXCLUSIVE bỏ qua mixer, SHARED qua mixer; mmap_policy 1/2/3; fd dmabuf thay /dev/snd.
+- Tránh priority inversion bằng lock-free FIFO, state queue, sao chép; resampler: linear < cubic < sinc.
+## 🎹 4. MIDI, USB audio, TV audio, debugging và warmup
+### 🎹 MIDI
+### 🔌 USB digital audio
+### 📺 TV audio
+### 🐞 Debug audio và warmup
+### 📝 Tóm tắt
+- MIDI 1.0 (5-pin DIN/USB/BLE/virtual), MIDI 2.0 qua USB từ Android 13; AMidi NDK từ Android 10; tính năng android.software.midi.
+- USB audio: isochronous không truyền lại; host mode PCM 16/24/32-bit, mono/stereo; accessory mode hạn chế; thêm audio.usb.default.
+- TV audio: AudioPort, audio patch, loopback 11/48 kHz mono 16-bit; tuner + HDMI out chuyển bằng patch.
+- Debug: tee sink (af.tee), NBLog lock-free (ro.test_harness=1); warmup đo bằng measuredWarmup.
+## 🎤 5. Tính năng nâng cao: concurrent capture, Sound Trigger, spatial audio, sound dose, soundbar, SCO
+### 🎤 Concurrent capture (Android 10)
+### 👂 Sound Trigger
+### 🔀 Combined audio device routing
+### 🎧 Spatial audio và head tracking (Android 13)
+### 🔊 Sound dose (Android 14)
+### 📺 Dynamic soundbar mode (Android 14)
+### 📞 Audio Managed SCO (Android 17)
+### 📝 Tóm tắt
+- Concurrent capture (Android 10): làm im client ưu tiên thấp thay vì chặn; HAL hỗ trợ nhiều input stream; HW_HOTWORD profile.
+- Sound Trigger: STHAL → Middleware → Service; vòng đời load → start → (event dừng) → unload.
+- Spatial audio (Android 13): Spatializer, HID head tracker, Audio HAL 7.1+, trễ vòng < 150 ms.
+- Sound dose (Android 14): CSD 7 ngày, 100% cảnh báo, RS1/RS2, ISoundDose; DSM dùng logical address 5; AMSCO (Android 17) để audio framework quản lý SCO.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>

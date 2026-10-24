@@ -1245,7 +1245,7 @@ window.BOOKS = [
   ]
 },
 {
-  "id": "aospaudio",
+  "id": "aospaudio", "mindmap": "aospaudio-mindmap.html",
   "title": "Android Audio (AOSP)",
   "subtitle": "Audio HAL, latency, MIDI/USB, spatial audio, sound dose",
   "author": "source.android.com/docs/core/audio",
