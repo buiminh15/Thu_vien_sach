@@ -123,7 +123,7 @@ window.BOOKS = [
     ]
   },
   {
-    id: "angularguide",
+    id: "angularguide", "mindmap": "angularguide-mindmap.html",
     title: "Angular 22 – giáo trình tiếng Việt dễ hiểu",
     subtitle: "Components, Signals, Template, DI, Forms, Router, HTTP, SSR, Testing (angular.dev)",
     author: "Biên soạn tiếng Việt từ tài liệu chính thức angular.dev",

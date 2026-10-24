@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mindmap – Angular 22 – giáo trình tiếng Việt dễ hiểu</title>
+<style>html,body{margin:0;height:100%}.markmap{width:100vw;height:100vh}.markmap>svg{width:100%;height:100%}</style>
+</head><body>
+<div class="markmap"><script type="text/template">
+# 🅰️ Angular 22 – giáo trình tiếng Việt dễ hiểu
+## 🧭 1. Angular là gì, cài đặt và cấu trúc dự án
+### 🧭 Angular có gì trong hộp?
+### 📦 Cài đặt và tạo dự án
+### 🗂️ Dự án mới trông thế nào?
+### 📝 Tóm tắt
+- Angular là nền tảng trọn gói: component, signals, template, DI, router, forms, HTTP, SSR, test, CLI.
+- Angular 22: standalone mặc định, zoneless mặc định (từ v21), OnPush mặc định (v22), Signal Forms stable, test bằng Vitest.
+- Tạo dự án: npm i -g @angular/cli → ng new → npm start (localhost:4200); điểm vào main.ts + app.config.ts + app.routes.ts.
+## 🧩 2. Component: khối xây dựng ứng dụng
+### 🧩 Định nghĩa một component
+### 🔗 Dùng component trong component khác
+### 🎯 Selector, style và đóng gói
+### 🏗️ Chia component thế nào cho tốt?
+### 📝 Tóm tắt
+- @Component gồm selector, template (hoặc templateUrl), styles; lớp TypeScript chứa hành vi.
+- Dùng component khác: import lớp + thêm vào imports + viết thẻ selector (standalone mặc định).
+- Host element cấu hình bằng thuộc tính host; style mặc định đóng gói theo component.
+## ⬇️ 3. Giao tiếp component: input, output, model, content projection, query
+### ⬇️ input(): dữ liệu từ cha xuống con
+### ⬆️ output(): sự kiện từ con lên cha
+### ↔️ model(): hai chiều giữa cha và con
+### 🧳 Content projection: nhét nội dung vào component
+### 🔍 Query: lấy phần tử/component con
+### 📝 Tóm tắt
+- input()/input.required() nhận dữ liệu (signal chỉ đọc); output() + emit() báo sự kiện; model() cho [( )] hai chiều.
+- ng-content (có select) để chiếu nội dung từ cha vào component con.
+- viewChild/viewChildren/contentChild(ren) lấy phần tử/component con dưới dạng signal; đọc sau khi render.
+## 📦 4. Signals: signal, computed, effect, linkedSignal, resource
+### 📦 signal() và computed()
+### ⚡ effect(): tác dụng phụ
+### 🔗 linkedSignal(): trạng thái phụ thuộc nhưng sửa được
+### 🌐 resource(): dữ liệu bất đồng bộ (stable v22)
+### 🔁 Zoneless và liên hệ RxJS
+### 📝 Tóm tắt
+- signal (ghi) – computed (dẫn xuất, cache, lười) – effect (tác dụng phụ, dùng ít) – linkedSignal (dẫn xuất nhưng ghi đè được).
+- resource({ params, loader }) cho dữ liệu bất đồng bộ với status/value/error; debounced là thử nghiệm.
+- Zoneless mặc định từ v21: đặt state hiển thị trong signal; RxJS ↔ signal qua toSignal/toObservable.
+## 🔗 5. Template: binding, control flow, @defer, @let và sự kiện
+### 🔗 Binding: nội suy, property, attribute, class, style
+### 🔀 Control flow: @if, @for, @switch
+### 💤 @defer: tải lười phần giao diện nặng
+### 📎 @let, ng-container, ng-template, biểu thức
+### 📝 Tóm tắt
+- Binding: {{ }}, [prop], [attr.x], [class.x], [style.x], (event), [(model)]; luôn gọi signal bằng ().
+- Control flow @if/@for(track bắt buộc)/@switch thay cho *ngIf/*ngFor/*ngSwitch.
+- @defer tải lười theo trigger (idle, viewport, interaction, hover, immediate, timer, when); @let, ng-container, ng-template hỗ trợ cấu trúc.
+## 🎛️ 6. Directive và Pipe
+### 🎛️ Attribute directive
+### 🧱 Structural directive và Directive Composition
+### 🪄 Pipe: biến đổi giá trị trong template
+### 📝 Tóm tắt
+- Attribute directive đóng gói hành vi trên phần tử (selector thuộc tính, host, input); structural directive thay bằng @if/@for cho code mới.
+- hostDirectives (composition) áp directive lên host và lộ input/output.
+- Pipe biến đổi hiển thị (date, currency, async…); pure mặc định, tự viết bằng @Pipe + PipeTransform.
+## 🔄 7. Vòng đời component và change detection (OnPush, zoneless)
+### 🔄 Các hook vòng đời
+### 🔍 Change detection là gì?
+### 📝 Tóm tắt
+- Hook chính: ngOnInit (khởi tạo), afterNextRender (DOM sẵn sàng, chỉ ở trình duyệt), ngOnDestroy/DestroyRef (dọn dẹp).
+- OnPush mặc định (v22): kiểm tra khi input đổi, có sự kiện, signal đổi, async pipe, markForCheck; Eager kiểm tra cả cây.
+- Zoneless (v21+): đặt state trong signal; đổi thuộc tính thường không đủ để cập nhật giao diện.
+## 🍽️ 8. Dependency Injection và service
+### 🍽️ Service và inject()
+### 🏗️ Provider và phạm vi (scope)
+### 🎫 Token cho giá trị không phải lớp
+### 📝 Tóm tắt
+- Service chia sẻ logic/state; @Service() = singleton root gọn; @Injectable cho provider nâng cao; lấy bằng inject().
+- Provider theo phạm vi: root (một bản), route, component (mỗi instance một bản); tìm từ gần lên xa.
+- InjectionToken cho giá trị không phải lớp; inject chỉ trong injection context.
+## 🧭 9. Forms: Signal Forms (stable v22), Reactive và Template-driven
+### 🧭 Chọn hệ thống form nào?
+### 📝 Signal Forms: form đầu tiên
+### ✅ Validation và field state
+### 📨 Gửi form (submission)
+### 📚 Reactive và Template-driven (tham khảo)
+### 📝 Tóm tắt
+- Signal Forms: model signal → form(model, schema) → [formField]; validation tập trung trong schema; đọc state qua signal (valid, errors, touched, dirty…).
+- Gửi form với submission.action + [formRoot]: touch field, kiểm tra, chạy action, gắn lỗi trả về, submitting() chống gửi trùng.
+- Reactive/Template-driven vẫn dùng tốt cho dự án có sẵn; chọn Signal Forms cho ứng dụng mới.
+## 🗺️ 10. Routing: định tuyến, guard, resolver, lazy loading
+### 🗺️ Khai báo route và hiển thị
+### 🚦 Điều hướng và đọc state của route
+### 🛡️ Guard: chặn hoặc cho vào
+### 📦 Resolver và lazy loading
+### 📝 Tóm tắt
+- Route = path ↔ component; provideRouter(routes); hiển thị qua router-outlet; ** (404) đặt cuối.
+- Điều hướng: routerLink / Router.navigate; đọc tham số bằng input với withComponentInputBinding.
+- Guard (canActivate…) chỉ là UX, trả UrlTree để redirect; resolver tải dữ liệu trước; loadComponent/loadChildren để lazy load.
+## 🌐 11. HTTP và dữ liệu: HttpClient, interceptor, httpResource, RxJS
+### 🌐 HttpClient cơ bản
+### 🧱 Interceptor
+### ⚡ httpResource: đọc dữ liệu bằng signal
+### 🔄 RxJS và signals cùng sống
+### 📝 Tóm tắt
+- HttpClient trả Observable (lười, gửi khi subscribe); từ v21 inject được mà không cần provideHttpClient (chỉ cần để bật tính năng).
+- Interceptor là hàm HttpInterceptorFn, clone request, đăng ký bằng withInterceptors; httpResource là signal để ĐỌC dữ liệu.
+- toSignal/toObservable/takeUntilDestroyed nối RxJS với signals.
+## 🧩 12. SSR, hydration, hiệu năng, bảo mật và a11y
+### 🧩 Hybrid rendering: CSR, SSG, SSR
+### 🚀 Hiệu năng
+### 🔒 Bảo mật
+### ♿ Tiếp cận (a11y)
+### 📝 Tóm tắt
+- CSR mặc định; SSG (prerender) và SSR chọn theo từng route; hydration + event replay + incremental hydration (@defer hydrate on…).
+- Hiệu năng: defer/lazy, NgOptimizedImage, OnPush + signals, track; đo bằng DevTools/Lighthouse.
+- Bảo mật: sanitize mặc định, hạn chế bypassSecurityTrust, quyền ở server. a11y: ngữ nghĩa, focus, CDK a11y, Angular Aria.
+## 🧪 13. Kiểm thử (Vitest) và công cụ: CLI, DevTools, Language Service
+### 🧪 Unit test với Vitest
+### 🧰 Component harness
+### 🛠️ Bộ công cụ
+### 📝 Tóm tắt
+- ng test chạy Vitest + jsdom; TestBed/ComponentFixture; zoneless dùng whenStable; setInput cho input.
+- Harness cho thao tác ổn định; provideHttpClientTesting để mock HTTP.
+- Công cụ: CLI (Vite+esbuild), DevTools, Language Service, ng update (migration), ng add.
+## 🗺️ 14. Bản đồ tra cứu: chọn đúng công cụ cho đúng việc
+### 🗺️ Tình huống → công cụ
+### 🔎 Tra cứu từ khóa
+### 🧭 Lời khuyên tổng kết
+### 📝 Tóm tắt
+- Chọn công cụ theo vai trò: signals cho state, input/output/model cho giao tiếp, service+inject cho chia sẻ, router/forms/http cho chức năng, SSR/defer cho hiệu năng.
+- Angular hiện đại = standalone + signals + OnPush + zoneless + control flow.
+- Cập nhật đều, test hành vi, bảo mật ở server, a11y ngay từ đầu.
+</script></div>
+<script src="https://cdn.jsdelivr.net/npm/markmap-autoloader@0.18.12"></script>
+</body></html>
