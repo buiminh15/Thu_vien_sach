@@ -1,7 +1,7 @@
 // Pick Stocks Like Warren Buffett (Boroson) – Chương 1: Chương 1–3 của sách.
 window.BOOK_DATA = window.BOOK_DATA || {};
-BOOK_DATA.buffett = BOOK_DATA.buffett || { chapters: [] };
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick = BOOK_DATA.buffettpick || { chapters: [] };
+BOOK_DATA.buffettpick.chapters.push({
   n: 1,
   title: 'Đầu tư như Buffett: cách làm, thành tích và cuộc đời',
   intro: 'Cách dễ nhất để “đầu tư như Buffett” là mua cổ phiếu Berkshire Hathaway; ngoài ra có thể mua các cổ phiếu Berkshire đang nắm và các quỹ kiểu Buffett. Chương này cũng tóm tắt thành tích 36 năm, cuộc sống giản dị và hành trình từ Omaha đến Graham–Newman.',

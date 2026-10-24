@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 7 (sách ch.17–19): nhận sai lầm, tránh lỗi tâm lý, đừng đa dạng hoá thừa.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 7,
   title: 'Nhận sai lầm, tránh bẫy tâm lý, tập trung hay đa dạng',
   intro: 'Buffett công khai liệt kê sai lầm của mình mỗi năm và học từ đó; ông tự nhận thành công nhờ “lý trí”. Chương này gồm danh mục bẫy tâm lý nhà đầu tư hay mắc, và cuộc tranh luận danh mục tập trung (Buffett) với đa dạng hoá (đa số nhà đầu tư nên chọn).',

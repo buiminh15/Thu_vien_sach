@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 6 (sách ch.15–16): nhà đầu tư không phải tay súng; làm ăn có tính kinh doanh.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 6,
   title: 'Nhà đầu tư, không phải tay súng; hãy kinh doanh lạnh lùng',
   intro: 'Buffett “sợ hoạt động” như sợ rủi ro: thời gian giữ ưa thích của ông là “mãi mãi”. Chương này giải thích vì sao đa số nhà đầu tư lại giao dịch quá nhiều, và nhấn mạnh phải giữ thái độ kinh doanh: cổ đông trước, tình cảm sau.',

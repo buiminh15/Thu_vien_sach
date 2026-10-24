@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 4 (sách ch.10–12): vòng tròn năng lực, làm bài tập, đi ngược đám đông.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 4,
   title: 'Mua cái bạn hiểu, làm bài tập, đi ngược đám đông',
   intro: 'Ba nguyên tắc nối tiếp: ở trong “vòng tròn năng lực” (Buffett tránh công nghệ, cổ phiếu nước ngoài, hàng hoá), điều tra như thám tử trước khi mua, và dám đi ngược đám đông — “tham lam khi người khác sợ hãi, sợ hãi khi người khác tham lam”.',

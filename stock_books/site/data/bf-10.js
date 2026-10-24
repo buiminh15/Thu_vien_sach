@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 10 (sách ch.29–31): Gipson, Price và các nhà đầu tư giá trị khác.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 10,
   title: 'Gipson, Price và các nhà đầu tư giá trị khác',
   intro: 'Thêm một loạt chân dung: James Gipson (Clipper — tập trung 30 mã), Michael Price (Mutual Series — giá trị, arbitrage, phá sản; tranh luận vụ Chase) và Royce, Eveillard, Lippman &amp; Baughman, Ferenbach, Gabelli, Olstein, Gunn (Dodge &amp; Cox). Điểm chung: mua rẻ, nghiên cứu sâu, kiên nhẫn qua những năm kém.',

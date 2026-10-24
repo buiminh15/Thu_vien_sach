@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 12 (Phụ lục 4–7): Schloss, Whitman, đại hội Berkshire, Phil Carret.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 12,
   title: 'Phụ lục: Schloss, Whitman, đại hội Berkshire và Phil Carret',
   intro: 'Bốn bài bổ sung: “65 năm ở Phố Wall” của Walter Schloss, Whitman về giá trị vs tăng trưởng (bốn yếu tố của Third Avenue), một cuối tuần ở đại hội cổ đông Berkshire (4/2001) và phỏng vấn Phil Carret — “nếu bạn có cổ phiếu tốt, hãy ngồi lên nó”.',

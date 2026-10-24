@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 2 (sách ch.4–6): Graham, Fisher, giá trị vs tăng trưởng.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 2,
   title: 'Hai người thầy: Graham, Fisher và giá trị vs tăng trưởng',
   intro: 'Buffett “85% Graham, 15% Fisher” (tác giả cho rằng gần 50–50). Graham dạy biên an toàn và ông Thị Trường; Fisher dạy mua công ty “bonanza” với 15 câu hỏi, rồi giữ mãi. Chương này cũng phân biệt cổ phiếu giá trị và tăng trưởng, cùng GARP.',

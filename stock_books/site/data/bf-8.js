@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 8 (sách ch.20–24): bộ lọc Buffett và 4 nhà quản lý.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 8,
   title: 'Bộ lọc kiểu Buffett và những người đi theo (Ruane, Hagstrom, Simpson, Browne)',
   intro: 'Các cách nhanh để tìm cổ phiếu Buffett có thể mua (bộ lọc của Hagstrom và Braverman) cùng chân dung bốn nhà quản lý quỹ chịu ảnh hưởng Buffett: Bill Ruane (Sequoia), Robert Hagstrom (Legg Mason Focus Trust), Louis Simpson (GEICO — người kế nhiệm có thể) và Chris Browne (Tweedy, Browne).',

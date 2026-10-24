@@ -813,7 +813,7 @@ window.BOOKS = [
 }
 ,
 {
-  "id": "buffett",
+  "id": "buffettpick", "mindmap": "buffettpick-mindmap.html",
   "title": "Chọn cổ phiếu như Warren Buffett (Pick Stocks Like Warren Buffett)",
   "subtitle": "J.K. Lasser’s – chiến lược của Buffett và các nhà đầu tư giá trị",
   "author": "Warren Boroson (John Wiley & Sons)",

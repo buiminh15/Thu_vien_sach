@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 11 (sách ch.32 + Phụ lục 1–3): tổng hợp, tiêu chí mua lại, danh ngôn.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 11,
   title: 'Tổng hợp: phẩm chất, công ty tuyệt vời và danh ngôn Buffett',
   intro: 'Phần kết sách: các lựa chọn đầu tư kiểu Buffett, phẩm chất nhà đầu tư xuất sắc, định nghĩa “doanh nghiệp tuyệt vời”, quảng cáo tìm mua công ty của Berkshire và tuyển tập danh ngôn của chủ tịch.',

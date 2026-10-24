@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 5 (sách ch.13–14): công ty tuyệt vời & người quản lý tốt.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 5,
   title: 'Công ty tuyệt vời và những người quản lý đáng tin',
   intro: 'Bốn khoản đầu tư kinh điển (GEICO, Washington Post, Coca-Cola, American Express) cho thấy khái niệm “hào kinh tế” (moat). Sau đó là điều Buffett đòi hỏi ở người quản lý: coi mình là chủ sở hữu, trung thực, tiết kiệm — “chưa bao giờ làm được thương vụ tốt với người xấu”.',

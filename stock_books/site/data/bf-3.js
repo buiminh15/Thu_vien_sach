@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 3 (sách ch.7–9): 12 nguyên tắc, không đánh bạc, mua giá hời.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 3,
   title: '12 nguyên tắc, không đánh bạc, mua giá “hời”',
   intro: 'Gốc của chiến lược Buffett: ông không phải con bạc — chỉ đặt cược vào những điều “gần như chắc chắn”. Chương này nêu 12 nguyên tắc, ẩn dụ “cú ném béo”, và các thước đo để nhận biết món hời: ROE, tăng trưởng 15%, biên lợi nhuận, giá trị sổ sách, nợ, và giá trị nội tại (dòng tiền chiết khấu).',

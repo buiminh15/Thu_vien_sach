@@ -1,5 +1,5 @@
 // Pick Stocks Like Warren Buffett – Chương 9 (sách ch.25–28): Whitman, Schloss, Torray, Walczak.
-BOOK_DATA.buffett.chapters.push({
+BOOK_DATA.buffettpick.chapters.push({
   n: 9,
   title: 'Whitman, Schloss, Torray và Walczak: bốn phong cách giá trị',
   intro: 'Bốn nhà đầu tư giá trị với bốn cách khác nhau: Martin Whitman (Third Avenue — nhà đầu tư thụ động, sẵn sàng mua công nghệ), Walter Schloss (học trò của Graham, chỉ nhìn con số), Robert Torray (mua công ty tốt chưa đắt, giữ lâu) và Edwin Walczak (Vontobel — “môn đồ Buffett” thường tự vấn).',
